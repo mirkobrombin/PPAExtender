@@ -16,7 +16,7 @@
 
 <p align="center">
     <img  src="https://github.com/mirkobrombin/PPAExtender/blob/master/screenshot.png" alt="Screenshot"> <br>
-    <img  src="https://github.com/mirkobrombin/PPAExtender/blob/master/screenshot-1.png" alt="Screenshot 1">
+    <img  src="https://github.com/mirkobrombin/PPAExtender/blob/master/screenshot-1.png" alt="Screenshot 1"> <br>
     <img  src="https://github.com/mirkobrombin/PPAExtender/blob/master/screenshot-2.png" alt="Screenshot 2">
 </p>
 
