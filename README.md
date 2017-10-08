@@ -16,8 +16,8 @@
 
 <p align="center">
     <img  src="https://github.com/mirkobrombin/PPAExtender/blob/master/screenshot.png"> <br>
-    <img  src="https://github.com/mirkobrombin/PPAExtender/blob/master/screenshot-1.png"> <br>
-    <img  src="https://github.com/mirkobrombin/PPAExtender/blob/master/screenshot-2.png">
+    <img  src="https://github.com/mirkobrombin/PPAExtender/blob/master/screenshot-2.png"> <br>
+    <img  src="https://github.com/mirkobrombin/PPAExtender/blob/master/screenshot-3.png"> 
 </p>
 
 
