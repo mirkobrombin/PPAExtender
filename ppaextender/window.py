@@ -21,7 +21,7 @@
 import gi
 from datetime import datetime
 gi.require_version('Gtk', '3.0')
-from gi.repository import Gtk, Gdk
+from gi.repository import Gtk, Gdk, GLib
 import constants as cn
 import headerbar as hb
 import stack as sk
@@ -39,7 +39,10 @@ class Window(Gtk.Window):
 
         self.screen = Gdk.Screen.get_default()
         self.css_provider = Gtk.CssProvider()
-        self.css_provider.load_from_path('style.css')
+        try:
+            self.css_provider.load_from_path('style.css')
+        except GLib.Error:
+            self.css_provider.load_from_path('/usr/local/bin/ppaextender/style.css')
         self.context = Gtk.StyleContext()
         self.context.add_provider_for_screen(self.screen, self.css_provider,
           Gtk.STYLE_PROVIDER_PRIORITY_USER)

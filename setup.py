@@ -16,7 +16,8 @@ install_data = [('share/applications', ['data/com.github.mirkobrombin.ppaextende
                 ('bin/ppaextender',['ppaextender/stack.py']),
                 ('bin/ppaextender',['ppaextender/welcome.py']),
                 ('bin/ppaextender',['ppaextender/window.py']),
-                ('bin/ppaextender',['ppaextender/__init__.py'])]
+                ('bin/ppaextender',['ppaextender/__init__.py']),
+                ('bin/ppaextender',['ppaextender/style.css'])]
 
 setup(  name='PPA Extender',
         version='0.0.1',

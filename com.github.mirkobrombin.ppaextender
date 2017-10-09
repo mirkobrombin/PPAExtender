@@ -27,15 +27,13 @@ launch_dir = os.path.dirname(os.path.abspath(sys.argv[0]))
 if launch_dir == "/usr/bin":
     modules_path = "/usr/share/com.github.mirkobrombin.ppaextender/ppaextender"
 else:
-    modules_path = launch_dir + "/addppa"
+    modules_path = launch_dir + "/ppaextender"
 
 sys.path.insert(0, modules_path)
 
 try:
-    import addppa.main
+    import ppaextender.main
 except ImportError:
     print("Failed to import module main.py!")
     print("Installation was assumed to be at:", modules_path)
     sys.exit(1)
-
-main.start()
