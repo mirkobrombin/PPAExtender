@@ -36,7 +36,7 @@ com.github.mirkobrombin.ppaextender
 ```
 
 ## Installation
-Be careful, this is an Alpha release, wait for a Stable please!  
+**Be careful**, modifying PPAs can damage your system.
 Grab an updated release [here](https://github.com/mirkobrombin/PPAExtender/archive/master.zip) or use **git**:
 
 ```bash
