@@ -41,7 +41,7 @@ class Welcome(Gtk.Box):
         self.welcome = self.welcome.new(cn.App.application_name, cn.App.application_description)
 
         # Welcome voices
-        self.welcome.append("document-open", "Add PPA", "Add new PPA")
+        self.welcome.append("document-new", "Add PPA", "Add new PPA")
         self.welcome.append("mail-archive", "List PPA", "List your PPA")
         
         self.welcome.connect("activated", self.on_welcome_activated)
