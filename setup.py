@@ -1,11 +1,7 @@
 #!/usr/bin/python3
 
-import glob, os, shutil
+import glob, os
 from distutils.core import setup
-
-shutil.copyfile(
-    'data/com.github.mirkobrombin.ppaextender.policy', 
-    '/usr/share/polkit-1/actions/com.github.mirkobrombin.ppaextender.policy')
 
 install_data = [('share/applications', ['data/com.github.mirkobrombin.ppaextender.desktop']),
                 ('share/metainfo', ['data/com.github.mirkobrombin.ppaextender.appdata.xml']),
