@@ -22,9 +22,6 @@ import gi
 from datetime import datetime
 gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk, Gdk, GLib
-import constants as cn
-import headerbar as hb
-import stack as sk
 try:
     import constants as cn
     import headerbar as hb
