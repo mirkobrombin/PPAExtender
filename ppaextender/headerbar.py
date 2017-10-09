@@ -24,6 +24,12 @@ gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk, Gdk
 import constants as cn
 import ppa as p
+try:
+    import constants as cn
+    import ppa as p
+except ImportError:
+    import ppaextender.constants as cn
+    import ppaextender.ppa as p
 
 class Headerbar(Gtk.HeaderBar):
 

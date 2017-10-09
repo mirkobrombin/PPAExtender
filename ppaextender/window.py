@@ -25,6 +25,14 @@ from gi.repository import Gtk, Gdk, GLib
 import constants as cn
 import headerbar as hb
 import stack as sk
+try:
+    import constants as cn
+    import headerbar as hb
+    import stack as sk
+except ImportError:
+    import ppaextender.constants as cn
+    import ppaextender.headerbar as hb
+    import ppaextender.stack as sk
 
 class Window(Gtk.Window):
 

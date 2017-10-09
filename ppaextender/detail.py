@@ -24,8 +24,12 @@ import webbrowser
 gi.require_version('Gtk', '3.0')
 gi.require_version('Granite', '1.0')
 from gi.repository import Gtk, Gdk, Granite
-import constants as cn
-import ppa as p
+try:
+    import constants as cn
+    import ppa as p
+except ImportError:
+    import ppaextender.constants as cn
+    import ppaextender.ppa as p
 
 class Detail(Gtk.Box):
     status = False

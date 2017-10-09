@@ -28,8 +28,13 @@ import webbrowser
 gi.require_version('Gtk', '3.0')
 gi.require_version('Granite', '1.0')
 from gi.repository import Gtk, Gdk, Granite, GObject, GLib
-import constants as cn
-from helper import HGtk
+try:
+    import constants as cn
+    from helper import HGtk
+except ImportError:
+    import ppaextender.constants as cn
+    from ppaextender.helper import HGtk
+
 
 GLib.threads_init()
 

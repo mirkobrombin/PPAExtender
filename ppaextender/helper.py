@@ -24,7 +24,10 @@ import webbrowser
 gi.require_version('Gtk', '3.0')
 gi.require_version('Granite', '1.0')
 from gi.repository import Gtk, Gdk, Granite
-import constants as cn
+try:
+    import constants as cn
+except ImportError:
+    import ppaextender.constants as cn
 
 # In this class I will try to create a simpler wrapper for Gtk methods
 class HGtk:
