@@ -28,7 +28,7 @@ In any case, ask for support [here](https://github.com/mirkobrombin/PPAExtender/
 - python3
 - libgtk-3-dev
 - libgranite-dev 
-- python-software-properties
+- software-properties-common
 
 ## How to run
 ```bash
