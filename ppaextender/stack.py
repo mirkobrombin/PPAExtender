@@ -24,10 +24,16 @@ import webbrowser
 gi.require_version('Gtk', '3.0')
 gi.require_version('Granite', '1.0')
 from gi.repository import Gtk, Gdk, Granite
-import constants as cn
-import welcome as wl
-import detail as dt
-import list as ls
+try:
+    import constants as cn
+    import welcome as wl
+    import detail as dt
+    import list as ls
+except ImportError:
+    import ppaextender.constants as cn
+    import ppaextender.welcome as wl
+    import ppaextender.detail as dt
+    import ppaextender.list as ls
 
 class Stack(Gtk.Box):
         
