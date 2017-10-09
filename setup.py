@@ -1,7 +1,11 @@
 #!/usr/bin/python3
 
-import glob, os 
+import glob, os, shutil
 from distutils.core import setup
+
+shutil.copyfile(
+    'data/com.github.mirkobrombin.ppaextender.policy', 
+    '/usr/share/polkit-1/actions/com.github.mirkobrombin.ppaextender.policy')
 
 install_data = [('share/applications', ['data/com.github.mirkobrombin.ppaextender.desktop']),
                 ('share/metainfo', ['data/com.github.mirkobrombin.ppaextender.appdata.xml']),
@@ -17,7 +21,8 @@ install_data = [('share/applications', ['data/com.github.mirkobrombin.ppaextende
                 ('bin/ppaextender',['ppaextender/welcome.py']),
                 ('bin/ppaextender',['ppaextender/window.py']),
                 ('bin/ppaextender',['ppaextender/__init__.py']),
-                ('bin/ppaextender',['ppaextender/style.css'])]
+                ('bin/ppaextender',['ppaextender/style.css']),
+                ('bin/ppaextender',['pkexec'])]
 
 setup(  name='PPA Extender',
         version='0.0.1',
