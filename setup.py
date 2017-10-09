@@ -3,8 +3,7 @@
 import glob, os
 from distutils.core import setup
 
-install_data = [('share/applications', ['data/com.github.mirkobrombin.ppaextender.desktop']),
-                ('share/metainfo', ['data/com.github.mirkobrombin.ppaextender.appdata.xml']),
+install_data = [('share/metainfo', ['data/com.github.mirkobrombin.ppaextender.appdata.xml']),
                 ('share/icons/hicolor/128x128/apps',['data/com.github.mirkobrombin.ppaextender.svg']),
                 ('bin/ppaextender',['data/style.css']),
                 ('bin/ppaextender',['ppaextender/constants.py']),
