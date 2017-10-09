@@ -81,6 +81,7 @@ class Thread_A(threading.Thread):
         self.parent.parent.list_all.ppa_model.clear()
         self.parent.parent.list_all.generate_entries(True)
 
+# This method need to be improved
 class PPA:
     waiting = "Waiting for PPA"
     invalid = "Not a valid PPA"
