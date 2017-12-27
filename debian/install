@@ -1,12 +1,11 @@
-ppaextender /usr/local/bin/
-ppaextender /usr/share/com.github.mirkobrombin.ppaextender/ppaextender
-setup.py /usr/share/com.github.mirkobrombin.ppaextender
-com.github.mirkobrombin.ppaextender /usr/local/bin
-com.github.mirkobrombin.ppaextender /usr/share/com.github.mirkobrombin.ppaextender
-data /usr/share/com.github.mirkobrombin.ppaextender
-data/com.github.mirkobrombin.ppaextender.svg /usr/local/share/icons/hicolor/128x128/apps
-data/com.github.mirkobrombin.ppaextender.desktop /usr/local/share/applications
-data/com.github.mirkobrombin.ppaextender.policy /usr/share/polkit-1/actions
-data/style.css /usr/share/com.github.mirkobrombin.ppaextender/data
-pkexec /usr/share/com.github.mirkobrombin.ppaextender
+repoman /usr/local/bin/
+repoman /usr/share/xyz.isantop.repoman/repoman
+setup.py /usr/share/xyz.isantop.repoman
+xyz.isantop.repoman /usr/local/bin
+xyz.isantop.repoman /usr/share/xyz.isantop.repoman
+data /usr/share/xyz.isantop.repoman
+data/xyz.isantop.repoman.desktop /usr/local/share/applications
+data/xyz.isantop.repoman.policy /usr/share/polkit-1/actions
+data/style.css /usr/share/xyz.isantop.repoman/data
+pkexec /usr/share/xyz.isantop.repoman
 

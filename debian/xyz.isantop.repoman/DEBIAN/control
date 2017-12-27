@@ -1,0 +1,11 @@
+Package: xyz.isantop.repoman
+Source: repoman
+Version: 0.0.6
+Architecture: amd64
+Maintainer: Ian Santopietro <ian@system76.com>
+Installed-Size: 184
+Depends: python3, python-requests
+Section: x11
+Priority: extra
+Description: Repoman
+ Hey man, let's go do crimes. Yeah, let's install software and not pay.
