@@ -27,11 +27,15 @@ from gi.repository import Gtk, Gdk, Granite
 try:
     import constants as cn
     import welcome as wl
+    import settings as st
+    import updates as up
     import detail as dt
     import list as ls
 except ImportError:
     import repoman.constants as cn
     import repoman.welcome as wl
+    import repoman.settings as st
+    import repoman.updates as up
     import repoman.detail as dt
     import repoman.list as ls
 
@@ -49,11 +53,15 @@ class Stack(Gtk.Box):
         self.stack.set_transition_duration(1000)
 
         self.welcome = wl.Welcome(self)
+        self.setting = st.Settings(self)
+        self.updates = up.Updates(self)
         self.detail = dt.Detail(self)
         self.list_all = ls.List(self)
 
-        self.stack.add_titled(self.welcome, "welcome", "Welcome")
-        self.stack.add_titled(self.detail, "detail", "Detail")
-        self.stack.add_titled(self.list_all, "list", "List")
+        #self.stack.add_titled(self.welcome, "welcome", "Welcome")
+        self.stack.add_titled(self.setting, "settings", "Settings")
+        self.stack.add_titled(self.updates, "updates", "Updates")
+        #self.stack.add_titled(self.detail, "detail", "Detail")
+        self.stack.add_titled(self.list_all, "list", "Extra Sources")
 
         self.pack_start(self.stack, True, True, 0)

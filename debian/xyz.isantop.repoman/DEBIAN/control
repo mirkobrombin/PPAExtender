@@ -3,7 +3,7 @@ Source: repoman
 Version: 0.0.6
 Architecture: amd64
 Maintainer: Ian Santopietro <ian@system76.com>
-Installed-Size: 184
+Installed-Size: 224
 Depends: python3, python-requests
 Section: x11
 Priority: extra

@@ -37,6 +37,9 @@ class List(Gtk.ScrolledWindow):
         Gtk.ScrolledWindow.__init__(self)
         self.parent = parent
         self.ppa = p.PPA(self)
+
+        self.parent.parent.hbar.trash.show()
+
         self.generate_entries()
 
     def generate_entries(self, update=False):

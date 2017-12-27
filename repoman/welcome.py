@@ -46,6 +46,8 @@ class Welcome(Gtk.Box):
 
         self.welcome.connect("activated", self.on_welcome_activated)
 
+        self.parent.parent.hbar.hide_trash()
+
         self.add(self.welcome)
 
     def on_welcome_activated(self, widget, index):
