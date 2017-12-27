@@ -33,10 +33,9 @@ class Application(Granite.Application):
 
     def do_activate(self):
         self.win = wn.Window()
-        self.win.set_default_size(600, 600)
+        self.win.set_default_size(800, 500)
         self.win.connect("delete-event", Gtk.main_quit)
         self.win.show_all()
-        self.win.hbar.back.hide()
         self.win.hbar.trash.hide()
 
         Gtk.main()

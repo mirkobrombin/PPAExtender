@@ -34,13 +34,15 @@ except ImportError:
 class Window(Gtk.Window):
 
     def __init__(self):
-        Gtk.Window.__init__(self, title=cn.App.application_name)
+        Gtk.Window.__init__(self)
 
         self.hbar = hb.Headerbar(self)
         self.set_titlebar(self.hbar)
 
         self.stack = sk.Stack(self)
         self.add(self.stack)
+
+        self.hbar.switcher.set_stack(self.stack.stack)
 
         self.screen = Gdk.Screen.get_default()
         self.css_provider = Gtk.CssProvider()

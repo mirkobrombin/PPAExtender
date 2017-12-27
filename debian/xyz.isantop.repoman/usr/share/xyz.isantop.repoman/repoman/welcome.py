@@ -49,7 +49,6 @@ class Welcome(Gtk.Box):
         self.add(self.welcome)
 
     def on_welcome_activated(self, widget, index):
-        self.parent.parent. hbar.toggle_back()
         if index == 0:
             # Add PPA
             self.parent.stack.set_visible_child_name("detail")

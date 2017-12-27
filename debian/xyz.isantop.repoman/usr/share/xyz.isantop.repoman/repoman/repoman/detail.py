@@ -44,10 +44,7 @@ class Detail(Gtk.Box):
 
         self.set_orientation(Gtk.Orientation.VERTICAL)
 
-        title = Gtk.Label("Add a software source")
-        title.set_name('Title')
-        title.set_justify(Gtk.Justification.CENTER)
-        self.add(title)
+
 
         description = Gtk.Label("Enter source line (ex: ppa:mirkobrombin/ppa) and press Enter")
         description.set_name('Description')
