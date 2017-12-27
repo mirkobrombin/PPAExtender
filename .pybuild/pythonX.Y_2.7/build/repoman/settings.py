@@ -84,8 +84,8 @@ class Settings(Gtk.Box):
         developer_grid.set_margin_bottom(12)
         developer_options.add(developer_grid)
 
-        developer_label = Gtk.Label("These options are those whice are " +
-                                    "primarily of interest to developers.")
+        developer_label = Gtk.Label("These options are those which are " +
+                                    "primarily of interest to \ndevelopers.")
         developer_label.set_line_wrap(True)
         developer_grid.attach(developer_label, 0, 0, 1, 1)
 

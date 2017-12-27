@@ -51,6 +51,9 @@ class List(Gtk.ScrolledWindow):
             self.ppa_model.append([ppa_l])
         self.ppa_s_sort = Gtk.TreeModelSort(model=self.ppa_model)
         self.treeview = Gtk.TreeView.new_with_model(self.ppa_s_sort)
+        self.treeview.set_margin_left(12)
+        self.treeview.set_margin_right(12)
+        self.treeview.set_margin_bottom(12)
         tree_selection = self.treeview.get_selection()
         tree_selection.connect('changed', self.on_row_change)
         for i, column_title in enumerate(["Name"]):
