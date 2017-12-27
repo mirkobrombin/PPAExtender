@@ -13,6 +13,11 @@ Standards-Version: 3.9.3
 
 Package: xyz.isantop.repoman
 Architecture: any
-Depends: python3, python-requests, ${misc:Depends}, ${shlibs:Depends}
+Depends: python3,
+         python-requests,
+         pop-shop,
+         software-properties-common
+         ${misc:Depends},
+         ${shlibs:Depends}
 Description: Repoman
  Hey man, let's go do crimes. Yeah, let's install software and not pay.
