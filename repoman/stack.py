@@ -49,7 +49,7 @@ class Stack(Gtk.Box):
         self.stack.set_transition_type(Gtk.StackTransitionType.SLIDE_LEFT_RIGHT)
         self.stack.set_transition_duration(300)
 
-        self.stack.connect("state-flags-changed", self.on_stack_state_changed)
+        self.stack.connect("set_focus_child", self.on_stack_focus_changed)
 
         self.setting = st.Settings(self)
         self.updates = up.Updates(self)
@@ -64,8 +64,13 @@ class Stack(Gtk.Box):
 
         self.pack_start(self.stack, True, True, 0)
 
-    def on_stack_state_changed(self, widget, data):
-        if self.stack.get_visible_child_name() == "list":
-            self.parent.hbar.trash.show()
+    def on_stack_focus_changed(self, widget, extra):
+        print("Stack Changed")
+        child = self.stack.get_visible_child_name()
+        print(child)
+        if child == "list":
+            print("Hit")
+            self.parent.hbar.edit_button.show()
         else:
-            self.parent.hbar.trash.hide()
+            print("miss")
+            self.parent.hbar.edit_button.hide()

@@ -36,7 +36,6 @@ class Application(Granite.Application):
         self.win.set_default_size(700, 400)
         self.win.connect("delete-event", Gtk.main_quit)
         self.win.show_all()
-        self.win.hbar.trash.hide()
 
         Gtk.main()
 

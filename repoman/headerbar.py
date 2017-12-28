@@ -26,10 +26,12 @@ try:
     import constants as cn
     import ppa as p
     from window import EditDialog
+    from window import AddDialog
 except ImportError:
     import repoman.constants as cn
     import repoman.ppa as p
     from repoman.window import EditDialog
+    from repoman.window import AddDialog
 
 class Headerbar(Gtk.HeaderBar):
 
@@ -48,21 +50,28 @@ class Headerbar(Gtk.HeaderBar):
         self.switcher.set_baseline_position(Gtk.BaselinePosition.CENTER)
         self.set_custom_title(self.switcher)
 
-        # spinner button
+        # spinner
         #self.spinner = Gtk.Spinner()
         #self.grid.attach(self.spinner, 0, 0, 1, 1)
 
-        # trash button
-        self.trash = Gtk.Button.new_from_icon_name("edit-delete-symbolic", Gtk.IconSize.SMALL_TOOLBAR)
-        self.trash.connect("clicked", self.on_trash_clicked)
-        Gtk.StyleContext.add_class(self.trash.get_style_context(), "destructive-action")
-        self.pack_end(self.trash)
+        # add button
+        add_button = Gtk.Button.new_from_icon_name("list-add-symbolic",
+                                                   Gtk.IconSize.SMALL_TOOLBAR)
+        Gtk.StyleContext.add_class(add_button.get_style_context(),
+                                   "image-button")
+        add_button.connect("clicked", self.on_add_button_clicked)
+        self.pack_end(add_button)
 
-    def on_help_clicked(self, widget):
-        webbrowser.open_new_tab("https://github.com/mirkobrombin/PPAExtender")
+        # edit button
+        self.edit_button = Gtk.Button.new_from_icon_name("edit-symbolic",
+                                                    Gtk.IconSize.SMALL_TOOLBAR)
+        Gtk.StyleContext.add_class(self.edit_button.get_style_context(),
+                                   "image-button")
+        self.edit_button.connect("clicked", self.on_edit_button_clicked)
+        self.pack_start(self.edit_button)
 
-    def on_trash_clicked(self, widget):
-        print("Trash Clicked")
+    def on_edit_button_clicked(self, widget):
+        print("Edit Clicked")
         #self.ppa.remove(self.ppa_name)
         dialog = EditDialog(self.parent, "bin",
                             "https://ppa.launchpad.net/system76-dev/archive",
@@ -77,8 +86,16 @@ class Headerbar(Gtk.HeaderBar):
 
         dialog.destroy()
 
-    def hide_trash(self):
-        self.trash.hide()
+    def on_add_button_clicked(self, widget):
+        print("Add Clicked")
+        self.parent.stack.stack.set_visible_child(self.parent.stack.list_all)
+        #self.ppa.remove(self.ppa_name)
+        dialog = AddDialog(self.parent)
+        response = dialog.run()
 
-    def show_trash(self):
-        self.trash.show()
+        if response == Gtk.ResponseType.OK:
+            print("The Add button was clicked.")
+        else:
+            print("The add was canceled.")
+
+        dialog.destroy()
