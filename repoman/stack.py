@@ -71,6 +71,8 @@ class Stack(Gtk.Box):
         if child == "list":
             print("Hit")
             self.parent.hbar.edit_button.show()
+            self.parent.hbar.add_button.show()
         else:
             print("miss")
             self.parent.hbar.edit_button.hide()
+            self.parent.hbar.add_button.hide()

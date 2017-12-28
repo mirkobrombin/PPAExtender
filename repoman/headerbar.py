@@ -55,12 +55,12 @@ class Headerbar(Gtk.HeaderBar):
         #self.grid.attach(self.spinner, 0, 0, 1, 1)
 
         # add button
-        add_button = Gtk.Button.new_from_icon_name("list-add-symbolic",
+        self.add_button = Gtk.Button.new_from_icon_name("list-add-symbolic",
                                                    Gtk.IconSize.SMALL_TOOLBAR)
-        Gtk.StyleContext.add_class(add_button.get_style_context(),
+        Gtk.StyleContext.add_class(self.add_button.get_style_context(),
                                    "image-button")
-        add_button.connect("clicked", self.on_add_button_clicked)
-        self.pack_end(add_button)
+        self.add_button.connect("clicked", self.on_self.add_button_clicked)
+        self.pack_end(self.add_button)
 
         # edit button
         self.edit_button = Gtk.Button.new_from_icon_name("edit-symbolic",
@@ -86,7 +86,7 @@ class Headerbar(Gtk.HeaderBar):
 
         dialog.destroy()
 
-    def on_add_button_clicked(self, widget):
+    def on_self.add_button_clicked(self, widget):
         print("Add Clicked")
         self.parent.stack.stack.set_visible_child(self.parent.stack.list_all)
         #self.ppa.remove(self.ppa_name)
