@@ -86,7 +86,7 @@ class Headerbar(Gtk.HeaderBar):
 
         dialog.destroy()
 
-    def on_self.add_button_clicked(self, widget):
+    def on_add_button_clicked(self, widget):
         print("Add Clicked")
         self.parent.stack.stack.set_visible_child(self.parent.stack.list_all)
         #self.ppa.remove(self.ppa_name)
