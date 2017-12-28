@@ -50,16 +50,16 @@ class RemoveThread(threading.Thread):
 
     def run(self):
         sp = SoftwareProperties()
-        sp.remove_source(ppa, remove_source_code=True)
-        os.remove(self.sources_path+self.ppa+".list")
-        try:
-            os.remove(self.sources_path+self.ppa+".list.save")
-        except FileNotFoundError:
-            pass
+        print("Removing PPA %s" % (self.ppa))
+        #sp.remove_source(ppa, remove_source_code=True)
+        #os.remove(self.sources_path+self.ppa+".list")
+        #try:
+        #    os.remove(self.sources_path+self.ppa+".list.save")
+        #except FileNotFoundError:
+        #    pass
         self.cache.open()
         self.cache.update()
         self.cache.open(None)
-        self.parent.parent.hbar.spinner.stop()
         self.parent.parent.stack.list_all.ppa_model.clear()
         self.parent.parent.stack.list_all.generate_entries(True)
         self.parent.parent.hbar.trash.set_sensitive(True)
@@ -67,21 +67,21 @@ class RemoveThread(threading.Thread):
 class AddThread(threading.Thread):
     cache = apt.Cache()
 
-    def __init__(self, parent, sources_path, url):
+    def __init__(self, parent, url):
         threading.Thread.__init__(self)
         self.parent = parent
-        self.sources_path = sources_path
         self.url = url
 
     def run(self):
         sp = SoftwareProperties()
-        sp.add_source_from_line(self.url)
+        print("Adding PPA %s" % (self.url))
+        #sp.add_source_from_line(self.url)
         sp.sourceslist.save()
         self.cache.open()
         self.cache.update()
         self.cache.open(None)
-        self.parent.parent.list_all.ppa_model.clear()
-        self.parent.parent.list_all.generate_entries(True)
+        self.parent.parent.stack.list_all.ppa_model.clear()
+        self.parent.parent.stack.list_all.generate_entries(True)
 
 # This method need to be improved
 class PPA:
@@ -94,19 +94,20 @@ class PPA:
     def __init__(self, parent):
         self.parent = parent
 
-    def add(self):
-        AddThread(self.parent, self.sources_path, self.url).start()
+    def add(self, url):
+        AddThread(self.parent, url).start()
 
     def remove(self, ppa):
         RemoveThread(self.parent, self.sources_path, ppa).start()
 
     def list_all(self):
-        l = []
-        for f in os.listdir(self.sources_path):
-            if not f.endswith(".save"):
-                f = f[:-5]
-                l.append(f)
-        return l
+        sp = SoftwareProperties()
+        isv_sources = sp.get_isv_sources()
+        source_list = []
+        for source in isv_sources:
+            if not str(source).startswith("#"):
+                source_list.append(str(source))
+        return source_list
 
     def validate(self, url, widget):
         self.url = url
