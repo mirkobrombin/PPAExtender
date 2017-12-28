@@ -26,10 +26,12 @@ try:
     import constants as cn
     import headerbar as hb
     import stack as sk
+    import ppa
 except ImportError:
     import repoman.constants as cn
     import repoman.headerbar as hb
     import repoman.stack as sk
+    import repoman.ppa
 
 class Window(Gtk.Window):
 
@@ -55,6 +57,8 @@ class Window(Gtk.Window):
           Gtk.STYLE_PROVIDER_PRIORITY_USER)
 
 class DeleteDialog(Gtk.Dialog):
+
+    ppa_name = False
 
     def __init__(self, parent):
         Gtk.Dialog.__init__(self, "Remove Source", parent, 0,
@@ -94,6 +98,8 @@ class DeleteDialog(Gtk.Dialog):
 
 class AddDialog(Gtk.Dialog):
 
+    ppa_name = False
+
     def __init__(self, parent):
         Gtk.Dialog.__init__(self, "Add Source", parent, 0,
                             (Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL,
@@ -132,6 +138,8 @@ class AddDialog(Gtk.Dialog):
         self.show_all()
 
 class EditDialog(Gtk.Dialog):
+
+    ppa_name = False
 
     def __init__(self, parent, repo_type, repo_uri, repo_version,
                  repo_component):

@@ -39,7 +39,7 @@ except ImportError:
 
 GLib.threads_init()
 
-class Thread_R(threading.Thread):
+class RemoveThread(threading.Thread):
     cache = apt.Cache()
 
     def __init__(self, parent, sources_path, ppa):
@@ -49,6 +49,8 @@ class Thread_R(threading.Thread):
         self.ppa = ppa
 
     def run(self):
+        sp = SoftwareProperties()
+        sp.remove_source(ppa, remove_source_code=True)
         os.remove(self.sources_path+self.ppa+".list")
         try:
             os.remove(self.sources_path+self.ppa+".list.save")
@@ -62,7 +64,7 @@ class Thread_R(threading.Thread):
         self.parent.parent.stack.list_all.generate_entries(True)
         self.parent.parent.hbar.trash.set_sensitive(True)
 
-class Thread_A(threading.Thread):
+class AddThread(threading.Thread):
     cache = apt.Cache()
 
     def __init__(self, parent, sources_path, url):
@@ -78,7 +80,6 @@ class Thread_A(threading.Thread):
         self.cache.open()
         self.cache.update()
         self.cache.open(None)
-        self.parent.parent.parent.hbar.spinner.stop()
         self.parent.parent.list_all.ppa_model.clear()
         self.parent.parent.list_all.generate_entries(True)
 
@@ -94,13 +95,10 @@ class PPA:
         self.parent = parent
 
     def add(self):
-        self.parent.parent.parent.hbar.spinner.start()
-        Thread_A(self.parent, self.sources_path, self.url).start()
+        AddThread(self.parent, self.sources_path, self.url).start()
 
     def remove(self, ppa):
-        self.parent.parent.hbar.trash.set_sensitive(False)
-        self.parent.parent.hbar.spinner.start()
-        Thread_R(self.parent, self.sources_path, ppa).start()
+        RemoveThread(self.parent, self.sources_path, ppa).start()
 
     def list_all(self):
         l = []
@@ -115,20 +113,12 @@ class PPA:
         if url.startswith("ppa:"):
             self.parent.status = True
             widget.set_text(self.valid)
-            HGtk.remove_class(widget, "error")
-            HGtk.add_class(widget, "success")
         elif url.startswith("deb"):
             self.parent.status = True
             widget.set_text(self.valid)
-            HGtk.remove_class(widget, "error")
-            HGtk.add_class(widget, "success")
         elif url == "":
             self.parent.status = False
             widget.set_text(self.waiting)
-            HGtk.remove_class(widget, "error")
-            HGtk.remove_class(widget, "success")
         else:
             self.parent.status = False
             widget.set_text(self.invalid)
-            HGtk.remove_class(widget, "success")
-            HGtk.add_class(widget, "error")
