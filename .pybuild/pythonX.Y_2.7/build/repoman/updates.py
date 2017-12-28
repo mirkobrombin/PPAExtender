@@ -38,7 +38,7 @@ class Updates(Gtk.Box):
 
         updates_grid = Gtk.Grid()
         updates_grid.set_margin_left(12)
-        updates_grid.set_margin_top(12)
+        updates_grid.set_margin_top(24)
         updates_grid.set_margin_right(12)
         updates_grid.set_margin_bottom(12)
         updates_grid.set_hexpand(True)
@@ -47,7 +47,7 @@ class Updates(Gtk.Box):
 
         updates_title = Gtk.Label("Update Sources")
         updates_title.set_halign(Gtk.Align.START)
-        Gtk.StyleContext.add_class(updates_title.get_style_context(), "h1")
+        Gtk.StyleContext.add_class(updates_title.get_style_context(), "h2")
         updates_grid.attach(updates_title, 0, 0, 1, 1)
 
         updates_label = Gtk.Label("These sources control how Pop!_OS will " +
@@ -59,7 +59,7 @@ class Updates(Gtk.Box):
 
         checks_grid = Gtk.Grid()
         checks_grid.set_margin_left(12)
-        checks_grid.set_margin_top(12)
+        checks_grid.set_margin_top(24)
         checks_grid.set_margin_right(12)
         checks_grid.set_margin_bottom(12)
         updates_grid.attach(checks_grid, 0, 2, 1, 1)
@@ -79,7 +79,7 @@ class Updates(Gtk.Box):
 
         notifications_title = Gtk.Label("Update Notifications")
         notifications_title.set_halign(Gtk.Align.START)
-        Gtk.StyleContext.add_class(notifications_title.get_style_context(), "h1")
+        Gtk.StyleContext.add_class(notifications_title.get_style_context(), "h2")
         updates_grid.attach(notifications_title, 0, 4, 1, 1)
 
         notifications_label = Gtk.Label("Change how Pop!_OS notifies you " +

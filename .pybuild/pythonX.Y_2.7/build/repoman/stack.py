@@ -26,17 +26,14 @@ gi.require_version('Granite', '1.0')
 from gi.repository import Gtk, Gdk, Granite
 try:
     import constants as cn
-    import welcome as wl
     import settings as st
     import updates as up
     import detail as dt
     import list as ls
 except ImportError:
     import repoman.constants as cn
-    import repoman.welcome as wl
     import repoman.settings as st
     import repoman.updates as up
-    import repoman.detail as dt
     import repoman.list as ls
 
 class Stack(Gtk.Box):
@@ -50,9 +47,10 @@ class Stack(Gtk.Box):
 
         self.stack = Gtk.Stack()
         self.stack.set_transition_type(Gtk.StackTransitionType.SLIDE_LEFT_RIGHT)
-        self.stack.set_transition_duration(1000)
+        self.stack.set_transition_duration(300)
 
-        self.welcome = wl.Welcome(self)
+        self.stack.connect("state-flags-changed", self.on_stack_state_changed)
+
         self.setting = st.Settings(self)
         self.updates = up.Updates(self)
         self.detail = dt.Detail(self)
@@ -65,3 +63,9 @@ class Stack(Gtk.Box):
         self.stack.add_titled(self.list_all, "list", "Extra Sources")
 
         self.pack_start(self.stack, True, True, 0)
+
+    def on_stack_state_changed(self, widget, data):
+        if self.stack.get_visible_child_name() == "list":
+            self.parent.hbar.trash.show()
+        else:
+            self.parent.hbar.trash.hide()

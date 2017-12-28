@@ -29,32 +29,11 @@ try:
 except ImportError:
     import repoman.constants as cn
 
-class Welcome(Gtk.Box):
+# In this class I will try to create a simpler wrapper for Gtk methods
+class HGtk:
 
-    def __init__(self, parent):
-        Gtk.Box.__init__(self, False, 0)
+    def remove_class(widget, css_class):
+        Gtk.StyleContext.remove_class(widget.get_style_context(), css_class)
 
-        self.parent = parent
-
-        # Create welcome widget
-        self.welcome = Granite.WidgetsWelcome()
-        self.welcome = self.welcome.new(cn.App.application_name, cn.App.application_description)
-
-        # Welcome voices
-        self.welcome.append("document-new", "Add PPA", "Add new PPA")
-        self.welcome.append("mail-archive", "List PPA", "List your PPA")
-
-        self.welcome.connect("activated", self.on_welcome_activated)
-
-        self.parent.parent.hbar.hide_trash()
-
-        self.add(self.welcome)
-
-    def on_welcome_activated(self, widget, index):
-        if index == 0:
-            # Add PPA
-            self.parent.stack.set_visible_child_name("detail")
-        else:
-            self.parent.parent. hbar.toggle_trash()
-            # List PPA
-            self.parent.stack.set_visible_child_name("list")
+    def add_class(widget, css_class):
+        Gtk.StyleContext.add_class(widget.get_style_context(), css_class)

@@ -25,9 +25,11 @@ from gi.repository import Gtk, Gdk
 try:
     import constants as cn
     import ppa as p
+    from window import EditDialog
 except ImportError:
     import repoman.constants as cn
     import repoman.ppa as p
+    from repoman.window import EditDialog
 
 class Headerbar(Gtk.HeaderBar):
 
@@ -55,13 +57,25 @@ class Headerbar(Gtk.HeaderBar):
         self.trash.connect("clicked", self.on_trash_clicked)
         Gtk.StyleContext.add_class(self.trash.get_style_context(), "destructive-action")
         self.pack_end(self.trash)
-        self.trash.hide()
 
     def on_help_clicked(self, widget):
         webbrowser.open_new_tab("https://github.com/mirkobrombin/PPAExtender")
 
     def on_trash_clicked(self, widget):
-        self.ppa.remove(self.ppa_name)
+        print("Trash Clicked")
+        #self.ppa.remove(self.ppa_name)
+        dialog = EditDialog(self.parent, "bin",
+                            "https://ppa.launchpad.net/system76-dev/archive",
+                            "artful",
+                            "release")
+        response = dialog.run()
+
+        if response == Gtk.ResponseType.OK:
+            print("The SAVE button was clicked.")
+        else:
+            print("The modify was canceled.")
+
+        dialog.destroy()
 
     def hide_trash(self):
         self.trash.hide()

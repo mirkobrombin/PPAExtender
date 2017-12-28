@@ -38,7 +38,7 @@ class Settings(Gtk.Box):
 
         settings_grid = Gtk.Grid()
         settings_grid.set_margin_left(12)
-        settings_grid.set_margin_top(12)
+        settings_grid.set_margin_top(24)
         settings_grid.set_margin_right(12)
         settings_grid.set_margin_bottom(12)
         settings_grid.set_hexpand(True)
@@ -47,7 +47,7 @@ class Settings(Gtk.Box):
 
         sources_title = Gtk.Label("Official Sources")
         sources_title.set_halign(Gtk.Align.START)
-        Gtk.StyleContext.add_class(sources_title.get_style_context(), "h1")
+        Gtk.StyleContext.add_class(sources_title.get_style_context(), "h2")
         settings_grid.attach(sources_title, 0, 0, 1, 1)
 
         sources_label = Gtk.Label("Official sources are those provided by Pop!_OS " +
@@ -59,7 +59,7 @@ class Settings(Gtk.Box):
 
         checks_grid = Gtk.Grid()
         checks_grid.set_margin_left(12)
-        checks_grid.set_margin_top(12)
+        checks_grid.set_margin_top(24)
         checks_grid.set_margin_right(12)
         checks_grid.set_margin_bottom(12)
         settings_grid.attach(checks_grid, 0, 2, 1, 1)
@@ -79,7 +79,7 @@ class Settings(Gtk.Box):
 
         developer_grid = Gtk.Grid()
         developer_grid.set_margin_left(12)
-        developer_grid.set_margin_top(12)
+        developer_grid.set_margin_top(24)
         developer_grid.set_margin_right(12)
         developer_grid.set_margin_bottom(12)
         developer_options.add(developer_grid)
