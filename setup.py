@@ -21,7 +21,7 @@ install_data = [('share/metainfo', ['data/xyz.isantop.repoman.appdata.xml']),
                 ('bin/repoman',['pkexec'])]
 
 setup(  name='Repoman',
-        version='0.0.1',
+        version='0.0.6',
         author='Ian Santopietro',
         description='Easily manage PPA',
         url='https://github.com/isantop/repoman',
