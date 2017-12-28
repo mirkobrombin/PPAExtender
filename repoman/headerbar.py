@@ -59,7 +59,7 @@ class Headerbar(Gtk.HeaderBar):
                                                    Gtk.IconSize.SMALL_TOOLBAR)
         Gtk.StyleContext.add_class(self.add_button.get_style_context(),
                                    "image-button")
-        self.add_button.connect("clicked", self.on_self.add_button_clicked)
+        self.add_button.connect("clicked", self.on_add_button_clicked)
         self.pack_end(self.add_button)
 
         # edit button
