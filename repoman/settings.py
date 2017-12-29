@@ -25,14 +25,18 @@ gi.require_version('Gtk', '3.0')
 gi.require_version('Granite', '1.0')
 from gi.repository import Gtk, Gdk, Granite
 try:
-    import constants as cn
+    import constants
+    import ppa
 except ImportError:
-    import repoman.constants as cn
+    import repoman.constants
+    import repoman.ppa
 
 class Settings(Gtk.Box):
 
     def __init__(self, parent):
         Gtk.Box.__init__(self, False, 0)
+
+        self.ppa = ppa.PPA(self)
 
         self.parent = parent
 
@@ -65,12 +69,19 @@ class Settings(Gtk.Box):
         settings_grid.attach(checks_grid, 0, 2, 1, 1)
 
         main_check = Gtk.CheckButton.new_with_label("Officially Supported Software (main)")
-        univ_check = Gtk.CheckButton.new_with_label("Community Supported Software (universe)")
-        rest_check = Gtk.CheckButton.new_with_label("Proprietary Drivers for Devices (restricted)")
-        mult_check = Gtk.CheckButton.new_with_label("Software with Copyright or Legal Restrictions (multiverse)")
+        main_check.set_active(self.ppa.main_enabled)
         checks_grid.attach(main_check, 0, 0, 1, 1)
+
+        univ_check = Gtk.CheckButton.new_with_label("Community Supported Software (universe)")
+        univ_check.set_active(self.ppa.univ_enabled)
         checks_grid.attach(univ_check, 0, 1, 1, 1)
+
+        rest_check = Gtk.CheckButton.new_with_label("Proprietary Drivers for Devices (restricted)")
+        rest_check.set_active(self.ppa.rest_enabled)
         checks_grid.attach(rest_check, 0, 2, 1, 1)
+
+        mult_check = Gtk.CheckButton.new_with_label("Software with Copyright or Legal Restrictions (multiverse)")
+        mult_check.set_active(self.ppa.mult_enabled)
         checks_grid.attach(mult_check, 0, 3, 1, 1)
 
         developer_options = Gtk.Expander()
@@ -90,7 +101,9 @@ class Settings(Gtk.Box):
         developer_grid.attach(developer_label, 0, 0, 1, 1)
 
         source_check = Gtk.CheckButton.new_with_label("Include Source Code")
+        source_check.set_active(self.ppa.source_code_state)
         developer_grid.attach(source_check, 0, 1, 1, 1)
 
         proposed_check = Gtk.CheckButton.new_with_label("Proposed Updates (artful-proposed)")
+        proposed_check.set_active(self.ppa.prop_enabled)
         developer_grid.attach(proposed_check, 0, 2, 1, 1)

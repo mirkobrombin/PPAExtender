@@ -25,12 +25,12 @@ gi.require_version('Gtk', '3.0')
 gi.require_version('Granite', '1.0')
 from gi.repository import Gtk, Gdk, Granite
 try:
-    import constants as cn
+    import constants
 except ImportError:
-    import repoman.constants as cn
+    import repoman.constants
 
 # In this class I will try to create a simpler wrapper for Gtk methods
-class HGtk:
+class Helper:
 
     def remove_class(widget, css_class):
         Gtk.StyleContext.remove_class(widget.get_style_context(), css_class)
