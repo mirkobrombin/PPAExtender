@@ -95,10 +95,6 @@ class PPA:
     cache = apt.Cache()
     update_automation_level = 3
     release_upgrades_policy = 0
-    secu_enabled = True
-    recc_enabled = True
-    back_enabled = True
-    prop_enabled = False
 
     def __init__(self, parent):
         self.parent = parent
@@ -136,12 +132,21 @@ class PPA:
         self.update_automation_level = self.sp.get_update_automation_level() #FIXME Doesn't change
         self.release_upgrades_policy = self.sp.get_release_upgrades_policy() #0 on, 2 off
         self.source_code_state = self.sp.get_source_code_state() # Bool
+
         for comp in self.sp.distro.source_template.components:
             self.enabledDict[comp.name] = self.sp.get_comp_download_state(comp)[0]
         self.main_enabled = self.enabledDict['main']
         self.univ_enabled = self.enabledDict['universe']
         self.rest_enabled = self.enabledDict['restricted']
         self.mult_enabled = self.enabledDict['multiverse']
+
+        for child in self.sp.distro.source_template.children:
+            if child.type != 'deb-src':
+                self.enabledDict[child.name] = self.sp.get_comp_child_state(child)[0]
+        self.secu_enabled = self.enabledDict['artful-security']
+        self.recc_enabled = self.enabledDict['artful-updates']
+        self.back_enabled = self.enabledDict['artful-backports']
+        self.prop_enabled = self.enabledDict['artful-proposed']
 
     def validate(self, url, widget):
         self.url = url
