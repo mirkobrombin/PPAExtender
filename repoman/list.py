@@ -34,6 +34,8 @@ except ImportError:
 
 class List(Gtk.ScrolledWindow):
 
+    listiter_count = 0
+
     def __init__(self, parent):
         self.sp = SoftwareProperties()
         Gtk.ScrolledWindow.__init__(self)
@@ -65,36 +67,35 @@ class List(Gtk.ScrolledWindow):
         sources_label.set_hexpand(True)
         self.content_grid.attach(sources_label, 0, 1, 1, 1)
 
-        self.generate_entries()
+        self.ppa_liststore = Gtk.ListStore(str, str)
+        view = Gtk.TreeView(self.ppa_liststore)
+        renderer = Gtk.CellRendererText()
+        column = Gtk.TreeViewColumn('Source', renderer, markup=0)
+        view.append_column(column)
+        view.set_hexpand(True)
+        view.set_vexpand(True)
+        tree_selection = view.get_selection()
+        tree_selection.connect('changed', self.on_row_change)
+        self.content_grid.attach(view, 0, 2, 1, 1)
 
-    def generate_entries(self, update=False):
-        isv_list = self.sp.get_isv_sources()
-        source_list = []
-        if update == False:
-            self.ppa_model = Gtk.ListStore(str, str)
+        self.generate_entries(self.ppa.get_isv())
+
+    def generate_entries(self, isv_list):
+        self.ppa_liststore.clear()
+
+        print(str(self.listiter_count))
+        self.listiter_count = self.listiter_count + 1
 
         for source in isv_list:
             if not str(source).startswith("#"):
                 source_pretty = self.sp.render_source(source)
-                self.ppa_model.insert_with_valuesv(-1,
-                                                   [0, 1],
-                                                   [source_pretty, str(source)])
-        self.ppa_s_sort = Gtk.TreeModelSort(model=self.ppa_model)
-        self.treeview = Gtk.TreeView.new_with_model(self.ppa_s_sort)
-        self.treeview.set_hexpand(True)
-        self.treeview.set_vexpand(True)
-        tree_selection = self.treeview.get_selection()
-        tree_selection.connect('changed', self.on_row_change)
-        for i, column_title in enumerate(["Name"]):
-            renderer = Gtk.CellRendererText()
-            column = Gtk.TreeViewColumn(column_title, renderer, markup=i)
-            self.treeview.append_column(column)
-        self.content_grid.attach(self.treeview, 0, 2, 1, 1)
+                self.ppa_liststore.insert_with_valuesv(-1,
+                                                       [0, 1],
+                                                       [source_pretty, str(source)])
 
     def on_row_change(self, widget):
         (model, pathlist) = widget.get_selected_rows()
         for path in pathlist :
             tree_iter = model.get_iter(path)
             value = model.get_value(tree_iter,1)
-            print(value)
             self.parent.parent.hbar.ppa_name = value

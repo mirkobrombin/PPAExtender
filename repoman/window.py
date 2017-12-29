@@ -151,7 +151,6 @@ class EditDialog(Gtk.Dialog):
 
         self.ppa = ppa.PPA(self)
         self.parent = parent
-        self.set_default_size(600, 100)
 
         content_area = self.get_content_area()
 
@@ -223,12 +222,10 @@ class EditDialog(Gtk.Dialog):
         response = dialog.run()
 
         if response == Gtk.ResponseType.OK:
-            print("The REMOVE button was clicked.")
             self.ppa.remove(self.parent.hbar.ppa_name)
             dialog.destroy()
             self.destroy()
         else:
-            print("The Remove was canceled.")
             dialog.destroy()
 
         

@@ -42,46 +42,37 @@ GLib.threads_init()
 class RemoveThread(threading.Thread):
     cache = apt.Cache()
 
-    def __init__(self, parent, sources_path, ppa):
+    def __init__(self, parent, sources_path, ppa, sp):
         threading.Thread.__init__(self)
         self.parent = parent
         self.sources_path = sources_path
         self.ppa = ppa
+        self.sp = sp
 
     def run(self):
-        sp = SoftwareProperties()
         print("Removing PPA %s" % (self.ppa))
-        #sp.remove_source(ppa, remove_source_code=True)
-        #os.remove(self.sources_path+self.ppa+".list")
-        #try:
-        #    os.remove(self.sources_path+self.ppa+".list.save")
-        #except FileNotFoundError:
-        #    pass
-        self.cache.open()
-        self.cache.update()
-        self.cache.open(None)
-        self.parent.parent.stack.list_all.ppa_model.clear()
-        self.parent.parent.stack.list_all.generate_entries(True)
-        self.parent.parent.hbar.trash.set_sensitive(True)
+        self.sp.remove_source(self.ppa, remove_source_code=True)
+        self.sp.sourceslist.save()
+        self.sp.reload_sourceslist()
+        isv_list = self.sp.get_isv_sources()
+        GObject.idle_add(self.parent.parent.stack.list_all.generate_entries, isv_list)
 
 class AddThread(threading.Thread):
     cache = apt.Cache()
 
-    def __init__(self, parent, url):
+    def __init__(self, parent, url, sp):
         threading.Thread.__init__(self)
         self.parent = parent
         self.url = url
+        self.sp = sp
 
     def run(self):
-        sp = SoftwareProperties()
         print("Adding PPA %s" % (self.url))
-        #sp.add_source_from_line(self.url)
-        sp.sourceslist.save()
-        self.cache.open()
-        self.cache.update()
-        self.cache.open(None)
-        self.parent.parent.stack.list_all.ppa_model.clear()
-        self.parent.parent.stack.list_all.generate_entries(True)
+        self.sp.add_source_from_line(self.url)
+        self.sp.sourceslist.save()
+        self.sp.reload_sourceslist()
+        isv_list = self.sp.get_isv_sources()
+        GObject.idle_add(self.parent.parent.stack.list_all.generate_entries, isv_list)
 
 # This method need to be improved
 class PPA:
@@ -90,15 +81,23 @@ class PPA:
     valid = "Valid PPA found"
     sources_path = "/etc/apt/sources.list.d/"
     cache = apt.Cache()
+    sp = SoftwareProperties()
+    cache = apt.Cache()
 
     def __init__(self, parent):
         self.parent = parent
 
+    def get_isv(self):
+        self.sp.reload_sourceslist()
+        list = self.sp.get_isv_sources()
+        print(list)
+        return list
+
     def add(self, url):
-        AddThread(self.parent, url).start()
+        AddThread(self.parent, url, self.sp).start()
 
     def remove(self, ppa):
-        RemoveThread(self.parent, self.sources_path, ppa).start()
+        RemoveThread(self.parent, self.sources_path, ppa, self.sp).start()
 
     def list_all(self):
         sp = SoftwareProperties()

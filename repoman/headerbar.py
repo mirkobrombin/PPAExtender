@@ -73,7 +73,6 @@ class Headerbar(Gtk.HeaderBar):
         self.pack_start(self.edit_button)
 
     def on_edit_button_clicked(self, widget):
-        print("Edit Clicked")
         #self.ppa.remove(self.ppa_name)
         source_info = self.ppa_name.split(" ")
         rtype = source_info[0]
@@ -91,17 +90,13 @@ class Headerbar(Gtk.HeaderBar):
         dialog.destroy()
 
     def on_add_button_clicked(self, widget):
-        print("Add Clicked")
         self.parent.stack.stack.set_visible_child(self.parent.stack.list_all)
         #self.ppa.remove(self.ppa_name)
         dialog = AddDialog(self.parent)
         response = dialog.run()
 
         if response == Gtk.ResponseType.OK:
-            print("The Add button was clicked.")
             url = dialog.ppa_entry.get_text()
             self.ppa.add(url)
-        else:
-            print("The add was canceled.")
 
         dialog.destroy()
