@@ -26,10 +26,12 @@ try:
     import constants as cn
     import headerbar as hb
     import stack as sk
+    import ppa
 except ImportError:
     import repoman.constants as cn
     import repoman.headerbar as hb
     import repoman.stack as sk
+    import repoman.ppa
 
 class Window(Gtk.Window):
 
@@ -55,6 +57,8 @@ class Window(Gtk.Window):
           Gtk.STYLE_PROVIDER_PRIORITY_USER)
 
 class DeleteDialog(Gtk.Dialog):
+
+    ppa_name = False
 
     def __init__(self, parent):
         Gtk.Dialog.__init__(self, "Remove Source", parent, 0,
@@ -94,6 +98,8 @@ class DeleteDialog(Gtk.Dialog):
 
 class AddDialog(Gtk.Dialog):
 
+    ppa_name = False
+
     def __init__(self, parent):
         Gtk.Dialog.__init__(self, "Add Source", parent, 0,
                             (Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL,
@@ -119,19 +125,22 @@ class AddDialog(Gtk.Dialog):
         add_label = Gtk.Label("e.g. ppa:mirkobrombin/ppa")
         content_grid.attach(add_label, 0, 1, 1, 1)
 
-        ppa_entry = Gtk.Entry()
-        ppa_entry.set_placeholder_text("Source Line")
-        ppa_entry.set_activates_default(True)
-        ppa_entry.set_width_chars(50)
-        ppa_entry.set_margin_top(12)
-        content_grid.attach(ppa_entry, 0, 2, 1, 1)
+        self.ppa_entry = Gtk.Entry()
+        self.ppa_entry.set_placeholder_text("Source Line")
+        self.ppa_entry.set_activates_default(True)
+        self.ppa_entry.set_width_chars(50)
+        self.ppa_entry.set_margin_top(12)
+        content_grid.attach(self.ppa_entry, 0, 2, 1, 1)
 
         Gtk.StyleContext.add_class(self.get_widget_for_response(Gtk.ResponseType.OK).get_style_context(),
                                    "suggested-action")
 
         self.show_all()
 
+
 class EditDialog(Gtk.Dialog):
+
+    ppa_name = False
 
     def __init__(self, parent, repo_type, repo_uri, repo_version,
                  repo_component):
@@ -139,6 +148,9 @@ class EditDialog(Gtk.Dialog):
                             (Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL,
                              Gtk.STOCK_SAVE, Gtk.ResponseType.OK),
                              modal=1, use_header_bar=1)
+
+        self.ppa = ppa.PPA(self)
+        self.parent = parent
 
         content_area = self.get_content_area()
 
@@ -149,26 +161,31 @@ class EditDialog(Gtk.Dialog):
         content_grid.set_margin_bottom(12)
         content_grid.set_column_spacing(12)
         content_grid.set_row_spacing(6)
-        content_grid.set_halign(Gtk.Align.CENTER)
+        content_grid.set_halign(Gtk.Align.FILL)
         content_grid.set_hexpand(True)
         content_area.add(content_grid)
 
         type_label = Gtk.Label("Type")
+        type_label.set_halign(Gtk.Align.END)
         uri_label = Gtk.Label("URI")
+        uri_label.set_halign(Gtk.Align.END)
         version_label = Gtk.Label("Version")
+        version_label.set_halign(Gtk.Align.END)
         component_label = Gtk.Label("Component")
+        component_label.set_halign(Gtk.Align.END)
         content_grid.attach(type_label, 0, 0, 1, 1)
         content_grid.attach(uri_label, 0, 1, 1, 1)
         content_grid.attach(version_label, 0, 2, 1, 1)
         content_grid.attach(component_label, 0, 3, 1, 1)
 
         type_box = Gtk.ComboBoxText()
-        type_box.append("bin", "Binary")
-        type_box.append("src", "Source code")
+        type_box.append("deb", "Binary")
+        type_box.append("deb-src", "Source code")
         type_box.set_active_id(repo_type)
         content_grid.attach(type_box, 1, 0, 1, 1)
 
         uri_entry = Gtk.Entry()
+        uri_entry.set_hexpand(True)
         uri_entry.set_placeholder_text("https://ppa.launchpad.net/...")
         uri_entry.set_text(repo_uri)
         uri_entry.set_activates_default(False)
@@ -205,11 +222,10 @@ class EditDialog(Gtk.Dialog):
         response = dialog.run()
 
         if response == Gtk.ResponseType.OK:
-            print("The REMOVE button was clicked.")
+            self.ppa.remove(self.parent.hbar.ppa_name)
             dialog.destroy()
             self.destroy()
         else:
-            print("The Remove was canceled.")
             dialog.destroy()
 
         

@@ -65,14 +65,11 @@ class Stack(Gtk.Box):
         self.pack_start(self.stack, True, True, 0)
 
     def on_stack_focus_changed(self, widget, extra):
-        print("Stack Changed")
         child = self.stack.get_visible_child_name()
         print(child)
         if child == "list":
-            print("Hit")
             self.parent.hbar.edit_button.show()
             self.parent.hbar.add_button.show()
         else:
-            print("miss")
             self.parent.hbar.edit_button.hide()
             self.parent.hbar.add_button.hide()

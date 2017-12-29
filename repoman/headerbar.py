@@ -24,12 +24,12 @@ gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk, Gdk
 try:
     import constants as cn
-    import ppa as p
+    import ppa
     from window import EditDialog
     from window import AddDialog
 except ImportError:
     import repoman.constants as cn
-    import repoman.ppa as p
+    import repoman.ppa
     from repoman.window import EditDialog
     from repoman.window import AddDialog
 
@@ -38,7 +38,7 @@ class Headerbar(Gtk.HeaderBar):
     ppa_name = False
 
     def __init__(self, parent):
-        self.ppa = p.PPA(self)
+        self.ppa = ppa.PPA(self)
 
         Gtk.HeaderBar.__init__(self)
         self.parent = parent
@@ -50,33 +50,39 @@ class Headerbar(Gtk.HeaderBar):
         self.switcher.set_baseline_position(Gtk.BaselinePosition.CENTER)
         self.set_custom_title(self.switcher)
 
+        self.buttonbox = Gtk.Box()
+        self.pack_end(self.buttonbox)
+
         # spinner
-        #self.spinner = Gtk.Spinner()
-        #self.grid.attach(self.spinner, 0, 0, 1, 1)
+        self.spinner = Gtk.Spinner()
+        self.buttonbox.add(self.spinner)
 
         # add button
         self.add_button = Gtk.Button.new_from_icon_name("list-add-symbolic",
                                                    Gtk.IconSize.SMALL_TOOLBAR)
         Gtk.StyleContext.add_class(self.add_button.get_style_context(),
                                    "image-button")
+        self.add_button.set_tooltip_text("Add New Source")
         self.add_button.connect("clicked", self.on_add_button_clicked)
-        self.pack_end(self.add_button)
+        self.buttonbox.add(self.add_button)
 
         # edit button
         self.edit_button = Gtk.Button.new_from_icon_name("edit-symbolic",
                                                     Gtk.IconSize.SMALL_TOOLBAR)
         Gtk.StyleContext.add_class(self.edit_button.get_style_context(),
                                    "image-button")
+        self.edit_button.set_tooltip_text("Modify Selected Source")
         self.edit_button.connect("clicked", self.on_edit_button_clicked)
         self.pack_start(self.edit_button)
 
     def on_edit_button_clicked(self, widget):
-        print("Edit Clicked")
         #self.ppa.remove(self.ppa_name)
-        dialog = EditDialog(self.parent, "bin",
-                            "https://ppa.launchpad.net/system76-dev/archive",
-                            "artful",
-                            "release")
+        source_info = self.ppa_name.split(" ")
+        rtype = source_info[0]
+        uri = source_info[-3]
+        version = source_info[-2]
+        comp = source_info[-1]
+        dialog = EditDialog(self.parent, rtype, uri, version, comp)
         response = dialog.run()
 
         if response == Gtk.ResponseType.OK:
@@ -87,15 +93,13 @@ class Headerbar(Gtk.HeaderBar):
         dialog.destroy()
 
     def on_add_button_clicked(self, widget):
-        print("Add Clicked")
         self.parent.stack.stack.set_visible_child(self.parent.stack.list_all)
         #self.ppa.remove(self.ppa_name)
         dialog = AddDialog(self.parent)
         response = dialog.run()
 
         if response == Gtk.ResponseType.OK:
-            print("The Add button was clicked.")
-        else:
-            print("The add was canceled.")
+            url = dialog.ppa_entry.get_text()
+            self.ppa.add(url)
 
         dialog.destroy()
