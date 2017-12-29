@@ -51,11 +51,16 @@ class RemoveThread(threading.Thread):
 
     def run(self):
         print("Removing PPA %s" % (self.ppa))
+        GObject.idle_add(self.parent.parent.stack.list_all.ppa_liststore.clear)
         self.sp.remove_source(self.ppa, remove_source_code=True)
         self.sp.sourceslist.save()
+        self.cache.open()
+        self.cache.update()
+        self.cache.open(None)
         self.sp.reload_sourceslist()
         isv_list = self.sp.get_isv_sources()
         GObject.idle_add(self.parent.parent.stack.list_all.generate_entries, isv_list)
+        GObject.idle_add(self.parent.parent.hbar.spinner.stop)
 
 class AddThread(threading.Thread):
     cache = apt.Cache()
@@ -68,11 +73,16 @@ class AddThread(threading.Thread):
 
     def run(self):
         print("Adding PPA %s" % (self.url))
+        GObject.idle_add(self.parent.parent.stack.list_all.ppa_liststore.clear)
         self.sp.add_source_from_line(self.url)
         self.sp.sourceslist.save()
+        self.cache.open()
+        self.cache.update()
+        self.cache.open(None)
         self.sp.reload_sourceslist()
         isv_list = self.sp.get_isv_sources()
         GObject.idle_add(self.parent.parent.stack.list_all.generate_entries, isv_list)
+        GObject.idle_add(self.parent.parent.hbar.spinner.stop)
 
 # This method need to be improved
 class PPA:
@@ -94,9 +104,11 @@ class PPA:
         return list
 
     def add(self, url):
+        self.parent.parent.hbar.spinner.start()
         AddThread(self.parent, url, self.sp).start()
 
     def remove(self, ppa):
+        self.parent.parent.hbar.spinner.start()
         RemoveThread(self.parent, self.sources_path, ppa, self.sp).start()
 
     def list_all(self):

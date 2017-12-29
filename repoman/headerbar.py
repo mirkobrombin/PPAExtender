@@ -50,9 +50,12 @@ class Headerbar(Gtk.HeaderBar):
         self.switcher.set_baseline_position(Gtk.BaselinePosition.CENTER)
         self.set_custom_title(self.switcher)
 
+        self.buttonbox = Gtk.Box()
+        self.pack_end(self.buttonbox)
+
         # spinner
-        #self.spinner = Gtk.Spinner()
-        #self.grid.attach(self.spinner, 0, 0, 1, 1)
+        self.spinner = Gtk.Spinner()
+        self.buttonbox.add(self.spinner)
 
         # add button
         self.add_button = Gtk.Button.new_from_icon_name("list-add-symbolic",
@@ -61,7 +64,7 @@ class Headerbar(Gtk.HeaderBar):
                                    "image-button")
         self.add_button.set_tooltip_text("Add New Source")
         self.add_button.connect("clicked", self.on_add_button_clicked)
-        self.pack_end(self.add_button)
+        self.buttonbox.add(self.add_button)
 
         # edit button
         self.edit_button = Gtk.Button.new_from_icon_name("edit-symbolic",
