@@ -41,8 +41,8 @@ class Settings(Gtk.Box):
 
         self.parent = parent
 
-        self.checkbutton_source_code = Gtk.CheckButton(label="Include source code")
-
+        self.source_check = Gtk.CheckButton(label="Include source code")
+        self.proposed_check = Gtk.CheckButton()
 
         settings_grid = Gtk.Grid()
         settings_grid.set_margin_left(12)
@@ -76,17 +76,19 @@ class Settings(Gtk.Box):
         developer_options.set_label("Developer Options (Advanced)")
         settings_grid.attach(developer_options, 0, 3, 1, 1)
 
-        developer_grid = Gtk.Grid()
-        developer_grid.set_margin_left(12)
-        developer_grid.set_margin_top(24)
-        developer_grid.set_margin_right(12)
-        developer_grid.set_margin_bottom(12)
-        developer_options.add(developer_grid)
+        self.developer_grid = Gtk.VBox()
+        self.developer_grid.set_margin_left(12)
+        self.developer_grid.set_margin_top(24)
+        self.developer_grid.set_margin_right(12)
+        self.developer_grid.set_margin_bottom(12)
+        developer_options.add(self.developer_grid)
 
         developer_label = Gtk.Label("These options are those which are " +
                                     "primarily of interest to \ndevelopers.")
         developer_label.set_line_wrap(True)
-        developer_grid.attach(developer_label, 0, 0, 1, 1)
+        self.developer_grid.add(developer_label)
+        self.developer_grid.add(self.source_check)
+        self.developer_grid.add(self.proposed_check)
 
         self.init_distro()
         self.show_distro()
@@ -102,6 +104,10 @@ class Settings(Gtk.Box):
                 widget.handler_unblock(self.handlers[widget])
 
     def init_distro(self):
+
+        self.handlers[self.source_check] = \
+                              self.source_check.connect("toggled",
+                                                                   self.on_source_check_toggled)
 
         for checkbutton in self.checks_grid.get_children():
             self.checks_grid.remove(checkbutton)
@@ -127,6 +133,20 @@ class Settings(Gtk.Box):
 
             self.checks_grid.add(checkbox)
             checkbox.show()
+
+        child_repos = self.ppa.get_distro_child_repos()
+        for template in child_repos:
+            if template.type == "deb-src":
+                continue
+
+            if "proposed" in template.name:
+                self.proposed_check.set_label("%s (%s)" % (template.description,
+                                                           template.name))
+                self.proposed_check.template = template
+                self.handlers[self.proposed_check] = self.proposed_check.connect("toggled",
+                                                   self.on_proposed_check_toggled,
+                                                   template)
+
         return 0
 
     def show_distro(self):
@@ -137,12 +157,29 @@ class Settings(Gtk.Box):
             checkbox.set_active(active)
             checkbox.set_inconsistent(inconsistent)
 
+        (src_active, src_inconsistent) = self.ppa.get_source_code_enabled()
+        self.source_check.set_active(src_active)
+        self.source_check.set_inconsistent(src_inconsistent)
+
+        (prop_active, prop_inconsistent) = self.ppa.get_child_download_state(self.proposed_check.template)
+        self.proposed_check.set_active(prop_active)
+        self.proposed_check.set_inconsistent(prop_inconsistent)
+
         self.unblock_handlers()
+        return 0
 
     def on_component_toggled(self, checkbutton, comp):
-        if checkbutton.get_active() == True:
-            self.ppa.enable_comp(comp)
-        else:
-            self.ppa.disable_comp(comp)
+        enabled = checkbutton.get_active()
+        self.ppa.set_comp_enabled(comp, enabled)
+        return 0
+
+    def on_source_check_toggled(self, checkbutton):
+        enabled = checkbutton.get_active()
+        self.ppa.set_source_code_enabled(enabled)
+        return 0
+
+    def on_proposed_check_toggled(self, checkbutton, comp):
+        enabled = checkbutton.get_active()
+        self.ppa.set_child_enabled(comp, enabled)
         return 0
     

@@ -40,6 +40,7 @@ class Updates(Gtk.Box):
         self.parent = parent
 
         self.ppa = ppa.PPA(self)
+        self.handlers = {}
 
         updates_grid = Gtk.Grid()
         updates_grid.set_margin_left(12)
@@ -62,25 +63,12 @@ class Updates(Gtk.Box):
         updates_label.set_halign(Gtk.Align.START)
         updates_grid.attach(updates_label, 0, 1, 1, 1)
 
-        checks_grid = Gtk.Grid()
-        checks_grid.set_margin_left(12)
-        checks_grid.set_margin_top(24)
-        checks_grid.set_margin_right(12)
-        checks_grid.set_margin_bottom(12)
-        updates_grid.attach(checks_grid, 0, 2, 1, 1)
-
-        secu_check = Gtk.CheckButton.new_with_label("Important Security Updates " +
-                                                    "(artful-security)")
-        secu_check.set_active(self.ppa.secu_enabled)
-        recc_check = Gtk.CheckButton.new_with_label("Recommended Updates " +
-                                                    "(artful-updates)")
-        recc_check.set_active(self.ppa.recc_enabled)
-        back_check = Gtk.CheckButton.new_with_label("Backported Updates " +
-                                                    "(artful-backports)")
-        back_check.set_active(self.ppa.back_enabled)
-        checks_grid.attach(secu_check, 0, 0, 1, 1)
-        checks_grid.attach(recc_check, 0, 1, 1, 1)
-        checks_grid.attach(back_check, 0, 2, 1, 1)
+        self.checks_grid = Gtk.VBox()
+        self.checks_grid.set_margin_left(12)
+        self.checks_grid.set_margin_top(24)
+        self.checks_grid.set_margin_right(12)
+        self.checks_grid.set_margin_bottom(12)
+        updates_grid.attach(self.checks_grid, 0, 2, 1, 1)
 
         separator = Gtk.HSeparator()
         updates_grid.attach(separator, 0, 3, 1, 1)
@@ -114,3 +102,61 @@ class Updates(Gtk.Box):
         version_check = Gtk.CheckButton.new_with_label("Notify about new versions " +
                                                        "of Pop!_OS")
         self.noti_grid.attach(version_check, 0, 2, 1, 1)
+
+        self.init_updates()
+        self.show_updates()
+
+    def block_handlers(self):
+        for widget in self.handlers:
+            if widget.handler_is_connected(self.handlers[widget]):
+                widget.handler_block(self.handlers[widget])
+
+    def unblock_handlers(self):
+        for widget in self.handlers:
+            if widget.handler_is_connected(self.handlers[widget]):
+                widget.handler_unblock(self.handlers[widget])
+
+    def init_updates(self):
+        print("init_distro")
+
+        for checkbutton in self.checks_grid.get_children():
+            self.checks_grid.remove(checkbutton)
+
+        comp_children = self.ppa.get_distro_child_repos()
+
+        for template in comp_children:
+            # Do not show -proposed or source entries here
+            if template.type == "deb-src":
+                continue
+            if "proposed" in template.name:
+                continue
+
+            if template.description == "Unsupported Updates":
+                description = "Backported Updates"
+            else:
+                description = template.description
+
+            checkbox = Gtk.CheckButton(label="%s (%s)" % (description,
+                                                          template.name))
+            checkbox.template = template
+            self.handlers[checkbox] = checkbox.connect("toggled",
+                                                       self.on_child_toggled,
+                                                       template)
+            self.checks_grid.add(checkbox)
+            checkbox.show()
+        return 0
+
+    def show_updates(self):
+        self.block_handlers()
+        print("show updates")
+
+        for checkbox in self.checks_grid.get_children():
+            (active, inconsistent) = self.ppa.get_child_download_state(checkbox.template)
+            checkbox.set_active(active)
+            checkbox.set_inconsistent(inconsistent)
+        self.unblock_handlers()
+        return 0
+
+    def on_child_toggled(self, checkbutton, child):
+        enabled = checkbutton.get_active()
+        self.ppa.set_child_enabled(child, enabled)

@@ -112,20 +112,52 @@ class PPA:
         components = self.sp.distro.source_template.components
         return components
 
+    # Returns the current child repos (updates)
+    def get_distro_child_repos(self):
+        repos = self.sp.distro.source_template.children
+        return repos
+
     # Get whether a component is enabled or not
     def get_comp_download_state(self, comp):
         (active, inconsistent) = self.sp.get_comp_download_state(comp)
-        print(comp.name + " (" + str(active) + ", " + str(inconsistent) + ")")
         return (active, inconsistent)
 
-    # Enable a component
-    def enable_comp(self, comp):
-        self.sp.enable_component(comp)
+    # Get whether a child repo is enabled or not
+    def get_child_download_state(self, child):
+        (active, inconsistent) = self.sp.get_comp_child_state(child)
+        print(child.name + " (" + str(active) + ", " + str(inconsistent) + ")")
+        return (active, inconsistent)
+
+    # Get Source Code State
+    def get_source_code_enabled(self):
+        enabled = self.sp.get_source_code_state()
+        if enabled == None:
+            return(False, True)
+        else:
+            return (enabled, False)
+
+    # Enable/Disable a component
+    def set_comp_enabled(self, comp, enabled):
+        if enabled == True:
+            self.sp.enable_component(comp)
+        else:
+            self.sp.disable_component(comp)
         return 0
 
-    # Disable a component
-    def disable_comp(self, comp):
-        self.sp.disable_component(comp)
+    # Enable/Disable a child repo
+    def set_child_enabled(self, child, enabled):
+        if enabled == True:
+            self.sp.enable_child_source(child)
+        else:
+            self.sp.disable_child_source(child)
+        return 0
+
+    # Enable/Disable source code
+    def set_source_code_enabled(self, enabled):
+        if enabled == True:
+            self.sp.enable_source_code_sources()
+        elif enabled == False:
+            self.sp.disable_source_code_sources()
         return 0
 
     # Get the current sources configuration
@@ -150,15 +182,6 @@ class PPA:
         self.back_enabled = self.enabledDict['artful-backports']
         self.prop_enabled = self.enabledDict['artful-proposed']
         return 0
-
-    # Enable/Disable source code
-    def set_source_code_enabled(self, enabled):
-        if enabled == True:
-            self.sp.enable_source_code_sources()
-        elif enabled == False:
-            self.sp.disable_source_code_sources()
-        return 0
-
 
     # Set the current configuration
     def set_config(self):
