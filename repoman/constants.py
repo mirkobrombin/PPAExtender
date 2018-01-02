@@ -22,14 +22,14 @@ gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk
 
 class App:
-    application_id = "com.github.mirkobrombin.ppaextender"
-    application_name = "PPA Extender"
-    application_description = "Easily manage PPA"
+    application_id = "xyz.isantop.repoman"
+    application_name = "Repoman"
+    application_description = "Easily manage PPAs"
     application_version ="1.0"
-    main_url = "https://github.com/mirkobrombin/ppaextender"
-    bug_url = "https://github.com/mirkobrombin/ppaextender/issues/labels/bug"
-    help_url = "https://github.com/mirkobrombin/Word/issues"
-    about_authors = {"Mirko Brombin <brombinmirko@gmail.com>"}
+    main_url = "https://github.com/isantop/repoman"
+    bug_url = "https://github.com/isantop/repoman/issues/labels/bug"
+    help_url = "https://github.com/isantop/repoman/issues"
+    about_authors = {"Ian Santopietro <ian@system76.com>"}
     about_comments = application_description
     about_license_type = Gtk.License.GPL_3_0
 

@@ -2,20 +2,20 @@
 '''
    Copyright 2017 Mirko Brombin (brombinmirko@gmail.com)
 
-   This file is part of PPAExtender.
+   This file is part of repoman.
 
-    PPAExtender is free software: you can redistribute it and/or modify
+    repoman is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation, either version 3 of the License, or
     (at your option) any later version.
 
-    PPAExtender is distributed in the hope that it will be useful,
+    repoman is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
 
     You should have received a copy of the GNU General Public License
-    along with PPAExtender.  If not, see <http://www.gnu.org/licenses/>.
+    along with repoman.  If not, see <http://www.gnu.org/licenses/>.
 '''
 
 import os
@@ -26,17 +26,17 @@ gi.require_version('Granite', '1.0')
 from gi.repository import Gtk, Gdk, Granite
 try:
     import constants as cn
-    import welcome as wl
-    import detail as dt
+    import settings as st
+    import updates as up
     import list as ls
 except ImportError:
-    import ppaextender.constants as cn
-    import ppaextender.welcome as wl
-    import ppaextender.detail as dt
-    import ppaextender.list as ls
+    import repoman.constants as cn
+    import repoman.settings as st
+    import repoman.updates as up
+    import repoman.list as ls
 
 class Stack(Gtk.Box):
-        
+
     # Define variable for GTK global theme
     settings = Gtk.Settings.get_default()
 
@@ -46,14 +46,25 @@ class Stack(Gtk.Box):
 
         self.stack = Gtk.Stack()
         self.stack.set_transition_type(Gtk.StackTransitionType.SLIDE_LEFT_RIGHT)
-        self.stack.set_transition_duration(1000)
-        
-        self.welcome = wl.Welcome(self)
-        self.detail = dt.Detail(self)
+        self.stack.set_transition_duration(300)
+
+        self.stack.connect("set_focus_child", self.on_stack_focus_changed)
+
+        self.setting = st.Settings(self)
+        self.updates = up.Updates(self)
         self.list_all = ls.List(self)
 
-        self.stack.add_titled(self.welcome, "welcome", "Welcome")
-        self.stack.add_titled(self.detail, "detail", "Detail")
-        self.stack.add_titled(self.list_all, "list", "List")
+        self.stack.add_titled(self.setting, "settings", "Settings")
+        self.stack.add_titled(self.updates, "updates", "Updates")
+        self.stack.add_titled(self.list_all, "list", "Extra Sources")
 
         self.pack_start(self.stack, True, True, 0)
+
+    def on_stack_focus_changed(self, widget, extra):
+        child = self.stack.get_visible_child_name()
+        if child == "list":
+            self.parent.hbar.edit_button.show()
+            self.parent.hbar.add_button.show()
+        else:
+            self.parent.hbar.edit_button.hide()
+            self.parent.hbar.add_button.hide()

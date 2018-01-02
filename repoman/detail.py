@@ -28,8 +28,8 @@ try:
     import constants as cn
     import ppa as p
 except ImportError:
-    import ppaextender.constants as cn
-    import ppaextender.ppa as p
+    import repoman.constants as cn
+    import repoman.ppa as p
 
 class Detail(Gtk.Box):
     status = False
@@ -44,26 +44,34 @@ class Detail(Gtk.Box):
 
         self.set_orientation(Gtk.Orientation.VERTICAL)
 
-        title = Gtk.Label("Add new PPA")
-        title.set_name('Title')
-        title.set_justify(Gtk.Justification.CENTER)
-        self.add(title)
 
-        description = Gtk.Label("Enter PPA (ex: ppa:mirkobrombin/ppa) and press Enter")
+
+        description = Gtk.Label("Enter source line (ex: ppa:mirkobrombin/ppa) and press Enter")
         description.set_name('Description')
         description.set_justify(Gtk.Justification.CENTER)
         self.add(description)
 
-        validate = Gtk.Label("Waiting for PPA")
+        validate = Gtk.Label("Waiting for source")
         self.validate = validate
         validate.set_name('Validate')
         validate.set_justify(Gtk.Justification.CENTER)
 
+        entry_grid = Gtk.Grid()
+        self.add(entry_grid)
+
         entry = Gtk.Entry()
-        entry.set_placeholder_text("Entry PPA here...")
+        entry.set_placeholder_text("Enter source line here...")
         entry.connect("key-release-event", self.on_entry_key_release)
         entry.connect("activate", self.on_entry_activate)
-        self.add(entry)
+        entry.set_hexpand(True)
+        entry_grid.attach(entry, 0, 0, 1, 1)
+
+        # Add button
+        ppa_add = Gtk.Button("Add")
+        ppa_add.connect("clicked", self.on_entry_activate)
+        Gtk.StyleContext.add_class(ppa_add.get_style_context(), "suggested-action")
+        entry_grid.attach(ppa_add, 1, 0, 1, 1)
+
 
         self.add(validate)
 
