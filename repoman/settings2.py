@@ -37,8 +37,12 @@ class Settings(Gtk.Box):
         Gtk.Box.__init__(self, False, 0)
 
         self.ppa = ppa.PPA(self)
+        self.handlers = {}
 
         self.parent = parent
+
+        self.checkbutton_source_code = Gtk.CheckButton(label="Include source code")
+
 
         settings_grid = Gtk.Grid()
         settings_grid.set_margin_left(12)
@@ -61,28 +65,12 @@ class Settings(Gtk.Box):
         sources_label.set_halign(Gtk.Align.START)
         settings_grid.attach(sources_label, 0, 1, 1, 1)
 
-        checks_grid = Gtk.Grid()
-        checks_grid.set_margin_left(12)
-        checks_grid.set_margin_top(24)
-        checks_grid.set_margin_right(12)
-        checks_grid.set_margin_bottom(12)
-        settings_grid.attach(checks_grid, 0, 2, 1, 1)
-
-        main_check = Gtk.CheckButton.new_with_label("Officially Supported Software (main)")
-        main_check.set_active(self.ppa.main_enabled)
-        checks_grid.attach(main_check, 0, 0, 1, 1)
-
-        univ_check = Gtk.CheckButton.new_with_label("Community Supported Software (universe)")
-        univ_check.set_active(self.ppa.univ_enabled)
-        checks_grid.attach(univ_check, 0, 1, 1, 1)
-
-        rest_check = Gtk.CheckButton.new_with_label("Proprietary Drivers for Devices (restricted)")
-        rest_check.set_active(self.ppa.rest_enabled)
-        checks_grid.attach(rest_check, 0, 2, 1, 1)
-
-        mult_check = Gtk.CheckButton.new_with_label("Software with Copyright or Legal Restrictions (multiverse)")
-        mult_check.set_active(self.ppa.mult_enabled)
-        checks_grid.attach(mult_check, 0, 3, 1, 1)
+        self.checks_grid = Gtk.VBox()
+        self.checks_grid.set_margin_left(12)
+        self.checks_grid.set_margin_top(24)
+        self.checks_grid.set_margin_right(12)
+        self.checks_grid.set_margin_bottom(12)
+        settings_grid.attach(self.checks_grid, 0, 2, 1, 1)
 
         developer_options = Gtk.Expander()
         developer_options.set_label("Developer Options (Advanced)")
@@ -100,15 +88,61 @@ class Settings(Gtk.Box):
         developer_label.set_line_wrap(True)
         developer_grid.attach(developer_label, 0, 0, 1, 1)
 
-        self.source_check = Gtk.CheckButton.new_with_label("Include Source Code")
-        self.source_check.set_active(self.ppa.source_code_state)
-        self.source_check.connect("toggled",
-                             self.on_source_check_toggled(self.source_check.get_active()))
-        developer_grid.attach(self.source_check, 0, 1, 1, 1)
+        self.init_distro()
+        self.show_distro()
 
-        proposed_check = Gtk.CheckButton.new_with_label("Proposed Updates (artful-proposed)")
-        proposed_check.set_active(self.ppa.prop_enabled)
-        developer_grid.attach(proposed_check, 0, 2, 1, 1)
+    def block_handlers(self):
+        for widget in self.handlers:
+            if widget.handler_is_connected(self.handlers[widget]):
+                widget.handler_block(self.handlers[widget])
 
-    def on_source_check_toggled(self, state):
-        self.ppa.set_source_code_enabled(state)
+    def unblock_handlers(self):
+        for widget in self.handlers:
+            if widget.handler_is_connected(self.handlers[widget]):
+                widget.handler_unblock(self.handlers[widget])
+
+    def init_distro(self):
+
+        for checkbutton in self.checks_grid.get_children():
+            self.checks_grid.remove(checkbutton)
+
+        distro_comps = self.ppa.get_distro_sources()
+
+        for comp in distro_comps:
+            description = comp.description
+            if description == 'Non-free drivers':
+                description = "Proprietary Drivers for Devices"
+            elif description == 'Restricted software':
+                description = "Software with Copyright or Legal Restrictions"
+            else:
+                description = description + " software"
+
+            label = "%s (%s)" % (description, comp.name)
+            checkbox = Gtk.CheckButton(label=label)
+
+            checkbox.comp = comp
+            self.handlers[checkbox] = checkbox.connect("toggled",
+                                                       self.on_component_toggled,
+                                                       comp.name)
+
+            self.checks_grid.add(checkbox)
+            checkbox.show()
+        return 0
+
+    def show_distro(self):
+        self.block_handlers()
+
+        for checkbox in self.checks_grid.get_children():
+            (active, inconsistent) = self.ppa.get_comp_download_state(checkbox.comp)
+            checkbox.set_active(active)
+            checkbox.set_inconsistent(inconsistent)
+
+        self.unblock_handlers()
+
+    def on_component_toggled(self, checkbutton, comp):
+        if checkbutton.get_active() == True:
+            self.ppa.enable_comp(comp)
+        else:
+            self.ppa.disable_comp(comp)
+        return 0
+    

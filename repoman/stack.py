@@ -26,13 +26,13 @@ gi.require_version('Granite', '1.0')
 from gi.repository import Gtk, Gdk, Granite
 try:
     import constants as cn
-    import settings as st
+    import settings2 as st
     import updates as up
     import detail as dt
     import list as ls
 except ImportError:
     import repoman.constants as cn
-    import repoman.settings as st
+    import repoman.settings2 as st
     import repoman.updates as up
     import repoman.list as ls
 

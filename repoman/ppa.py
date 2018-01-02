@@ -107,24 +107,26 @@ class PPA:
         print(list)
         return list
 
-    # Starts a new thread to add a repository
-    def add(self, url):
-        self.parent.parent.hbar.spinner.start()
-        AddThread(self.parent, url, self.sp).start()
+    # Returns the current distro Components.
+    def get_distro_sources(self):
+        components = self.sp.distro.source_template.components
+        return components
 
-    # Starts a new thread to remove a repository
-    def remove(self, ppa):
-        self.parent.parent.hbar.spinner.start()
-        RemoveThread(self.parent, self.sources_path, ppa, self.sp).start()
+    # Get whether a component is enabled or not
+    def get_comp_download_state(self, comp):
+        (active, inconsistent) = self.sp.get_comp_download_state(comp)
+        print(comp.name + " (" + str(active) + ", " + str(inconsistent) + ")")
+        return (active, inconsistent)
 
-    def list_all(self):
-        sp = SoftwareProperties()
-        isv_sources = sp.get_isv_sources()
-        source_list = []
-        for source in isv_sources:
-            if not str(source).startswith("#"):
-                source_list.append(str(source))
-        return source_list
+    # Enable a component
+    def enable_comp(self, comp):
+        self.sp.enable_component(comp)
+        return 0
+
+    # Disable a component
+    def disable_comp(self, comp):
+        self.sp.disable_component(comp)
+        return 0
 
     # Get the current sources configuration
     def get_configuration(self):
@@ -147,18 +149,36 @@ class PPA:
         self.recc_enabled = self.enabledDict['artful-updates']
         self.back_enabled = self.enabledDict['artful-backports']
         self.prop_enabled = self.enabledDict['artful-proposed']
+        return 0
 
-    def validate(self, url, widget):
-        self.url = url
-        if url.startswith("ppa:"):
-            self.parent.status = True
-            widget.set_text(self.valid)
-        elif url.startswith("deb"):
-            self.parent.status = True
-            widget.set_text(self.valid)
-        elif url == "":
-            self.parent.status = False
-            widget.set_text(self.waiting)
-        else:
-            self.parent.status = False
-            widget.set_text(self.invalid)
+    # Enable/Disable source code
+    def set_source_code_enabled(self, enabled):
+        if enabled == True:
+            self.sp.enable_source_code_sources()
+        elif enabled == False:
+            self.sp.disable_source_code_sources()
+        return 0
+
+
+    # Set the current configuration
+    def set_config(self):
+        print("Test")
+
+    # Starts a new thread to add a repository
+    def add(self, url):
+        self.parent.parent.hbar.spinner.start()
+        AddThread(self.parent, url, self.sp).start()
+
+    # Starts a new thread to remove a repository
+    def remove(self, ppa):
+        self.parent.parent.hbar.spinner.start()
+        RemoveThread(self.parent, self.sources_path, ppa, self.sp).start()
+
+    def list_all(self):
+        sp = SoftwareProperties()
+        isv_sources = sp.get_isv_sources()
+        source_list = []
+        for source in isv_sources:
+            if not str(source).startswith("#"):
+                source_list.append(str(source))
+        return source_list
