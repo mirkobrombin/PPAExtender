@@ -1,21 +1,22 @@
 #!/usr/bin/python3
 '''
    Copyright 2017 Mirko Brombin (brombinmirko@gmail.com)
+   Copyright 2017 Ian Santopietro (ian@system76.com)
 
-   This file is part of PPAExtender.
+   This file is part of Repoman.
 
-    PPAExtender is free software: you can redistribute it and/or modify
+    Repoman is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation, either version 3 of the License, or
     (at your option) any later version.
 
-    PPAExtender is distributed in the hope that it will be useful,
+    Repoman is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
 
     You should have received a copy of the GNU General Public License
-    along with PPAExtender.  If not, see <http://www.gnu.org/licenses/>.
+    along with Repoman.  If not, see <http://www.gnu.org/licenses/>.
 '''
 
 import os
@@ -67,6 +68,9 @@ class List(Gtk.ScrolledWindow):
         sources_label.set_hexpand(True)
         self.content_grid.attach(sources_label, 0, 1, 1, 1)
 
+        list_grid = Gtk.Grid()
+        self.content_grid.attach(list_grid, 0, 2, 1, 1)
+
         self.ppa_liststore = Gtk.ListStore(str, str)
         view = Gtk.TreeView(self.ppa_liststore)
         renderer = Gtk.CellRendererText()
@@ -76,9 +80,38 @@ class List(Gtk.ScrolledWindow):
         view.set_vexpand(True)
         tree_selection = view.get_selection()
         tree_selection.connect('changed', self.on_row_change)
-        self.content_grid.attach(view, 0, 2, 1, 1)
+        list_grid.attach(view, 0, 0, 1, 1)
+
+         # add button
+        add_button = Gtk.Button.new_from_icon_name("list-add-symbolic",
+                                                   Gtk.IconSize.SMALL_TOOLBAR)
+        Gtk.StyleContext.add_class(add_button.get_style_context(),
+                                   "image-button")
+        add_button.set_tooltip_text("Add New Source")
+        add_button.connect("clicked", self.on_add_button_clicked)
+
+        # edit button
+        edit_button = Gtk.Button.new_from_icon_name("edit-symbolic",
+                                                    Gtk.IconSize.SMALL_TOOLBAR)
+        Gtk.StyleContext.add_class(edit_button.get_style_context(),
+                                   "image-button")
+        edit_button.set_tooltip_text("Modify Selected Source")
+        edit_button.connect("clicked", self.on_edit_button_clicked)
+
+        action_bar = Gtk.ActionBar()
+        Gtk.StyleContext.add_class(action_bar.get_style_context(),
+                                   "inline-toolbar")
+        action_bar.add(edit_button)
+        action_bar.add(add_button)
+        list_grid.attach(action_bar, 0, 1, 1, 1)
 
         self.generate_entries(self.ppa.get_isv())
+
+    def on_edit_button_clicked(self, widget):
+        print("Inline Edit Clicked")
+
+    def on_add_button_clicked(self, widget):
+        print("Inline Add Clicked")
 
     def generate_entries(self, isv_list):
         self.ppa_liststore.clear()
