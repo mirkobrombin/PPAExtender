@@ -26,13 +26,12 @@ gi.require_version('Granite', '1.0')
 from gi.repository import Gtk, Gdk, Granite
 try:
     import constants as cn
-    import settings2 as st
+    import settings as st
     import updates as up
-    import detail as dt
     import list as ls
 except ImportError:
     import repoman.constants as cn
-    import repoman.settings2 as st
+    import repoman.settings as st
     import repoman.updates as up
     import repoman.list as ls
 
@@ -53,20 +52,16 @@ class Stack(Gtk.Box):
 
         self.setting = st.Settings(self)
         self.updates = up.Updates(self)
-        self.detail = dt.Detail(self)
         self.list_all = ls.List(self)
 
-        #self.stack.add_titled(self.welcome, "welcome", "Welcome")
         self.stack.add_titled(self.setting, "settings", "Settings")
         self.stack.add_titled(self.updates, "updates", "Updates")
-        #self.stack.add_titled(self.detail, "detail", "Detail")
         self.stack.add_titled(self.list_all, "list", "Extra Sources")
 
         self.pack_start(self.stack, True, True, 0)
 
     def on_stack_focus_changed(self, widget, extra):
         child = self.stack.get_visible_child_name()
-        print(child)
         if child == "list":
             self.parent.hbar.edit_button.show()
             self.parent.hbar.add_button.show()
