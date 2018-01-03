@@ -25,6 +25,7 @@ import apt
 import threading
 import time
 from softwareproperties.SoftwareProperties import SoftwareProperties
+from aptsources.sourceslist import SourceEntry
 import webbrowser
 gi.require_version('Gtk', '3.0')
 gi.require_version('Granite', '1.0')
@@ -59,8 +60,9 @@ class RemoveThread(threading.Thread):
         self.cache.open(None)
         self.sp.reload_sourceslist()
         isv_list = self.sp.get_isv_sources()
-        GObject.idle_add(self.parent.parent.stack.list_all.generate_entries, isv_list)
-        GObject.idle_add(self.parent.parent.hbar.spinner.stop)
+        GObject.idle_add(self.parent.parent.parent.stack.list_all.generate_entries, isv_list)
+        GObject.idle_add(self.parent.parent.parent.stack.list_all.view.set_sensitive, True)
+        GObject.idle_add(self.parent.parent.parent.hbar.spinner.stop)
 
 class AddThread(threading.Thread):
     cache = apt.Cache()
@@ -81,8 +83,34 @@ class AddThread(threading.Thread):
         self.cache.open(None)
         self.sp.reload_sourceslist()
         isv_list = self.sp.get_isv_sources()
-        GObject.idle_add(self.parent.parent.stack.list_all.generate_entries, isv_list)
-        GObject.idle_add(self.parent.parent.hbar.spinner.stop)
+        GObject.idle_add(self.parent.parent.parent.stack.list_all.generate_entries, isv_list)
+        GObject.idle_add(self.parent.parent.parent.stack.list_all.view.set_sensitive, True)
+        GObject.idle_add(self.parent.parent.parent.hbar.spinner.stop)
+
+class ModifyThread(threading.Thread):
+    cache = apt.Cache()
+
+    def __init__(self, parent, old_source, new_source, sp):
+        threading.Thread.__init__(self)
+        self.parent = parent
+        self.old_source = old_source
+        self.new_source = new_source
+        self.sp = sp
+
+    def run(self):
+        index = self.sp.sourceslist.list.index(self.old_source)
+        file = self.sp.sourceslist.list[index].file
+        self.new_source_entry = SourceEntry(self.new_source,file)
+        self.sp.sourceslist.list[index] = self.new_source_entry
+        self.sp.sourceslist.save()
+        self.cache.open()
+        self.cache.update()
+        self.cache.open(None)
+        self.sp.reload_sourceslist()
+        isv_list = self.sp.get_isv_sources()
+        GObject.idle_add(self.parent.parent.parent.stack.list_all.generate_entries, isv_list)
+        GObject.idle_add(self.parent.parent.parent.stack.list_all.view.set_sensitive, True)
+        GObject.idle_add(self.parent.parent.parent.hbar.spinner.stop)
 
 # This method need to be improved
 class PPA:
@@ -92,9 +120,6 @@ class PPA:
     sources_path = "/etc/apt/sources.list.d/"
     cache = apt.Cache()
     sp = SoftwareProperties()
-    cache = apt.Cache()
-    update_automation_level = 3
-    release_upgrades_policy = 0
 
     def __init__(self, parent):
         self.parent = parent
@@ -183,19 +208,54 @@ class PPA:
         self.prop_enabled = self.enabledDict['artful-proposed']
         return 0
 
-    # Set the current configuration
-    def set_config(self):
-        print("Test")
+    def get_line(self, enabled, rtype, archs, uri, version, component):
+        """Collect all values from the entries and create an apt line"""
+        if enabled == True:
+          line = ""
+        else:
+          line = "#"
+
+        line = "%s %s %s %s %s %s" % (line,
+                                      rtype,
+                                      archs,
+                                      uri,
+                                      version,
+                                      component)
+        return line
+
+    # Turn an added deb line into an apt source
+    def deb_line_to_source(self, line):
+        print(line)
+        source = self.sp._find_source_from_string(line)
+        return source
+
+    # Modify an existing PPA
+    def modify_ppa(self, old_source, rtype, archs, uri, version, component):
+        print("Old source: %s\n" % old_source)
+        print("New source: %s %s %s %s %s" % (rtype,
+                                              archs,
+                                              uri,
+                                              version,
+                                              component))
+        line = self.get_line(True, rtype, archs, uri, version, component)
+        self.parent.parent.parent.hbar.spinner.start()
+        self.parent.parent.parent.stack.list_all.view.set_sensitive(False)
+        ModifyThread(self.parent, old_source, line, self.sp).start()
+
 
     # Starts a new thread to add a repository
     def add(self, url):
-        self.parent.parent.hbar.spinner.start()
+        self.parent.parent.parent.hbar.spinner.start()
+        self.parent.parent.parent.stack.list_all.view.set_sensitive(False)
         AddThread(self.parent, url, self.sp).start()
 
     # Starts a new thread to remove a repository
     def remove(self, ppa):
-        self.parent.parent.hbar.spinner.start()
+        self.parent.parent.parent.hbar.spinner.start()
+        self.parent.parent.parent.stack.list_all.view.set_sensitive(False)
         RemoveThread(self.parent, self.sources_path, ppa, self.sp).start()
+
+
 
     def list_all(self):
         sp = SoftwareProperties()

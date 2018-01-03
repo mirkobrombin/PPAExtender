@@ -28,20 +28,23 @@ from gi.repository import Gtk, Gdk, Granite
 from softwareproperties.SoftwareProperties import SoftwareProperties
 try:
     import constants as cn
-    import ppa as p
+    import ppa
+    import window
 except ImportError:
     import repoman.constants as cn
-    import repoman.ppa as p
+    import repoman.ppa
+    import repoman.window
 
 class List(Gtk.ScrolledWindow):
 
     listiter_count = 0
+    ppa_name = False
 
     def __init__(self, parent):
         self.sp = SoftwareProperties()
         Gtk.ScrolledWindow.__init__(self)
         self.parent = parent
-        self.ppa = p.PPA(self)
+        self.ppa = ppa.PPA(self)
 
         self.content_grid = Gtk.Grid()
         self.content_grid.set_margin_top(24)
@@ -72,15 +75,15 @@ class List(Gtk.ScrolledWindow):
         self.content_grid.attach(list_grid, 0, 2, 1, 1)
 
         self.ppa_liststore = Gtk.ListStore(str, str)
-        view = Gtk.TreeView(self.ppa_liststore)
+        self.view = Gtk.TreeView(self.ppa_liststore)
         renderer = Gtk.CellRendererText()
         column = Gtk.TreeViewColumn('Source', renderer, markup=0)
-        view.append_column(column)
-        view.set_hexpand(True)
-        view.set_vexpand(True)
-        tree_selection = view.get_selection()
+        self.view.append_column(column)
+        self.view.set_hexpand(True)
+        self.view.set_vexpand(True)
+        tree_selection = self.view.get_selection()
         tree_selection.connect('changed', self.on_row_change)
-        list_grid.attach(view, 0, 0, 1, 1)
+        list_grid.attach(self.view, 0, 0, 1, 1)
 
          # add button
         add_button = Gtk.Button.new_from_icon_name("list-add-symbolic",
@@ -108,7 +111,33 @@ class List(Gtk.ScrolledWindow):
         self.generate_entries(self.ppa.get_isv())
 
     def on_edit_button_clicked(self, widget):
-        print("Inline Edit Clicked")
+        source = self.ppa.deb_line_to_source(self.ppa_name)
+        dialog = window.EditDialog(self.parent.parent,
+                            source.type,
+                            source.uri,
+                            source.dist,
+                            source.comps,
+                            source.architectures)
+        response = dialog.run()
+
+        if response == Gtk.ResponseType.OK:
+            if dialog.type_box.get_active() == 0:
+                new_rtype = "deb"
+            elif dialog.type_box.get_active() == 1:
+                new_rtype = "deb-src"
+            new_uri = dialog.uri_entry.get_text()
+            new_version = dialog.version_entry.get_text()
+            new_component = dialog.component_entry.get_text()
+            self.ppa.modify_ppa(source,
+                                new_rtype,
+                                source.architectures,
+                                new_uri,
+                                new_version,
+                                new_component)
+        else:
+            print("The modify was canceled.")
+
+        dialog.destroy()
 
     def on_add_button_clicked(self, widget):
         print("Inline Add Clicked")
@@ -131,4 +160,4 @@ class List(Gtk.ScrolledWindow):
         for path in pathlist :
             tree_iter = model.get_iter(path)
             value = model.get_value(tree_iter,1)
-            self.parent.parent.hbar.ppa_name = value
+            self.ppa_name = value
