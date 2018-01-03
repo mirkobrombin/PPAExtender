@@ -25,13 +25,9 @@ from gi.repository import Gtk, Gdk
 try:
     import constants as cn
     import ppa
-    from window import EditDialog
-    from window import AddDialog
 except ImportError:
     import repoman.constants as cn
     import repoman.ppa
-    from repoman.window import EditDialog
-    from repoman.window import AddDialog
 
 class Headerbar(Gtk.HeaderBar):
 
@@ -57,24 +53,6 @@ class Headerbar(Gtk.HeaderBar):
         self.spinner = Gtk.Spinner()
         self.buttonbox.add(self.spinner)
 
-        # add button
-        self.add_button = Gtk.Button.new_from_icon_name("list-add-symbolic",
-                                                   Gtk.IconSize.SMALL_TOOLBAR)
-        Gtk.StyleContext.add_class(self.add_button.get_style_context(),
-                                   "image-button")
-        self.add_button.set_tooltip_text("Add New Source")
-        self.add_button.connect("clicked", self.on_add_button_clicked)
-        self.buttonbox.add(self.add_button)
-
-        # edit button
-        self.edit_button = Gtk.Button.new_from_icon_name("edit-symbolic",
-                                                    Gtk.IconSize.SMALL_TOOLBAR)
-        Gtk.StyleContext.add_class(self.edit_button.get_style_context(),
-                                   "image-button")
-        self.edit_button.set_tooltip_text("Modify Selected Source")
-        self.edit_button.connect("clicked", self.on_edit_button_clicked)
-        self.pack_start(self.edit_button)
-
     def on_edit_button_clicked(self, widget):
         #self.ppa.remove(self.ppa_name)
         source_info = self.ppa_name.split(" ")
@@ -95,7 +73,7 @@ class Headerbar(Gtk.HeaderBar):
     def on_add_button_clicked(self, widget):
         self.parent.stack.stack.set_visible_child(self.parent.stack.list_all)
         #self.ppa.remove(self.ppa_name)
-        dialog = AddDialog(self.parent)
+        dialog = window.EditDialog(self.parent)
         response = dialog.run()
 
         if response == Gtk.ResponseType.OK:

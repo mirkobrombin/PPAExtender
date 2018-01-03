@@ -142,8 +142,13 @@ class EditDialog(Gtk.Dialog):
 
     ppa_name = False
 
-    def __init__(self, parent, repo_type, repo_uri, repo_version,
-                 repo_component):
+    def __init__(self,
+                 parent,
+                 repo_type,
+                 repo_uri,
+                 repo_version,
+                 repo_component,
+                 repo_archs):
         Gtk.Dialog.__init__(self, "Modify Source", parent, 0,
                             (Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL,
                              Gtk.STOCK_SAVE, Gtk.ResponseType.OK),
@@ -178,31 +183,31 @@ class EditDialog(Gtk.Dialog):
         content_grid.attach(version_label, 0, 2, 1, 1)
         content_grid.attach(component_label, 0, 3, 1, 1)
 
-        type_box = Gtk.ComboBoxText()
-        type_box.append("deb", "Binary")
-        type_box.append("deb-src", "Source code")
-        type_box.set_active_id(repo_type)
-        content_grid.attach(type_box, 1, 0, 1, 1)
+        self.type_box = Gtk.ComboBoxText()
+        self.type_box.append("deb", "Binary")
+        self.type_box.append("deb-src", "Source code")
+        self.type_box.set_active_id(repo_type)
+        content_grid.attach(self.type_box, 1, 0, 1, 1)
 
-        uri_entry = Gtk.Entry()
-        uri_entry.set_hexpand(True)
-        uri_entry.set_placeholder_text("https://ppa.launchpad.net/...")
-        uri_entry.set_text(repo_uri)
-        uri_entry.set_activates_default(False)
-        uri_entry.set_width_chars(40)
-        content_grid.attach(uri_entry, 1, 1, 1, 1)
+        self.uri_entry = Gtk.Entry()
+        self.uri_entry.set_hexpand(True)
+        self.uri_entry.set_placeholder_text("https://ppa.launchpad.net/...")
+        self.uri_entry.set_text(repo_uri)
+        self.uri_entry.set_activates_default(False)
+        self.uri_entry.set_width_chars(40)
+        content_grid.attach(self.uri_entry, 1, 1, 1, 1)
 
-        version_entry = Gtk.Entry()
-        version_entry.set_placeholder_text("artful")
-        version_entry.set_text(repo_version)
-        version_entry.set_activates_default(False)
-        content_grid.attach(version_entry, 1, 2, 1, 1)
+        self.version_entry = Gtk.Entry()
+        self.version_entry.set_placeholder_text("artful")
+        self.version_entry.set_text(repo_version)
+        self.version_entry.set_activates_default(False)
+        content_grid.attach(self.version_entry, 1, 2, 1, 1)
 
-        component_entry = Gtk.Entry()
-        component_entry.set_placeholder_text("release")
-        component_entry.set_text(repo_component)
-        component_entry.set_activates_default(False)
-        content_grid.attach(component_entry, 1, 3, 1, 1)
+        self.component_entry = Gtk.Entry()
+        self.component_entry.set_placeholder_text("main")
+        self.component_entry.set_text(repo_component[0])
+        self.component_entry.set_activates_default(False)
+        content_grid.attach(self.component_entry, 1, 3, 1, 1)
 
         remove_button = Gtk.Button.new_with_label("Remove Source")
         Gtk.StyleContext.add_class(remove_button.get_style_context(),
@@ -222,7 +227,7 @@ class EditDialog(Gtk.Dialog):
         response = dialog.run()
 
         if response == Gtk.ResponseType.OK:
-            self.ppa.remove(self.parent.hbar.ppa_name)
+            self.ppa.remove(self.parent.stack.list_all.ppa_name)
             dialog.destroy()
             self.destroy()
         else:
