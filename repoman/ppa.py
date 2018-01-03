@@ -60,9 +60,9 @@ class RemoveThread(threading.Thread):
         self.cache.open(None)
         self.sp.reload_sourceslist()
         isv_list = self.sp.get_isv_sources()
-        GObject.idle_add(self.parent.parent.parent.stack.list_all.generate_entries, isv_list)
-        GObject.idle_add(self.parent.parent.parent.stack.list_all.view.set_sensitive, True)
-        GObject.idle_add(self.parent.parent.parent.hbar.spinner.stop)
+        GObject.idle_add(self.parent.parent.stack.list_all.generate_entries, isv_list)
+        GObject.idle_add(self.parent.parent.stack.list_all.view.set_sensitive, True)
+        GObject.idle_add(self.parent.parent.hbar.spinner.stop)
 
 class AddThread(threading.Thread):
     cache = apt.Cache()
@@ -251,8 +251,8 @@ class PPA:
 
     # Starts a new thread to remove a repository
     def remove(self, ppa):
-        self.parent.parent.parent.hbar.spinner.start()
-        self.parent.parent.parent.stack.list_all.view.set_sensitive(False)
+        self.parent.parent.hbar.spinner.start()
+        self.parent.parent.stack.list_all.view.set_sensitive(False)
         RemoveThread(self.parent, self.sources_path, ppa, self.sp).start()
 
 

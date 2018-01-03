@@ -35,14 +35,14 @@ except ImportError:
     import repoman.ppa
     import repoman.window
 
-class List(Gtk.ScrolledWindow):
+class List(Gtk.Box):
 
     listiter_count = 0
     ppa_name = False
 
     def __init__(self, parent):
         self.sp = SoftwareProperties()
-        Gtk.ScrolledWindow.__init__(self)
+        Gtk.Box.__init__(self, False, 0)
         self.parent = parent
         self.ppa = ppa.PPA(self)
 
@@ -73,6 +73,8 @@ class List(Gtk.ScrolledWindow):
 
         list_grid = Gtk.Grid()
         self.content_grid.attach(list_grid, 0, 2, 1, 1)
+        list_window = Gtk.ScrolledWindow()
+        list_grid.attach(list_window, 0, 0, 1, 1)
 
         self.ppa_liststore = Gtk.ListStore(str, str)
         self.view = Gtk.TreeView(self.ppa_liststore)
@@ -83,7 +85,7 @@ class List(Gtk.ScrolledWindow):
         self.view.set_vexpand(True)
         tree_selection = self.view.get_selection()
         tree_selection.connect('changed', self.on_row_change)
-        list_grid.attach(self.view, 0, 0, 1, 1)
+        list_window.add(self.view)
 
          # add button
         add_button = Gtk.Button.new_from_icon_name("list-add-symbolic",
@@ -143,8 +145,17 @@ class List(Gtk.ScrolledWindow):
 
         dialog.destroy()
 
+
     def on_add_button_clicked(self, widget):
-        print("Inline Add Clicked")
+        #self.ppa.remove(self.ppa_name)
+        dialog = window.AddDialog(self.parent.parent)
+        response = dialog.run()
+
+        if response == Gtk.ResponseType.OK:
+            url = dialog.ppa_entry.get_text()
+            self.ppa.add(url)
+
+        dialog.destroy()
 
     def generate_entries(self, isv_list):
         self.ppa_liststore.clear()

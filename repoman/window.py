@@ -227,7 +227,7 @@ class EditDialog(Gtk.Dialog):
         response = dialog.run()
 
         if response == Gtk.ResponseType.OK:
-            self.ppa.remove(self.parent.hbar.ppa_name)
+            self.ppa.remove(self.parent.stack.list_all.ppa_name)
             dialog.destroy()
             self.destroy()
         else:
