@@ -19,18 +19,13 @@
     along with Repoman.  If not, see <http://www.gnu.org/licenses/>.
 '''
 
-import os
 import gi
-import webbrowser
 gi.require_version('Gtk', '3.0')
-gi.require_version('Granite', '1.0')
-from gi.repository import Gtk, Gdk, Granite
+from gi.repository import Gtk
 try:
-    import constants
-    import ppa
+    from ppa import PPA
 except ImportError:
-    import repoman.constants
-    import repoman.ppa
+    from repoman.ppa import PPA
 
 class Updates(Gtk.Box):
 
@@ -39,7 +34,7 @@ class Updates(Gtk.Box):
 
         self.parent = parent
 
-        self.ppa = ppa.PPA(self)
+        self.ppa = PPA(self)
         self.handlers = {}
 
         updates_grid = Gtk.Grid()

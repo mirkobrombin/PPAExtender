@@ -18,25 +18,20 @@
     along with PPAExtender.  If not, see <http://www.gnu.org/licenses/>.
 '''
 
-import os
 import gi
-import webbrowser
 gi.require_version('Gtk', '3.0')
-gi.require_version('Granite', '1.0')
-from gi.repository import Gtk, Gdk, Granite
+from gi.repository import Gtk
 try:
-    import constants
-    import ppa
+    from ppa import PPA
 except ImportError:
-    import repoman.constants
-    import repoman.ppa
+    from repoman.ppa import PPA
 
 class Settings(Gtk.Box):
 
     def __init__(self, parent):
         Gtk.Box.__init__(self, False, 0)
 
-        self.ppa = ppa.PPA(self)
+        self.ppa = PPA(self)
         self.handlers = {}
 
         self.parent = parent

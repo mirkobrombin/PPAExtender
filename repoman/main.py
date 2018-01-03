@@ -21,19 +21,16 @@
 
 import gi
 gi.require_version('Gtk', '3.0')
-gi.require_version('Granite', '1.0')
-from gi.repository import Gtk, Gdk, Granite, GObject
+from gi.repository import Gtk, Gdk
 try:
-    import constants
-    import window
+    from window import Window
 except ImportError:
-    import repoman.constants
-    import repoman.window
+    from repoman.window import Window
 
-class Application(Granite.Application):
+class Application(Gtk.Application):
 
     def do_activate(self):
-        self.win = window.Window()
+        self.win = Window()
         self.win.set_default_size(700, 400)
         self.win.connect("delete-event", Gtk.main_quit)
         self.win.show_all()
@@ -45,14 +42,7 @@ class Application(Granite.Application):
 
 app = Application()
 
-stylesheet = """
-    @define-color colorPrimary """+constants.Colors.primary_color+""";
-    @define-color textColorPrimary """+constants.Colors.primary_text_color+""";
-    @define-color textColorPrimaryShadow """+constants.Colors.primary_text_shadow_color+""";
-""";
-
 style_provider = Gtk.CssProvider()
-style_provider.load_from_data(bytes(stylesheet.encode()))
 Gtk.StyleContext.add_provider_for_screen(
     Gdk.Screen.get_default(), style_provider,
     Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION

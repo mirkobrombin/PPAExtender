@@ -19,24 +19,13 @@
     along with Repoman.  If not, see <http://www.gnu.org/licenses/>.
 '''
 
-import os
 import gi
 import apt
 import threading
-import time
 from softwareproperties.SoftwareProperties import SoftwareProperties
 from aptsources.sourceslist import SourceEntry
-import webbrowser
 gi.require_version('Gtk', '3.0')
-gi.require_version('Granite', '1.0')
-from gi.repository import Gtk, Gdk, Granite, GObject, GLib
-try:
-    import constants as cn
-    from helper import Helper
-except ImportError:
-    import repoman.constants as cn
-    from repoman.helper import Helper
-
+from gi.repository import GObject, GLib
 
 GLib.threads_init()
 

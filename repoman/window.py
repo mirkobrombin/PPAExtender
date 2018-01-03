@@ -19,29 +19,26 @@
 '''
 
 import gi
-from datetime import datetime
 gi.require_version('Gtk', '3.0')
-from gi.repository import Gtk, Gdk, GLib, GObject
+from gi.repository import Gtk, Gdk, GLib
 try:
-    import constants as cn
-    import headerbar as hb
-    import stack as sk
-    import ppa
+    from headerbar import Headerbar
+    from stack import Stack
+    from ppa import PPA
 except ImportError:
-    import repoman.constants as cn
-    import repoman.headerbar as hb
-    import repoman.stack as sk
-    import repoman.ppa
+    from repoman.headerbar import Headerbar
+    from repoman.stack import Stack
+    from repoman.ppa import PPA
 
 class Window(Gtk.Window):
 
     def __init__(self):
         Gtk.Window.__init__(self)
 
-        self.hbar = hb.Headerbar(self)
+        self.hbar = Headerbar(self)
         self.set_titlebar(self.hbar)
 
-        self.stack = sk.Stack(self)
+        self.stack = Stack(self)
         self.add(self.stack)
 
         self.hbar.switcher.set_stack(self.stack.stack)
@@ -155,7 +152,7 @@ class EditDialog(Gtk.Dialog):
                              Gtk.STOCK_SAVE, Gtk.ResponseType.OK),
                              modal=1, use_header_bar=1)
 
-        self.ppa = ppa.PPA(self)
+        self.ppa = PPA(self)
         self.parent = parent
 
         content_area = self.get_content_area()

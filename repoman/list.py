@@ -19,21 +19,16 @@
     along with Repoman.  If not, see <http://www.gnu.org/licenses/>.
 '''
 
-import os
 import gi
-import webbrowser
 gi.require_version('Gtk', '3.0')
-gi.require_version('Granite', '1.0')
-from gi.repository import Gtk, Gdk, Granite
+from gi.repository import Gtk
 from softwareproperties.SoftwareProperties import SoftwareProperties
 try:
-    import constants as cn
-    import ppa
-    import window
+    from ppa import PPA
+    from window import AddDialog, EditDialog
 except ImportError:
-    import repoman.constants as cn
-    import repoman.ppa
-    import repoman.window
+    from repoman.ppa import PPA
+    from repoman.window import AddDialog, EditDialog
 
 class List(Gtk.Box):
 
@@ -44,7 +39,7 @@ class List(Gtk.Box):
         self.sp = SoftwareProperties()
         Gtk.Box.__init__(self, False, 0)
         self.parent = parent
-        self.ppa = ppa.PPA(self)
+        self.ppa = PPA(self)
 
         self.content_grid = Gtk.Grid()
         self.content_grid.set_margin_top(24)
@@ -114,7 +109,7 @@ class List(Gtk.Box):
 
     def on_edit_button_clicked(self, widget):
         source = self.ppa.deb_line_to_source(self.ppa_name)
-        dialog = window.EditDialog(self.parent.parent,
+        dialog = EditDialog(self.parent.parent,
                                    source.disabled,
                                    source.type,
                                    source.uri,
@@ -152,7 +147,7 @@ class List(Gtk.Box):
 
     def on_add_button_clicked(self, widget):
         #self.ppa.remove(self.ppa_name)
-        dialog = window.AddDialog(self.parent.parent)
+        dialog = AddDialog(self.parent.parent)
         response = dialog.run()
 
         if response == Gtk.ResponseType.OK:

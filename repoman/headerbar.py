@@ -19,22 +19,19 @@
 '''
 
 import gi
-import webbrowser
 gi.require_version('Gtk', '3.0')
-from gi.repository import Gtk, Gdk
+from gi.repository import Gtk
 try:
-    import constants as cn
-    import ppa
+    from ppa import PPA
 except ImportError:
-    import repoman.constants as cn
-    import repoman.ppa
+    from repoman.ppa import PPA
 
 class Headerbar(Gtk.HeaderBar):
 
     ppa_name = False
 
     def __init__(self, parent):
-        self.ppa = ppa.PPA(self)
+        self.ppa = PPA(self)
 
         Gtk.HeaderBar.__init__(self)
         self.parent = parent
