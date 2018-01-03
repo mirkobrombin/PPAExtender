@@ -115,11 +115,12 @@ class List(Gtk.Box):
     def on_edit_button_clicked(self, widget):
         source = self.ppa.deb_line_to_source(self.ppa_name)
         dialog = window.EditDialog(self.parent.parent,
-                            source.type,
-                            source.uri,
-                            source.dist,
-                            source.comps,
-                            source.architectures)
+                                   source.disabled,
+                                   source.type,
+                                   source.uri,
+                                   source.dist,
+                                   source.comps,
+                                   source.architectures)
         response = dialog.run()
 
         if response == Gtk.ResponseType.OK:
@@ -127,7 +128,9 @@ class List(Gtk.Box):
                 new_rtype = "deb"
             elif dialog.type_box.get_active() == 1:
                 new_rtype = "deb-src"
+            new_disabled = not dialog.enabled_switch.get_active()
             new_uri = dialog.uri_entry.get_text()
+            print(new_disabled)
             new_version = dialog.version_entry.get_text()
             new_component = dialog.component_entry.get_text()
             new_archs = "[arch="
@@ -135,6 +138,7 @@ class List(Gtk.Box):
                 new_archs = "%s%s," % (new_archs, arch)
             new_archs = new_archs[:-1] + "]"
             self.ppa.modify_ppa(source,
+                                new_disabled,
                                 new_rtype,
                                 new_archs,
                                 new_uri,

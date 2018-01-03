@@ -46,38 +46,7 @@ class Headerbar(Gtk.HeaderBar):
         self.switcher.set_baseline_position(Gtk.BaselinePosition.CENTER)
         self.set_custom_title(self.switcher)
 
-        self.buttonbox = Gtk.Box()
-        self.pack_end(self.buttonbox)
-
         # spinner
         self.spinner = Gtk.Spinner()
-        self.buttonbox.add(self.spinner)
+        self.pack_end(self.spinner)
 
-    def on_edit_button_clicked(self, widget):
-        #self.ppa.remove(self.ppa_name)
-        source_info = self.ppa_name.split(" ")
-        rtype = source_info[0]
-        uri = source_info[-3]
-        version = source_info[-2]
-        comp = source_info[-1]
-        dialog = EditDialog(self.parent, rtype, uri, version, comp)
-        response = dialog.run()
-
-        if response == Gtk.ResponseType.OK:
-            print("The SAVE button was clicked.")
-        else:
-            print("The modify was canceled.")
-
-        dialog.destroy()
-
-    def on_add_button_clicked(self, widget):
-        self.parent.stack.stack.set_visible_child(self.parent.stack.list_all)
-        #self.ppa.remove(self.ppa_name)
-        dialog = window.EditDialog(self.parent)
-        response = dialog.run()
-
-        if response == Gtk.ResponseType.OK:
-            url = dialog.ppa_entry.get_text()
-            self.ppa.add(url)
-
-        dialog.destroy()

@@ -144,6 +144,7 @@ class EditDialog(Gtk.Dialog):
 
     def __init__(self,
                  parent,
+                 repo_disabled,
                  repo_type,
                  repo_uri,
                  repo_version,
@@ -178,10 +179,13 @@ class EditDialog(Gtk.Dialog):
         version_label.set_halign(Gtk.Align.END)
         component_label = Gtk.Label("Component")
         component_label.set_halign(Gtk.Align.END)
+        enabled_label = Gtk.Label("Enabled")
+        enabled_label.set_halign(Gtk.Align.END)
         content_grid.attach(type_label, 0, 0, 1, 1)
         content_grid.attach(uri_label, 0, 1, 1, 1)
         content_grid.attach(version_label, 0, 2, 1, 1)
         content_grid.attach(component_label, 0, 3, 1, 1)
+        content_grid.attach(enabled_label, 0, 4, 1, 1)
 
         self.type_box = Gtk.ComboBoxText()
         self.type_box.append("deb", "Binary")
@@ -194,7 +198,7 @@ class EditDialog(Gtk.Dialog):
         self.uri_entry.set_placeholder_text("https://ppa.launchpad.net/...")
         self.uri_entry.set_text(repo_uri)
         self.uri_entry.set_activates_default(False)
-        self.uri_entry.set_width_chars(40)
+        self.uri_entry.set_width_chars(50)
         content_grid.attach(self.uri_entry, 1, 1, 1, 1)
 
         self.version_entry = Gtk.Entry()
@@ -209,12 +213,18 @@ class EditDialog(Gtk.Dialog):
         self.component_entry.set_activates_default(False)
         content_grid.attach(self.component_entry, 1, 3, 1, 1)
 
+        self.enabled_switch = Gtk.Switch()
+        self.enabled_switch.set_halign(Gtk.Align.START)
+        self.enabled_switch.set_active(not repo_disabled)
+        content_grid.attach(self.enabled_switch, 1, 4, 1, 1)
+
+
         remove_button = Gtk.Button.new_with_label("Remove Source")
         Gtk.StyleContext.add_class(remove_button.get_style_context(),
                                    "destructive-action")
         remove_button.set_margin_top(12)
         remove_button.connect("clicked", self.on_remove_button_clicked)
-        content_grid.attach(remove_button, 0, 4, 1, 1)
+        content_grid.attach(remove_button, 0, 5, 1, 1)
 
         Gtk.StyleContext.add_class(self.get_widget_for_response(Gtk.ResponseType.OK).get_style_context(),
                                    "suggested-action")
