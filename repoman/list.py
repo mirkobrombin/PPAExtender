@@ -23,12 +23,8 @@ import gi
 gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk
 from softwareproperties.SoftwareProperties import SoftwareProperties
-try:
-    from ppa import PPA
-    from window import AddDialog, EditDialog
-except ImportError:
-    from repoman.ppa import PPA
-    from repoman.window import AddDialog, EditDialog
+from .ppa import PPA
+from .dialog import AddDialog, EditDialog
 
 class List(Gtk.Box):
 
@@ -59,7 +55,7 @@ class List(Gtk.Box):
         sources_label = Gtk.Label("These sources are for software provided by " +
                                   "a third party. They may present a security " +
                                   "risk or can cause system instability. " +
-                                  "\nOnly add sources that you trust.")
+                                  "Only add sources that you trust.")
         sources_label.set_line_wrap(True)
         sources_label.set_halign(Gtk.Align.START)
         sources_label.set_justify(Gtk.Justification.FILL)

@@ -32,8 +32,3 @@ class App:
     about_authors = {"Ian Santopietro <ian@system76.com>"}
     about_comments = application_description
     about_license_type = Gtk.License.GPL_3_0
-
-class Colors:
-    primary_color = "#4c6ea5"
-    primary_text_color = "#ebf1f9"
-    primary_text_shadow_color = "#172d4f"

@@ -224,12 +224,8 @@ class PPA:
     # Modify an existing PPA
     def modify_ppa(self, old_source, disabled, rtype, archs, uri, version, component):
         print("Old source: %s\n" % old_source)
-        print("New source: %s %s %s %s %s" % (rtype,
-                                              archs,
-                                              uri,
-                                              version,
-                                              component))
         line = self.get_line(disabled, rtype, archs, uri, version, component)
+        print(line)
         self.parent.parent.parent.hbar.spinner.start()
         self.parent.parent.parent.stack.list_all.view.set_sensitive(False)
         ModifyThread(self.parent, old_source, line, self.sp).start()

@@ -21,14 +21,9 @@
 import gi
 gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk
-try:
-    from settings import Settings
-    from updates import Updates
-    from list import List
-except ImportError:
-    from repoman.settings import Settings
-    from repoman.updates import Updates
-    from repoman.list import List
+from .settings import Settings
+from .updates import Updates
+from .list import List
 
 class Stack(Gtk.Box):
 

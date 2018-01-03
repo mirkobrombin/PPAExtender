@@ -22,10 +22,8 @@
 import gi
 gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk, Gdk
-try:
-    from window import Window
-except ImportError:
-    from repoman.window import Window
+from .window import Window
+from .constants import App
 
 class Application(Gtk.Application):
 
@@ -48,4 +46,4 @@ Gtk.StyleContext.add_provider_for_screen(
     Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION
 )
 
-app.run("", 1)
+app.run()

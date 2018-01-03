@@ -21,10 +21,7 @@
 import gi
 gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk
-try:
-    from ppa import PPA
-except ImportError:
-    from repoman.ppa import PPA
+from .ppa import PPA
 
 class Headerbar(Gtk.HeaderBar):
 
