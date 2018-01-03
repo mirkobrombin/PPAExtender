@@ -128,9 +128,13 @@ class List(Gtk.ScrolledWindow):
             new_uri = dialog.uri_entry.get_text()
             new_version = dialog.version_entry.get_text()
             new_component = dialog.component_entry.get_text()
+            new_archs = "[arch="
+            for arch in source.architectures:
+                new_archs = "%s%s," % (new_archs, arch)
+            new_archs = new_archs[:-1] + "]"
             self.ppa.modify_ppa(source,
                                 new_rtype,
-                                source.architectures,
+                                new_archs,
                                 new_uri,
                                 new_version,
                                 new_component)
