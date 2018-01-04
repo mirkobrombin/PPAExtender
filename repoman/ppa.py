@@ -19,24 +19,13 @@
     along with Repoman.  If not, see <http://www.gnu.org/licenses/>.
 '''
 
-import os
 import gi
 import apt
 import threading
-import time
 from softwareproperties.SoftwareProperties import SoftwareProperties
 from aptsources.sourceslist import SourceEntry
-import webbrowser
 gi.require_version('Gtk', '3.0')
-gi.require_version('Granite', '1.0')
-from gi.repository import Gtk, Gdk, Granite, GObject, GLib
-try:
-    import constants as cn
-    from helper import Helper
-except ImportError:
-    import repoman.constants as cn
-    from repoman.helper import Helper
-
+from gi.repository import GObject, GLib
 
 GLib.threads_init()
 
@@ -52,7 +41,6 @@ class RemoveThread(threading.Thread):
 
     def run(self):
         print("Removing PPA %s" % (self.ppa))
-        #GObject.idle_add(self.parent.parent.stack.list_all.ppa_liststore.clear)
         self.sp.remove_source(self.ppa, remove_source_code=True)
         self.sp.sourceslist.save()
         self.cache.open()
@@ -75,7 +63,6 @@ class AddThread(threading.Thread):
 
     def run(self):
         print("Adding PPA %s" % (self.url))
-        #GObject.idle_add(self.parent.parent.stack.list_all.ppa_liststore.clear)
         self.sp.add_source_from_line(self.url)
         self.sp.sourceslist.save()
         self.cache.open()
@@ -123,13 +110,11 @@ class PPA:
 
     def __init__(self, parent):
         self.parent = parent
-        self.get_configuration()
 
     # Returns a list of all 3rd-party software sources.
     def get_isv(self):
         self.sp.reload_sourceslist()
         list = self.sp.get_isv_sources()
-        print(list)
         return list
 
     # Returns the current distro Components.
@@ -185,42 +170,22 @@ class PPA:
             self.sp.disable_source_code_sources()
         return 0
 
-    # Get the current sources configuration
-    def get_configuration(self):
-        self.enabledDict = {}
-        self.update_automation_level = self.sp.get_update_automation_level() #FIXME Doesn't change
-        self.release_upgrades_policy = self.sp.get_release_upgrades_policy() #0 on, 2 off
-        self.source_code_state = self.sp.get_source_code_state() # Bool
-
-        for comp in self.sp.distro.source_template.components:
-            self.enabledDict[comp.name] = self.sp.get_comp_download_state(comp)[0]
-        self.main_enabled = self.enabledDict['main']
-        self.univ_enabled = self.enabledDict['universe']
-        self.rest_enabled = self.enabledDict['restricted']
-        self.mult_enabled = self.enabledDict['multiverse']
-
-        for child in self.sp.distro.source_template.children:
-            if child.type != 'deb-src':
-                self.enabledDict[child.name] = self.sp.get_comp_child_state(child)[0]
-        self.secu_enabled = self.enabledDict['artful-security']
-        self.recc_enabled = self.enabledDict['artful-updates']
-        self.back_enabled = self.enabledDict['artful-backports']
-        self.prop_enabled = self.enabledDict['artful-proposed']
-        return 0
-
-    def get_line(self, enabled, rtype, archs, uri, version, component):
+    def get_line(self, isdisabled, rtype, archs, uri, version, component):
         """Collect all values from the entries and create an apt line"""
-        if enabled == True:
-          line = ""
+        if isdisabled == True:
+            disstr = "#"
         else:
-          line = "#"
+            disstr = ""
 
-        line = "%s %s %s %s %s %s" % (line,
-                                      rtype,
-                                      archs,
-                                      uri,
-                                      version,
-                                      component)
+        if archs == "[arch]":
+            archs = ""
+
+        line = "%s%s %s %s %s %s" % (disstr,
+                                     rtype,
+                                     archs,
+                                     uri,
+                                     version,
+                                     component)
         return line
 
     # Turn an added deb line into an apt source
@@ -230,14 +195,10 @@ class PPA:
         return source
 
     # Modify an existing PPA
-    def modify_ppa(self, old_source, rtype, archs, uri, version, component):
+    def modify_ppa(self, old_source, disabled, rtype, archs, uri, version, component):
         print("Old source: %s\n" % old_source)
-        print("New source: %s %s %s %s %s" % (rtype,
-                                              archs,
-                                              uri,
-                                              version,
-                                              component))
-        line = self.get_line(True, rtype, archs, uri, version, component)
+        line = self.get_line(disabled, rtype, archs, uri, version, component)
+        print(line)
         self.parent.parent.parent.hbar.spinner.start()
         self.parent.parent.parent.stack.list_all.view.set_sensitive(False)
         ModifyThread(self.parent, old_source, line, self.sp).start()
@@ -255,13 +216,40 @@ class PPA:
         self.parent.parent.stack.list_all.view.set_sensitive(False)
         RemoveThread(self.parent, self.sources_path, ppa, self.sp).start()
 
+    # Validate if a line appears to be a valid apt line or ppa.
+    def validate(self, line):
 
+        if line.startswith("deb"):
+            if "http" in line:
+                return True
 
-    def list_all(self):
-        sp = SoftwareProperties()
-        isv_sources = sp.get_isv_sources()
-        source_list = []
-        for source in isv_sources:
-            if not str(source).startswith("#"):
-                source_list.append(str(source))
-        return source_list
+        elif line.startswith("ppa:"):
+            if "/" in line:
+                return True
+
+        elif line.startswith("http"):
+            if "://" in line:
+                return True
+
+        else:
+            return False
+
+    # Get the current OS name, or fallback if not available
+    def get_os_name(self):
+        try:
+            with open("/etc/os-release") as os_release_file:
+                os_release = os_release_file.readlines()
+                for line in os_release:
+                    parse = line.split('=')
+                    if parse[0] == "NAME":
+                        if parse[1].startswith('"'):
+                            return parse[1][1:-2]
+                        else:
+                            return parse[1][:-1]
+                    else:
+                        continue
+        except FileNotFoundError:
+            return "your OS"
+
+        return "your OS"
+

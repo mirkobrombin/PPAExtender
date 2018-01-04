@@ -18,27 +18,14 @@
     along with repoman.  If not, see <http://www.gnu.org/licenses/>.
 '''
 
-import os
 import gi
-import webbrowser
 gi.require_version('Gtk', '3.0')
-gi.require_version('Granite', '1.0')
-from gi.repository import Gtk, Gdk, Granite
-try:
-    import constants as cn
-    import settings as st
-    import updates as up
-    import list as ls
-except ImportError:
-    import repoman.constants as cn
-    import repoman.settings as st
-    import repoman.updates as up
-    import repoman.list as ls
+from gi.repository import Gtk
+from .settings import Settings
+from .updates import Updates
+from .list import List
 
 class Stack(Gtk.Box):
-
-    # Define variable for GTK global theme
-    settings = Gtk.Settings.get_default()
 
     def __init__(self, parent):
         Gtk.Box.__init__(self, orientation=Gtk.Orientation.VERTICAL, spacing=6)
@@ -48,9 +35,9 @@ class Stack(Gtk.Box):
         self.stack.set_transition_type(Gtk.StackTransitionType.SLIDE_LEFT_RIGHT)
         self.stack.set_transition_duration(300)
 
-        self.setting = st.Settings(self)
-        self.updates = up.Updates(self)
-        self.list_all = ls.List(self)
+        self.setting = Settings(self)
+        self.updates = Updates(self)
+        self.list_all = List(self)
 
         self.stack.add_titled(self.setting, "settings", "Settings")
         self.stack.add_titled(self.updates, "updates", "Updates")

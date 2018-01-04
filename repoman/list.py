@@ -19,21 +19,12 @@
     along with Repoman.  If not, see <http://www.gnu.org/licenses/>.
 '''
 
-import os
 import gi
-import webbrowser
 gi.require_version('Gtk', '3.0')
-gi.require_version('Granite', '1.0')
-from gi.repository import Gtk, Gdk, Granite
+from gi.repository import Gtk
 from softwareproperties.SoftwareProperties import SoftwareProperties
-try:
-    import constants as cn
-    import ppa
-    import window
-except ImportError:
-    import repoman.constants as cn
-    import repoman.ppa
-    import repoman.window
+from .ppa import PPA
+from .dialog import AddDialog, EditDialog
 
 class List(Gtk.Box):
 
@@ -44,7 +35,7 @@ class List(Gtk.Box):
         self.sp = SoftwareProperties()
         Gtk.Box.__init__(self, False, 0)
         self.parent = parent
-        self.ppa = ppa.PPA(self)
+        self.ppa = PPA(self)
 
         self.content_grid = Gtk.Grid()
         self.content_grid.set_margin_top(24)
@@ -64,7 +55,7 @@ class List(Gtk.Box):
         sources_label = Gtk.Label("These sources are for software provided by " +
                                   "a third party. They may present a security " +
                                   "risk or can cause system instability. " +
-                                  "\nOnly add sources that you trust.")
+                                  "Only add sources that you trust.")
         sources_label.set_line_wrap(True)
         sources_label.set_halign(Gtk.Align.START)
         sources_label.set_justify(Gtk.Justification.FILL)
@@ -83,6 +74,7 @@ class List(Gtk.Box):
         self.view.append_column(column)
         self.view.set_hexpand(True)
         self.view.set_vexpand(True)
+        self.view.connect("row-activated", self.on_row_activated)
         tree_selection = self.view.get_selection()
         tree_selection.connect('changed', self.on_row_change)
         list_window.add(self.view)
@@ -113,13 +105,29 @@ class List(Gtk.Box):
         self.generate_entries(self.ppa.get_isv())
 
     def on_edit_button_clicked(self, widget):
-        source = self.ppa.deb_line_to_source(self.ppa_name)
-        dialog = window.EditDialog(self.parent.parent,
+        selec = self.view.get_selection()
+        (model, pathlist) = selec.get_selected_rows()
+        tree_iter = model.get_iter(pathlist[0])
+        value = model.get_value(tree_iter, 1)
+        print("PPA to edit: %s" % value)
+        self.do_edit(value)
+
+    def on_row_activated(self, widget, data1, data2):
+        tree_iter = self.ppa_liststore.get_iter(data1)
+        value = self.ppa_liststore.get_value(tree_iter, 1)
+        print("PPA to edit: %s" % value)
+        self.do_edit(value)
+
+    def do_edit(self, repo):
+        source = self.ppa.deb_line_to_source(repo)
+        dialog = EditDialog(self.parent.parent,
+                            source.disabled,
                             source.type,
                             source.uri,
                             source.dist,
                             source.comps,
-                            source.architectures)
+                            source.architectures,
+                            repo)
         response = dialog.run()
 
         if response == Gtk.ResponseType.OK:
@@ -127,7 +135,9 @@ class List(Gtk.Box):
                 new_rtype = "deb"
             elif dialog.type_box.get_active() == 1:
                 new_rtype = "deb-src"
+            new_disabled = not dialog.enabled_switch.get_active()
             new_uri = dialog.uri_entry.get_text()
+            print(new_disabled)
             new_version = dialog.version_entry.get_text()
             new_component = dialog.component_entry.get_text()
             new_archs = "[arch="
@@ -135,6 +145,7 @@ class List(Gtk.Box):
                 new_archs = "%s%s," % (new_archs, arch)
             new_archs = new_archs[:-1] + "]"
             self.ppa.modify_ppa(source,
+                                new_disabled,
                                 new_rtype,
                                 new_archs,
                                 new_uri,
@@ -148,7 +159,7 @@ class List(Gtk.Box):
 
     def on_add_button_clicked(self, widget):
         #self.ppa.remove(self.ppa_name)
-        dialog = window.AddDialog(self.parent.parent)
+        dialog = AddDialog(self.parent.parent)
         response = dialog.run()
 
         if response == Gtk.ResponseType.OK:
@@ -164,11 +175,25 @@ class List(Gtk.Box):
         self.listiter_count = self.listiter_count + 1
 
         for source in isv_list:
-            if not str(source).startswith("#"):
-                source_pretty = self.sp.render_source(source)
-                self.ppa_liststore.insert_with_valuesv(-1,
-                                                       [0, 1],
-                                                       [source_pretty, str(source)])
+            if not "cdrom" in str(source):
+                if not str(source).startswith("#"):
+                    source_pretty = self.sp.render_source(source)
+                    if "Partners" in source_pretty:
+                        continue
+                    self.ppa_liststore.insert_with_valuesv(-1,
+                                                           [0, 1],
+                                                           [source_pretty, str(source)])
+        for source in isv_list:
+            if not "cdrom" in str(source):
+                if str(source).startswith("#"):
+                    source_str_list = self.sp.render_source(source).split("b>")
+                    source_pretty = "%s%s <i>Disabled</i>" % (source_str_list[1][:-2],
+                                                              source_str_list[2])
+                    if "Partners" in source_pretty:
+                        continue
+                    self.ppa_liststore.insert_with_valuesv(-1,
+                                                           [0, 1],
+                                                           [source_pretty, str(source)])
 
     def on_row_change(self, widget):
         (model, pathlist) = widget.get_selected_rows()

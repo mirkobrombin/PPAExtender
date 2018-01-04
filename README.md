@@ -3,9 +3,9 @@
 #### Hey man, let's go hangout and do crimes. Yeah, let's go get software and not pay!
 ##### https://youtu.be/9bTp6n2qJdI
 
-Repoman is a software sources manager for Pop!_OS. It allows you to configure
-system repository information and other system settings, as well as add, remove,
-and modify third-party repositories on the system.
+Repoman is a software sources manager for Debian-based linux distributions. It
+allows you to configure system repository information and other system settings,
+as well as add, remove, and modify third-party repositories on the system.
 
 Repoman is based on [PPAExtender](https://github.com/mirkobrombin/PPAExtender)
 

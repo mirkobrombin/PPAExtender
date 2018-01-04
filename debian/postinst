@@ -1,6 +1,0 @@
-#!/bin/sh
-
-set -e
-
-cd /usr/share/xyz.isantop.repoman
-sudo python3 setup.py install
