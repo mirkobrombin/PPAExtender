@@ -74,6 +74,7 @@ class List(Gtk.Box):
         self.view.append_column(column)
         self.view.set_hexpand(True)
         self.view.set_vexpand(True)
+        self.view.connect("row-activated", self.on_row_activated)
         tree_selection = self.view.get_selection()
         tree_selection.connect('changed', self.on_row_change)
         list_window.add(self.view)
@@ -104,6 +105,13 @@ class List(Gtk.Box):
         self.generate_entries(self.ppa.get_isv())
 
     def on_edit_button_clicked(self, widget):
+        self.do_edit()
+
+    def on_row_activated(self, widget, data1, data2):
+        print("Data1: %s, Data2: %s " % (data1, data2))
+        self.do_edit()
+
+    def do_edit(self):
         source = self.ppa.deb_line_to_source(self.ppa_name)
         dialog = EditDialog(self.parent.parent,
                                    source.disabled,
