@@ -47,7 +47,7 @@ class Window(Gtk.Window):
         try:
             self.css_provider.load_from_path('style.css')
         except GLib.Error:
-            self.css_provider.load_from_path('/usr/local/bin/ppaextender/style.css')
+            self.css_provider.load_from_path('/usr/share/ppaextender/style.css')
         self.context = Gtk.StyleContext()
         self.context.add_provider_for_screen(self.screen, self.css_provider,
           Gtk.STYLE_PROVIDER_PRIORITY_USER)
