@@ -17,6 +17,6 @@ Depends: ${python3:Depends}, ${misc:Depends},
          software-properties-common,
          gir1.2-gtk-3.0,
          gir1.2-granite-1.0,
-python-requests,
+         python-requests,
 Description: PPA Extender
  Easily manage PPA
