@@ -184,7 +184,7 @@ class EditDialog(Gtk.Dialog):
         Gtk.Dialog.__init__(self, "Modify Source", parent, 0,
                             (Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL,
                              Gtk.STOCK_SAVE, Gtk.ResponseType.OK),
-                             modal=1, use_header_bar=0)
+                             modal=1, use_header_bar=header)
 
         self.ppa = PPA(self)
         self.parent = parent
@@ -253,12 +253,10 @@ class EditDialog(Gtk.Dialog):
         remove_button = Gtk.Button.new_with_label("Remove Source")
         Gtk.StyleContext.add_class(remove_button.get_style_context(),
                                    "destructive-action")
-        remove_button.set_halign(Gtk.Align.START)
         remove_button.set_margin_top(12)
         remove_button.connect("clicked", self.on_remove_button_clicked)
 
-        action_area.add(remove_button)
-        action_area.props.layout_style = Gtk.ButtonBoxStyle.EXPAND
+        action_area.pack_start(remove_button, False, False, 6)
 
         Gtk.StyleContext.add_class(self.get_widget_for_response(Gtk.ResponseType.OK).get_style_context(),
                                    "suggested-action")
