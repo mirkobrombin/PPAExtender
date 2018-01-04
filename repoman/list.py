@@ -159,11 +159,25 @@ class List(Gtk.Box):
         self.listiter_count = self.listiter_count + 1
 
         for source in isv_list:
-            if not str(source).startswith("#"):
-                source_pretty = self.sp.render_source(source)
-                self.ppa_liststore.insert_with_valuesv(-1,
-                                                       [0, 1],
-                                                       [source_pretty, str(source)])
+            if not "cdrom" in str(source):
+                if not str(source).startswith("#"):
+                    source_pretty = self.sp.render_source(source)
+                    if "Partners" in source_pretty:
+                        continue
+                    self.ppa_liststore.insert_with_valuesv(-1,
+                                                           [0, 1],
+                                                           [source_pretty, str(source)])
+        for source in isv_list:
+            if not "cdrom" in str(source):
+                if str(source).startswith("#"):
+                    source_str_list = self.sp.render_source(source).split("b>")
+                    source_pretty = "%s%s <i>Disabled</i>" % (source_str_list[1][:-2],
+                                                              source_str_list[2])
+                    if "Partners" in source_pretty:
+                        continue
+                    self.ppa_liststore.insert_with_valuesv(-1,
+                                                           [0, 1],
+                                                           [source_pretty, str(source)])
 
     def on_row_change(self, widget):
         (model, pathlist) = widget.get_selected_rows()

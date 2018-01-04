@@ -118,7 +118,6 @@ class PPA:
     def get_isv(self):
         self.sp.reload_sourceslist()
         list = self.sp.get_isv_sources()
-        print(list)
         return list
 
     # Returns the current distro Components.
