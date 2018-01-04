@@ -249,14 +249,13 @@ class EditDialog(Gtk.Dialog):
         self.enabled_switch.set_active(not repo_disabled)
         content_grid.attach(self.enabled_switch, 1, 4, 1, 1)
 
-        action_area = self.get_action_area()
+
         remove_button = Gtk.Button.new_with_label("Remove Source")
         Gtk.StyleContext.add_class(remove_button.get_style_context(),
                                    "destructive-action")
         remove_button.set_margin_top(12)
         remove_button.connect("clicked", self.on_remove_button_clicked)
-
-        action_area.pack_start(remove_button, False, False, 6)
+        content_grid.attach(remove_button, 0, 5, 1, 1)
 
         Gtk.StyleContext.add_class(self.get_widget_for_response(Gtk.ResponseType.OK).get_style_context(),
                                    "suggested-action")
