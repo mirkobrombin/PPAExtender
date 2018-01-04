@@ -32,6 +32,7 @@ class Updates(Gtk.Box):
         self.parent = parent
 
         self.ppa = PPA(self)
+        self.os_name = self.ppa.get_os_name()
         self.handlers = {}
 
         updates_grid = Gtk.Grid()
@@ -48,8 +49,8 @@ class Updates(Gtk.Box):
         Gtk.StyleContext.add_class(updates_title.get_style_context(), "h2")
         updates_grid.attach(updates_title, 0, 0, 1, 1)
 
-        updates_label = Gtk.Label("These sources control how Pop!_OS will " +
-                                  "check for updates. \nIt is recommended to " +
+        updates_label = Gtk.Label("These sources control how %s " % self.os_name +
+                                  "checks for updates. \nIt is recommended to " +
                                   "leave these sources enabled.")
         updates_label.set_line_wrap(True)
         updates_label.set_halign(Gtk.Align.START)
@@ -70,8 +71,9 @@ class Updates(Gtk.Box):
         Gtk.StyleContext.add_class(self.notifications_title.get_style_context(), "h2")
         updates_grid.attach(self.notifications_title, 0, 4, 1, 1)
 
-        self.notifications_label = Gtk.Label("Change how Pop!_OS notifies you " +
-                                        "about pending software updates.")
+        self.notifications_label = Gtk.Label("Change how %s " % self.os_name +
+                                             "notifies you about pending " +
+                                             "software updates.")
         self.notifications_label.set_line_wrap(True)
         self.notifications_label.set_halign(Gtk.Align.CENTER)
         updates_grid.attach(self.notifications_label, 0, 5, 1, 1)
@@ -92,7 +94,7 @@ class Updates(Gtk.Box):
         self.noti_grid.attach(auto_check, 0, 1, 1, 1)
 
         version_check = Gtk.CheckButton.new_with_label("Notify about new versions " +
-                                                       "of Pop!_OS")
+                                                       "of %s" % self.os_name)
         self.noti_grid.attach(version_check, 0, 2, 1, 1)
 
         self.init_updates()

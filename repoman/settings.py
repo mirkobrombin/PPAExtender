@@ -25,10 +25,14 @@ from .ppa import PPA
 
 class Settings(Gtk.Box):
 
+
+
+
     def __init__(self, parent):
         Gtk.Box.__init__(self, False, 0)
 
         self.ppa = PPA(self)
+        self.os_name = self.ppa.get_os_name()
         self.handlers = {}
 
         self.parent = parent
@@ -50,9 +54,9 @@ class Settings(Gtk.Box):
         Gtk.StyleContext.add_class(sources_title.get_style_context(), "h2")
         settings_grid.attach(sources_title, 0, 0, 1, 1)
 
-        sources_label = Gtk.Label("Official sources are those provided by Pop!_OS " +
-                                 "and its developers. \nIt's recommended to leave " +
-                                 "these sources enabled.")
+        sources_label = Gtk.Label("Official sources are those provided by " +
+                                  "%s and its developers. \nIt's " % self.os_name +
+                                  "recommended to leave these sources enabled.")
         sources_label.set_line_wrap(True)
         sources_label.set_halign(Gtk.Align.START)
         settings_grid.attach(sources_label, 0, 1, 1, 1)
