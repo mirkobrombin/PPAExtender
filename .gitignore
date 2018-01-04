@@ -1,0 +1,7 @@
+.pybuild
+build
+*/__pycache__
+*.pyc
+debian/com.github*
+debian/files
+debian/.debhelper

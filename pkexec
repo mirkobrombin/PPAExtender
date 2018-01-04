@@ -1,2 +1,2 @@
-#!/bin/shì
-pkexec env DISPLAY=$DISPLAY XAUTHORITY=$XAUTHORITY com.github.mirkobrombin.ppaextender /etc/rc.local
+#!/bin/sh
+pkexec env DISPLAY=$DISPLAY XAUTHORITY=$XAUTHORITY com.github.mirkobrombin.ppaextender 
