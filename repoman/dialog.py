@@ -20,8 +20,39 @@
 
 import gi
 gi.require_version('Gtk', '3.0')
-from gi.repository import Gtk, Gdk, GLib
+from gi.repository import Gtk
 from .ppa import PPA
+
+class ErrorDialog(Gtk.Dialog):
+
+    def __init__(self, parent, dialog_title, dialog_icon,
+                 message_title, message_text):
+        Gtk.Dialog.__init__(self, dialog_title, parent, 0, "hg",
+                            (Gtk.STOCK_CLOSE, Gtk.ResponseType.OK),
+                            modal=1)
+
+        content_area = self.get_content_area()
+
+        content_grid = Gtk.Grid()
+        content_grid.set_margin_top(24)
+        content_grid.set_margin_left(24)
+        content_grid.set_margin_right(24)
+        content_grid.set_margin_bottom(24)
+        content_grid.set_column_spacing(36)
+        content_grid.set_row_spacing(12)
+        content_area.add(content_grid)
+
+        error_image = Gtk.Image.new_from_icon_name(dialog_icon,
+                                                   Gtk.IconSize.DIALOG)
+        content_grid.attach(error_image, 0, 0, 1, 2)
+
+        dialog_label = Gtk.Label(message_title)
+        dialog_message = Gtk.Label(message_text)
+        content_grid.attach(dialog_label, 1, 0, 1, 1)
+        content_grid.attach(dialog_message, 1, 1, 1, 1)
+
+        self.show_all()
+
 
 class DeleteDialog(Gtk.Dialog):
 
@@ -73,6 +104,8 @@ class AddDialog(Gtk.Dialog):
                              Gtk.STOCK_ADD, Gtk.ResponseType.OK),
                              modal=1, use_header_bar=1)
 
+        self.ppa = PPA(parent)
+
         content_area = self.get_content_area()
 
         content_grid = Gtk.Grid()
@@ -95,14 +128,27 @@ class AddDialog(Gtk.Dialog):
         self.ppa_entry = Gtk.Entry()
         self.ppa_entry.set_placeholder_text("Source Line")
         self.ppa_entry.set_activates_default(True)
+        self.ppa_entry.connect("changed", self.on_entry_changed)
         self.ppa_entry.set_width_chars(50)
         self.ppa_entry.set_margin_top(12)
         content_grid.attach(self.ppa_entry, 0, 2, 1, 1)
 
-        Gtk.StyleContext.add_class(self.get_widget_for_response(Gtk.ResponseType.OK).get_style_context(),
+        self.add_button = self.get_widget_for_response(Gtk.ResponseType.OK)
+        self.add_button.set_sensitive(False)
+
+        Gtk.StyleContext.add_class(self.add_button.get_style_context(),
                                    "suggested-action")
+        self.add_button.grab_default()
 
         self.show_all()
+
+    def on_entry_changed(self, widget):
+        entry_text = widget.get_text()
+        entry_valid = self.ppa.validate(entry_text)
+        try:
+            self.add_button.set_sensitive(entry_valid)
+        except TypeError:
+            pass
 
 
 class EditDialog(Gtk.Dialog):
@@ -116,7 +162,11 @@ class EditDialog(Gtk.Dialog):
                  repo_uri,
                  repo_version,
                  repo_component,
-                 repo_archs):
+                 repo_archs,
+                 repo_whole):
+
+        self.repo_whole = repo_whole
+
         Gtk.Dialog.__init__(self, "Modify Source", parent, 0,
                             (Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL,
                              Gtk.STOCK_SAVE, Gtk.ResponseType.OK),
@@ -204,7 +254,7 @@ class EditDialog(Gtk.Dialog):
         response = dialog.run()
 
         if response == Gtk.ResponseType.OK:
-            self.ppa.remove(self.parent.stack.list_all.ppa_name)
+            self.ppa.remove(self.repo_whole)
             dialog.destroy()
             self.destroy()
         else:

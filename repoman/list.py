@@ -105,21 +105,29 @@ class List(Gtk.Box):
         self.generate_entries(self.ppa.get_isv())
 
     def on_edit_button_clicked(self, widget):
-        self.do_edit()
+        selec = self.view.get_selection()
+        (model, pathlist) = selec.get_selected_rows()
+        tree_iter = model.get_iter(pathlist[0])
+        value = model.get_value(tree_iter, 1)
+        print("PPA to edit: %s" % value)
+        self.do_edit(value)
 
     def on_row_activated(self, widget, data1, data2):
-        print("Data1: %s, Data2: %s " % (data1, data2))
-        self.do_edit()
+        tree_iter = self.ppa_liststore.get_iter(data1)
+        value = self.ppa_liststore.get_value(tree_iter, 1)
+        print("PPA to edit: %s" % value)
+        self.do_edit(value)
 
-    def do_edit(self):
-        source = self.ppa.deb_line_to_source(self.ppa_name)
+    def do_edit(self, repo):
+        source = self.ppa.deb_line_to_source(repo)
         dialog = EditDialog(self.parent.parent,
-                                   source.disabled,
-                                   source.type,
-                                   source.uri,
-                                   source.dist,
-                                   source.comps,
-                                   source.architectures)
+                            source.disabled,
+                            source.type,
+                            source.uri,
+                            source.dist,
+                            source.comps,
+                            source.architectures,
+                            repo)
         response = dialog.run()
 
         if response == Gtk.ResponseType.OK:

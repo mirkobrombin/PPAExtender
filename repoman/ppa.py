@@ -41,7 +41,6 @@ class RemoveThread(threading.Thread):
 
     def run(self):
         print("Removing PPA %s" % (self.ppa))
-        #GObject.idle_add(self.parent.parent.stack.list_all.ppa_liststore.clear)
         self.sp.remove_source(self.ppa, remove_source_code=True)
         self.sp.sourceslist.save()
         self.cache.open()
@@ -64,7 +63,6 @@ class AddThread(threading.Thread):
 
     def run(self):
         print("Adding PPA %s" % (self.url))
-        #GObject.idle_add(self.parent.parent.stack.list_all.ppa_liststore.clear)
         self.sp.add_source_from_line(self.url)
         self.sp.sourceslist.save()
         self.cache.open()
@@ -242,13 +240,20 @@ class PPA:
         self.parent.parent.stack.list_all.view.set_sensitive(False)
         RemoveThread(self.parent, self.sources_path, ppa, self.sp).start()
 
+    # Validate if a line appears to be a valid apt line or ppa.
+    def validate(self, line):
 
+        if line.startswith("deb"):
+            if "http" in line:
+                return True
 
-    def list_all(self):
-        sp = SoftwareProperties()
-        isv_sources = sp.get_isv_sources()
-        source_list = []
-        for source in isv_sources:
-            if not str(source).startswith("#"):
-                source_list.append(str(source))
-        return source_list
+        elif line.startswith("ppa:"):
+            if "/" in line:
+                return True
+
+        elif line.startswith("http"):
+            if "://" in line:
+                return True
+
+        else:
+            return False

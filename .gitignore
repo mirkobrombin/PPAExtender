@@ -3,6 +3,5 @@ build
 *.pyc
 debian/.debhelper/
 debian/files
-debian/xyz.isantop.repoman.debhelper.log
-debian/xyz.isantop.repoman.substvars
-debian/xyz.isantop.repoman/
+debian/xyz.isantop.repoman*
+debian/com.github*

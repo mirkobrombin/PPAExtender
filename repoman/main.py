@@ -23,7 +23,6 @@ import gi
 gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk, Gdk
 from .window import Window
-from .constants import App
 
 class Application(Gtk.Application):
 
