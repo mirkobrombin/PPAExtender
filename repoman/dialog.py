@@ -59,10 +59,15 @@ class DeleteDialog(Gtk.Dialog):
     ppa_name = False
 
     def __init__(self, parent):
+
+        settings = Gtk.Settings.get_default()
+
+        header = settings.props.gtk_dialogs_use_header
+
         Gtk.Dialog.__init__(self, "Remove Source", parent, 0,
                             (Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL,
                              Gtk.STOCK_REMOVE, Gtk.ResponseType.OK),
-                             modal=1, use_header_bar=1)
+                             modal=1, use_header_bar=header)
 
         content_area = self.get_content_area()
 
@@ -99,10 +104,14 @@ class AddDialog(Gtk.Dialog):
     ppa_name = False
 
     def __init__(self, parent):
+
+        settings = Gtk.Settings.get_default()
+        header = settings.props.gtk_dialogs_use_header
+
         Gtk.Dialog.__init__(self, "Add Source", parent, 0,
                             (Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL,
                              Gtk.STOCK_ADD, Gtk.ResponseType.OK),
-                             modal=1, use_header_bar=1)
+                             modal=1, use_header_bar=header)
 
         self.ppa = PPA(parent)
 
@@ -167,10 +176,15 @@ class EditDialog(Gtk.Dialog):
 
         self.repo_whole = repo_whole
 
+        settings = Gtk.Settings.get_default()
+        header = settings.props.gtk_dialogs_use_header
+
+        print(header)
+
         Gtk.Dialog.__init__(self, "Modify Source", parent, 0,
                             (Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL,
                              Gtk.STOCK_SAVE, Gtk.ResponseType.OK),
-                             modal=1, use_header_bar=1)
+                             modal=1, use_header_bar=header)
 
         self.ppa = PPA(self)
         self.parent = parent

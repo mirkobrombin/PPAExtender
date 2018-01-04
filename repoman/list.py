@@ -37,6 +37,8 @@ class List(Gtk.Box):
         self.parent = parent
         self.ppa = PPA(self)
 
+        self.settings = Gtk.Settings()
+
         self.content_grid = Gtk.Grid()
         self.content_grid.set_margin_top(24)
         self.content_grid.set_margin_left(12)
