@@ -1,0 +1,4 @@
+.pybuild
+build
+*/__pycache__
+*.pyc
