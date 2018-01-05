@@ -179,7 +179,7 @@ class EditDialog(Gtk.Dialog):
         settings = Gtk.Settings.get_default()
         header = settings.props.gtk_dialogs_use_header
 
-        print(header)
+        header = False
 
         Gtk.Dialog.__init__(self, "Modify Source", parent, 0,
                             (Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL,
@@ -188,6 +188,8 @@ class EditDialog(Gtk.Dialog):
 
         self.ppa = PPA(self)
         self.parent = parent
+
+        self.props.resizable = False
 
         content_area = self.get_content_area()
 
@@ -253,14 +255,33 @@ class EditDialog(Gtk.Dialog):
         remove_button = Gtk.Button.new_with_label("Remove Source")
         Gtk.StyleContext.add_class(remove_button.get_style_context(),
                                    "destructive-action")
-        remove_button.set_margin_top(12)
         remove_button.connect("clicked", self.on_remove_button_clicked)
-        content_grid.attach(remove_button, 0, 5, 1, 1)
+        #content_grid.attach(remove_button, 0, 5, 1, 1)
 
-        Gtk.StyleContext.add_class(self.get_widget_for_response(Gtk.ResponseType.OK).get_style_context(),
+        save_button = self.get_widget_for_response(Gtk.ResponseType.OK)
+        cancel_button = self.get_widget_for_response(Gtk.ResponseType.CANCEL)
+
+        Gtk.StyleContext.add_class(save_button.get_style_context(),
                                    "suggested-action")
 
+
+        action_area = self.get_action_area()
+        action_area.add(remove_button)
+
+
         self.show_all()
+
+        if header == False:
+            separator = Gtk.Separator()
+            separator.set_hexpand(True)
+            action_area.add(separator)
+            separator.show()
+            action_area.set_homogeneous(True)
+            action_area.remove(save_button)
+            action_area.remove(cancel_button)
+            action_area.props.layout_style = Gtk.ButtonBoxStyle.EDGE
+            action_area.add(cancel_button)
+            action_area.add(save_button)
 
     def on_remove_button_clicked(self, widget):
         print("Remove Clicked")
