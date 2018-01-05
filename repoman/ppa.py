@@ -42,16 +42,24 @@ class RemoveThread(threading.Thread):
 
     def run(self):
         print("Removing PPA %s" % (self.ppa))
-        self.sp.remove_source(self.ppa, remove_source_code=True)
-        self.sp.sourceslist.save()
-        self.cache.open()
-        self.cache.update()
-        self.cache.open(None)
-        self.sp.reload_sourceslist()
+        try:
+            self.sp.remove_source(self.ppa, remove_source_code=True)
+            self.sp.sourceslist.save()
+            self.cache.open()
+            self.cache.update()
+            self.cache.open(None)
+            self.sp.reload_sourceslist()
+        except:
+            self.exc = sys.exc_info()
+            self.throw_error(self.exc[1])
         isv_list = self.sp.get_isv_sources()
         GObject.idle_add(self.parent.parent.stack.list_all.generate_entries, isv_list)
         GObject.idle_add(self.parent.parent.stack.list_all.view.set_sensitive, True)
         GObject.idle_add(self.parent.parent.hbar.spinner.stop)
+
+    def throw_error(self, message):
+        GObject.idle_add(self.parent.parent.stack.list_all.throw_error_dialog,
+                         message, "error")
 
 class AddThread(threading.Thread):
     cache = apt.Cache()
@@ -73,10 +81,6 @@ class AddThread(threading.Thread):
             self.cache.update()
             self.cache.open(None)
             self.sp.reload_sourceslist()
-        except PermissionError:
-            self.throw_error("You don't have permission to add repositories. Please " +
-                             "re-run this tool as root or ensure you typed your " +
-                             "password display")
         except:
             self.exc = sys.exc_info()
             self.throw_error(self.exc[1])
@@ -100,19 +104,27 @@ class ModifyThread(threading.Thread):
         self.sp = sp
 
     def run(self):
-        index = self.sp.sourceslist.list.index(self.old_source)
-        file = self.sp.sourceslist.list[index].file
-        self.new_source_entry = SourceEntry(self.new_source,file)
-        self.sp.sourceslist.list[index] = self.new_source_entry
-        self.sp.sourceslist.save()
-        self.cache.open()
-        self.cache.update()
-        self.cache.open(None)
-        self.sp.reload_sourceslist()
+        try:
+            index = self.sp.sourceslist.list.index(self.old_source)
+            file = self.sp.sourceslist.list[index].file
+            self.new_source_entry = SourceEntry(self.new_source,file)
+            self.sp.sourceslist.list[index] = self.new_source_entry
+            self.sp.sourceslist.save()
+            self.cache.open()
+            self.cache.update()
+            self.cache.open(None)
+            self.sp.reload_sourceslist()
+        except:
+            self.exc = sys.exc_info()
+            self.throw_error(self.exc[1])
         isv_list = self.sp.get_isv_sources()
         GObject.idle_add(self.parent.parent.parent.stack.list_all.generate_entries, isv_list)
         GObject.idle_add(self.parent.parent.parent.stack.list_all.view.set_sensitive, True)
         GObject.idle_add(self.parent.parent.parent.hbar.spinner.stop)
+
+    def throw_error(self, message):
+        GObject.idle_add(self.parent.parent.parent.stack.list_all.throw_error_dialog,
+                         message, "error")
 
 class DebugThread(threading.Thread):
     cache = apt.Cache()

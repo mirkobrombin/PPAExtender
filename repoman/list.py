@@ -142,6 +142,7 @@ class List(Gtk.Box):
             print(new_disabled)
             new_version = dialog.version_entry.get_text()
             new_component = dialog.component_entry.get_text()
+            dialog.destroy()
             new_archs = "[arch="
             for arch in source.architectures:
                 new_archs = "%s%s," % (new_archs, arch)
@@ -154,10 +155,7 @@ class List(Gtk.Box):
                                 new_version,
                                 new_component)
         else:
-            print("The modify was canceled.")
-
-        dialog.destroy()
-
+            dialog.destroy()
 
     def on_add_button_clicked(self, widget):
         #self.ppa.remove(self.ppa_name)
