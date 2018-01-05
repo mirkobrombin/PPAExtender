@@ -200,8 +200,7 @@ class EditDialog(Gtk.Dialog):
         content_grid.set_margin_bottom(12)
         content_grid.set_column_spacing(12)
         content_grid.set_row_spacing(6)
-        content_grid.set_halign(Gtk.Align.FILL)
-        content_grid.set_hexpand(True)
+        content_grid.set_halign(Gtk.Align.CENTER)
         content_area.add(content_grid)
 
         type_label = Gtk.Label("Type")
@@ -227,11 +226,10 @@ class EditDialog(Gtk.Dialog):
         content_grid.attach(self.type_box, 1, 0, 1, 1)
 
         self.uri_entry = Gtk.Entry()
-        self.uri_entry.set_hexpand(True)
         self.uri_entry.set_placeholder_text("https://ppa.launchpad.net/...")
         self.uri_entry.set_text(repo_uri)
         self.uri_entry.set_activates_default(False)
-        self.uri_entry.set_width_chars(50)
+        self.uri_entry.set_width_chars(40)
         content_grid.attach(self.uri_entry, 1, 1, 1, 1)
 
         self.version_entry = Gtk.Entry()
@@ -267,19 +265,22 @@ class EditDialog(Gtk.Dialog):
 
         action_area = self.get_action_area()
         action_area.add(remove_button)
+        separator = Gtk.Box()
+        separator.set_hexpand(True)
+        action_area.add(separator)
+        separator.show()
+        separator2 = Gtk.Box()
+        separator2.set_hexpand(True)
+        action_area.add(separator2)
+        separator2.show()
 
 
         self.show_all()
 
         if header == False:
-            separator = Gtk.Separator()
-            separator.set_hexpand(True)
-            action_area.add(separator)
-            separator.show()
-            action_area.set_homogeneous(True)
             action_area.remove(save_button)
             action_area.remove(cancel_button)
-            action_area.props.layout_style = Gtk.ButtonBoxStyle.EDGE
+            action_area.props.layout_style = Gtk.ButtonBoxStyle.START
             action_area.add(cancel_button)
             action_area.add(save_button)
 
