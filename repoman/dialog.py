@@ -179,8 +179,6 @@ class EditDialog(Gtk.Dialog):
         settings = Gtk.Settings.get_default()
         header = settings.props.gtk_dialogs_use_header
 
-        header = False
-
         Gtk.Dialog.__init__(self, "Modify Source", parent, 0,
                             (Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL,
                              Gtk.STOCK_SAVE, Gtk.ResponseType.OK),
@@ -195,9 +193,9 @@ class EditDialog(Gtk.Dialog):
 
         content_grid = Gtk.Grid()
         content_grid.set_margin_top(24)
-        content_grid.set_margin_left(12)
-        content_grid.set_margin_right(12)
-        content_grid.set_margin_bottom(12)
+        content_grid.set_margin_left(24)
+        content_grid.set_margin_right(24)
+        content_grid.set_margin_bottom(24)
         content_grid.set_column_spacing(12)
         content_grid.set_row_spacing(6)
         content_grid.set_halign(Gtk.Align.CENTER)
@@ -273,6 +271,7 @@ class EditDialog(Gtk.Dialog):
         separator2.set_hexpand(True)
         action_area.add(separator2)
         separator2.show()
+        action_area.props.layout_style = Gtk.ButtonBoxStyle.START
 
 
         self.show_all()
@@ -280,7 +279,6 @@ class EditDialog(Gtk.Dialog):
         if header == False:
             action_area.remove(save_button)
             action_area.remove(cancel_button)
-            action_area.props.layout_style = Gtk.ButtonBoxStyle.START
             action_area.add(cancel_button)
             action_area.add(save_button)
 
