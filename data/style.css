@@ -27,3 +27,8 @@
 .inline-toolbar {
   padding: 0;
 }
+
+separator {
+  color: transparent;
+  background-color: transparent;
+}
