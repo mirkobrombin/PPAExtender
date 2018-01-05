@@ -19,9 +19,10 @@
     along with Repoman.  If not, see <http://www.gnu.org/licenses/>.
 '''
 
+import sys
 import gi
 import apt
-import threading
+import threading, queue, time
 from softwareproperties.SoftwareProperties import SoftwareProperties
 from aptsources.sourceslist import SourceEntry
 gi.require_version('Gtk', '3.0')
@@ -54,6 +55,7 @@ class RemoveThread(threading.Thread):
 
 class AddThread(threading.Thread):
     cache = apt.Cache()
+    exc = None
 
     def __init__(self, parent, url, sp):
         threading.Thread.__init__(self)
@@ -63,16 +65,29 @@ class AddThread(threading.Thread):
 
     def run(self):
         print("Adding PPA %s" % (self.url))
-        self.sp.add_source_from_line(self.url)
-        self.sp.sourceslist.save()
-        self.cache.open()
-        self.cache.update()
-        self.cache.open(None)
-        self.sp.reload_sourceslist()
+
+        try:
+            self.sp.add_source_from_line(self.url)
+            self.sp.sourceslist.save()
+            self.cache.open()
+            self.cache.update()
+            self.cache.open(None)
+            self.sp.reload_sourceslist()
+        except PermissionError:
+            self.throw_error("You don't have permission to add repositories. Please " +
+                             "re-run this tool as root or ensure you typed your " +
+                             "password display")
+        except:
+            self.exc = sys.exc_info()
+            self.throw_error(self.exc[1])
         isv_list = self.sp.get_isv_sources()
         GObject.idle_add(self.parent.parent.parent.stack.list_all.generate_entries, isv_list)
         GObject.idle_add(self.parent.parent.parent.stack.list_all.view.set_sensitive, True)
         GObject.idle_add(self.parent.parent.parent.hbar.spinner.stop)
+
+    def throw_error(self, message):
+        GObject.idle_add(self.parent.parent.parent.stack.list_all.throw_error_dialog,
+                         message, "error")
 
 class ModifyThread(threading.Thread):
     cache = apt.Cache()
@@ -98,6 +113,39 @@ class ModifyThread(threading.Thread):
         GObject.idle_add(self.parent.parent.parent.stack.list_all.generate_entries, isv_list)
         GObject.idle_add(self.parent.parent.parent.stack.list_all.view.set_sensitive, True)
         GObject.idle_add(self.parent.parent.parent.hbar.spinner.stop)
+
+class DebugThread(threading.Thread):
+    cache = apt.Cache()
+    exc = None
+
+    def __init__(self, parent, old_source, new_source, sp):
+        threading.Thread.__init__(self)
+        self.parent = parent
+        self.old_source = old_source
+        self.new_source = new_source
+        self.sp = sp
+
+    def run(self):
+        print("Doing a thread for %s" % self.old_source)
+        try:
+            time.sleep(5)
+            tim.sleep(2)
+        except:
+            self.exc = sys.exc_info()
+            GObject.idle_add(self.parent.parent.parent.stack.list_all.throw_error_dialog,
+                             str(self.exc[1]), "error")
+        isv_list = self.sp.get_isv_sources()
+        GObject.idle_add(self.parent.parent.parent.stack.list_all.generate_entries, isv_list)
+        GObject.idle_add(self.parent.parent.parent.stack.list_all.view.set_sensitive, True)
+        GObject.idle_add(self.parent.parent.parent.hbar.spinner.stop)
+
+    def join(self):
+        threading.Thread.join(self)
+        if self.exc:
+            msg = "Thread '%s' threw an exception: %s" % (self.getName(),
+                                                          self.exc[1])
+            new_exc = Exception(msg)
+            raise new_exc.with_traceback(self.exc[2])
 
 # This method need to be improved
 class PPA:
@@ -208,7 +256,8 @@ class PPA:
     def add(self, url):
         self.parent.parent.parent.hbar.spinner.start()
         self.parent.parent.parent.stack.list_all.view.set_sensitive(False)
-        AddThread(self.parent, url, self.sp).start()
+        t = AddThread(self.parent, url, self.sp)
+        t.start()
 
     # Starts a new thread to remove a repository
     def remove(self, ppa):

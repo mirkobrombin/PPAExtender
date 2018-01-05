@@ -166,9 +166,10 @@ class List(Gtk.Box):
 
         if response == Gtk.ResponseType.OK:
             url = dialog.ppa_entry.get_text()
+            dialog.destroy()
             self.ppa.add(url)
-
-        dialog.destroy()
+        else:
+            dialog.destroy()
 
     def generate_entries(self, isv_list):
         self.ppa_liststore.clear()
@@ -203,3 +204,11 @@ class List(Gtk.Box):
             tree_iter = model.get_iter(path)
             value = model.get_value(tree_iter,1)
             self.ppa_name = value
+
+    def throw_error_dialog(self, message, msg_type):
+        if msg_type == "error":
+            msg_type = Gtk.MessageType.ERROR
+        dialog = Gtk.MessageDialog(self.parent.parent, 0, msg_type,
+                                   Gtk.ButtonsType.CLOSE, message)
+        dialog.run()
+        dialog.destroy()
