@@ -74,7 +74,7 @@ class Settings(Gtk.Box):
 
         self.developer_grid = Gtk.VBox()
         self.developer_grid.set_margin_left(12)
-        self.developer_grid.set_margin_top(24)
+        self.developer_grid.set_margin_top(12)
         self.developer_grid.set_margin_right(12)
         self.developer_grid.set_margin_bottom(12)
         developer_options.add(self.developer_grid)
@@ -82,6 +82,7 @@ class Settings(Gtk.Box):
         developer_label = Gtk.Label("These options are those which are " +
                                     "primarily of interest to \ndevelopers.")
         developer_label.set_line_wrap(True)
+        developer_label.set_margin_bottom(12)
         self.developer_grid.add(developer_label)
         self.developer_grid.add(self.source_check)
         self.developer_grid.add(self.proposed_check)
