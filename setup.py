@@ -13,7 +13,6 @@ setup(
     packages=['repoman'],
     data_files=[
         ('share/metainfo', ['data/xyz.isantop.repoman.appdata.xml']),
-        ('share/applications', ['data/xyz.isantop.repoman.desktop']),
         ('share/repoman', ['data/style.css']),
         ('lib/repoman', ['xyz.isantop.repoman.pkexec']),
     ],
