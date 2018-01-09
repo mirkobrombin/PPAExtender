@@ -15,6 +15,6 @@ setup(
         ('share/metainfo', ['data/xyz.isantop.repoman.appdata.xml']),
         ('share/applications', ['data/xyz.isantop.repoman.desktop']),
         ('share/repoman', ['data/style.css']),
-        ('lib/repoman', ['pkexec']),
+        ('lib/repoman', ['xyz.isantop.repoman.pkexec']),
     ],
 )

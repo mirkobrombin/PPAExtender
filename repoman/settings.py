@@ -1,21 +1,22 @@
 #!/usr/bin/python3
 '''
    Copyright 2017 Mirko Brombin (brombinmirko@gmail.com)
+   Copyright 2017 Ian Santopietro (ian@system76.com)
 
-   This file is part of PPAExtender.
+   This file is part of Repoman.
 
-    PPAExtender is free software: you can redistribute it and/or modify
+    Repoman is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation, either version 3 of the License, or
     (at your option) any later version.
 
-    PPAExtender is distributed in the hope that it will be useful,
+    Repoman is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
 
     You should have received a copy of the GNU General Public License
-    along with PPAExtender.  If not, see <http://www.gnu.org/licenses/>.
+    along with Repoman.  If not, see <http://www.gnu.org/licenses/>.
 '''
 
 import gi
@@ -74,7 +75,7 @@ class Settings(Gtk.Box):
 
         self.developer_grid = Gtk.VBox()
         self.developer_grid.set_margin_left(12)
-        self.developer_grid.set_margin_top(24)
+        self.developer_grid.set_margin_top(12)
         self.developer_grid.set_margin_right(12)
         self.developer_grid.set_margin_bottom(12)
         developer_options.add(self.developer_grid)
@@ -82,6 +83,7 @@ class Settings(Gtk.Box):
         developer_label = Gtk.Label("These options are those which are " +
                                     "primarily of interest to \ndevelopers.")
         developer_label.set_line_wrap(True)
+        developer_label.set_margin_bottom(12)
         self.developer_grid.add(developer_label)
         self.developer_grid.add(self.source_check)
         self.developer_grid.add(self.proposed_check)
