@@ -12,7 +12,6 @@ Repoman is based on [PPAExtender](https://github.com/mirkobrombin/PPAExtender)
 ## Requirements
 - python3
 - libgtk-3-dev
-- libgranite-dev
 - software-properties-common
 
 ## Installation
