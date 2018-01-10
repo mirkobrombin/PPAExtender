@@ -1,2 +1,2 @@
 #!/bin/sh
-pkexec env DISPLAY=$DISPLAY XAUTHORITY=$XAUTHORITY xyz.isantop.repoman
+pkexec env DISPLAY=$DISPLAY XAUTHORITY=$XAUTHORITY repoman
