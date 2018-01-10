@@ -1,12 +1,6 @@
 #!/usr/bin/python3
 
 from distutils.core import setup
-import glob #for translations
-
-# Translations
-translations = []
-for filename in glob.iglob('po/*', recursive=False):
-    translations.append(filename)
 
 setup(
     name='Repoman',
