@@ -21,8 +21,8 @@ setup(
         ('share/metainfo', ['data/xyz.isantop.repoman.appdata.xml']),
         ('share/applications', ['data/xyz.isantop.repoman.desktop']),
         ('share/repoman', ['data/style.css']),
-        ('share/repoman/po/es/LC_MESSAGES', ['po/es/repoman.mo'),
-        ('share/repoman/po/sv/LC_MESSAGES', ['po/sv/repoman.mo'),
+        ('share/repoman/po/es/LC_MESSAGES', ['po/es/repoman.mo']),
+        ('share/repoman/po/sv/LC_MESSAGES', ['po/sv/repoman.mo']),
         ('lib/repoman', ['xyz.isantop.repoman.pkexec']),
     ],
 )
