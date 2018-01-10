@@ -27,7 +27,7 @@ sudo apt install repoman
 Additionally, you can use **git**:
 
 ```bash
-git clone https://github.com/isantop/repoman.git
+git clone https://github.com/pop-os/repoman.git
 cd repoman
 sudo python3 setup.py install
 ```
