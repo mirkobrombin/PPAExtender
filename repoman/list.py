@@ -25,6 +25,10 @@ from gi.repository import Gtk
 from softwareproperties.SoftwareProperties import SoftwareProperties
 from .ppa import PPA
 from .dialog import AddDialog, EditDialog
+import gettext
+gettext.bindtextdomain('repoman', '/usr/share/repoman/po')
+gettext.textdomain("repoman")
+_ = gettext.gettext
 
 class List(Gtk.Box):
 
@@ -49,15 +53,12 @@ class List(Gtk.Box):
         self.content_grid.set_vexpand(True)
         self.add(self.content_grid)
 
-        sources_title = Gtk.Label("Extra Sources")
+        sources_title = Gtk.Label(_("Extra Sources"))
         Gtk.StyleContext.add_class(sources_title.get_style_context(), "h2")
         sources_title.set_halign(Gtk.Align.START)
         self.content_grid.attach(sources_title, 0, 0, 1, 1)
 
-        sources_label = Gtk.Label("These sources are for software provided by " +
-                                  "a third party. They may present a security " +
-                                  "risk or can cause system instability. " +
-                                  "Only add sources that you trust.")
+        sources_label = Gtk.Label(_("These sources are for software provided by a third party. They may present a security risk or can cause system instability. Only add sources that you trust."))
         sources_label.set_line_wrap(True)
         sources_label.set_halign(Gtk.Align.START)
         sources_label.set_justify(Gtk.Justification.FILL)
@@ -72,7 +73,7 @@ class List(Gtk.Box):
         self.ppa_liststore = Gtk.ListStore(str, str)
         self.view = Gtk.TreeView(self.ppa_liststore)
         renderer = Gtk.CellRendererText()
-        column = Gtk.TreeViewColumn('Source', renderer, markup=0)
+        column = Gtk.TreeViewColumn(_("Source"), renderer, markup=0)
         self.view.append_column(column)
         self.view.set_hexpand(True)
         self.view.set_vexpand(True)
@@ -86,7 +87,7 @@ class List(Gtk.Box):
                                                    Gtk.IconSize.SMALL_TOOLBAR)
         Gtk.StyleContext.add_class(add_button.get_style_context(),
                                    "image-button")
-        add_button.set_tooltip_text("Add New Source")
+        add_button.set_tooltip_text(_("Add New Source"))
         add_button.connect("clicked", self.on_add_button_clicked)
 
         # edit button
@@ -94,7 +95,7 @@ class List(Gtk.Box):
                                                     Gtk.IconSize.SMALL_TOOLBAR)
         Gtk.StyleContext.add_class(edit_button.get_style_context(),
                                    "image-button")
-        edit_button.set_tooltip_text("Modify Selected Source")
+        edit_button.set_tooltip_text(_("Modify Selected Source"))
         edit_button.connect("clicked", self.on_edit_button_clicked)
 
         action_bar = Gtk.ActionBar()
