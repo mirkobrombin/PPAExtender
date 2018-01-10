@@ -91,7 +91,7 @@ class Updates(Gtk.Box):
         self.noti_grid.attach(notify_check, 0, 0, 1, 1)
 
 
-        auto_check = Gtk.CheckButton.new_with_label(_("Automatically install important security updates.")
+        auto_check = Gtk.CheckButton.new_with_label(_("Automatically install important security updates."))
         self.noti_grid.attach(auto_check, 0, 1, 1, 1)
 
         version_check = Gtk.CheckButton.new_with_label(_("Notify about new versions of %s") % self.os_name)

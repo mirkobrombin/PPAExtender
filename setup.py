@@ -1,6 +1,12 @@
 #!/usr/bin/python3
 
 from distutils.core import setup
+import glob #for translations
+
+# Translations
+translations = []
+for filename in glob.iglob('po/*', recursive=False):
+    translations.append(filename)
 
 setup(
     name='Repoman',
@@ -15,7 +21,7 @@ setup(
         ('share/metainfo', ['data/xyz.isantop.repoman.appdata.xml']),
         ('share/applications', ['data/xyz.isantop.repoman.desktop']),
         ('share/repoman', ['data/style.css']),
-        ('share/repoman', ['po']),
+        ('share/repoman/po', translations),
         ('lib/repoman', ['xyz.isantop.repoman.pkexec']),
     ],
 )
