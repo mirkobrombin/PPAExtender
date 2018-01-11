@@ -227,7 +227,7 @@ class EditDialog(Gtk.Dialog):
         content_grid.set_margin_left(24)
         content_grid.set_margin_right(24)
         content_grid.set_margin_bottom(24)
-        content_grid.set_column_spacing(6)
+        content_grid.set_column_spacing(12)
         content_grid.set_row_spacing(12)
         content_grid.set_halign(Gtk.Align.CENTER)
         content_area.add(content_grid)
