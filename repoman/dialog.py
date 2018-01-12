@@ -96,12 +96,13 @@ class DeleteDialog(Gtk.Dialog):
         content_grid.set_margin_left(24)
         content_grid.set_margin_right(24)
         content_grid.set_margin_bottom(24)
-        content_grid.set_column_spacing(36)
-        content_grid.set_row_spacing(12)
+        content_grid.set_column_spacing(12)
+        content_grid.set_row_spacing(6)
         content_area.add(content_grid)
 
         delete_image = Gtk.Image.new_from_icon_name("dialog-warning-symbolic",
                                                 Gtk.IconSize.DIALOG)
+        delete_image.props.valign = Gtk.Align.START
         content_grid.attach(delete_image, 0, 0, 1, 2)
 
         delete_label = Gtk.Label(_("Are you sure you want to remove this source?"))
@@ -109,6 +110,9 @@ class DeleteDialog(Gtk.Dialog):
         content_grid.attach(delete_label, 1, 0, 1, 1)
 
         delete_explain = Gtk.Label(_("If you remove this source, you will need to add it again to continue using it. Any software you've installed from this source will remain installed."))
+        delete_explain.props.wrap = True
+        delete_explain.set_max_width_chars(50)
+        delete_explain.set_xalign(0)
         content_grid.attach(delete_explain, 1, 1, 1, 1)
 
         Gtk.StyleContext.add_class(self.get_widget_for_response(Gtk.ResponseType.OK).get_style_context(),
