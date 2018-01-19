@@ -62,7 +62,7 @@ class Updates(Gtk.Box):
         updates_grid.attach(updates_title, 0, 0, 1, 1)
 
         updates_label = Gtk.Label(_("These sources control how %s checks for updates. It is recommended to leave these sources enabled.") % self.os_name)
-
+        
         updates_label.set_line_wrap(True)
         updates_label.set_halign(Gtk.Align.START)
         updates_grid.attach(updates_label, 0, 1, 1, 1)
@@ -83,7 +83,7 @@ class Updates(Gtk.Box):
         updates_grid.attach(self.notifications_title, 0, 4, 1, 1)
 
         self.notifications_label = Gtk.Label(_("Change how %s notifies you about pending software updates.") % self.os_name)
-
+        
         self.notifications_label.set_line_wrap(True)
         self.notifications_label.set_halign(Gtk.Align.CENTER)
         updates_grid.attach(self.notifications_label, 0, 5, 1, 1)
@@ -162,4 +162,4 @@ class Updates(Gtk.Box):
     def on_child_toggled(self, checkbutton, child):
         enabled = checkbutton.get_active()
         self.ppa.set_child_enabled(child, enabled)
-
+        
