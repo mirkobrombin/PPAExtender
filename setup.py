@@ -14,6 +14,7 @@ setup(
     data_files=[
         ('share/metainfo', ['data/repoman.appdata.xml']),
         ('share/applications', ['data/repoman.desktop']),
+        ('share/polkit-1/actions', ['data/org.pop.pkexec.repoman.policy']),
         ('share/repoman', ['data/style.css']),
         ('share/repoman/po/es/LC_MESSAGES', ['po/es/repoman.mo']),
         ('share/repoman/po/sv/LC_MESSAGES', ['po/sv/repoman.mo']),

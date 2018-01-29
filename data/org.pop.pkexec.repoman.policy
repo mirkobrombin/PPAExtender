@@ -5,7 +5,7 @@
 
 <policyconfig>
 
-  <action id="org.freedesktop.policykit.pkexec.run-repoman">
+  <action id="org.pop.RepoMan.run">
     <description>Run Repoman</description>
     <message>Authentication is required to manage system software sources</message>
     <defaults>
