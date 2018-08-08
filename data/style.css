@@ -19,15 +19,6 @@
 	color: #ff3300;
 }
 
-.inline-toolbar button {
-  padding: 0;
-  margin: 0;
-}
-
-.inline-toolbar {
-  padding: 0;
-}
-
 separator {
   color: transparent;
   background-color: transparent;
