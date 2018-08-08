@@ -1,6 +1,6 @@
-repoman (0.0.6) UNRELEASED; urgency=medium
+repoman (0.0.7) bionic; urgency=medium
 
   * Rebrand
+  * Remove inline-toolbar styling because it is broken
 
- -- Ian Santopietro <ian@system76.com>  Tue, 26 Dec 2017 16:57:11 -0700
-
+ -- Ian Santopietro <ian@system76.com>  Wed, 08 Aug 2018 15:20:34 -0600
