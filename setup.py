@@ -4,7 +4,7 @@ from distutils.core import setup
 
 setup(
     name='Repoman',
-    version='1.0.0',
+    version='1.0.1',
     author='Ian Santopietro',
     description='Easily manage PPAs',
     url='https://github.com/isantop/repoman',
