@@ -91,26 +91,27 @@ class List(Gtk.Box):
         list_window.add(self.view)
 
          # add button
-        add_button = Gtk.Button.new_from_icon_name("list-add-symbolic",
-                                                   Gtk.IconSize.SMALL_TOOLBAR)
+        add_button = Gtk.ToolButton()
+        add_button.set_icon_name("list-add-symbolic")
         Gtk.StyleContext.add_class(add_button.get_style_context(),
                                    "image-button")
         add_button.set_tooltip_text(_("Add New Source"))
         add_button.connect("clicked", self.on_add_button_clicked)
 
         # edit button
-        edit_button = Gtk.Button.new_from_icon_name("edit-symbolic",
-                                                    Gtk.IconSize.SMALL_TOOLBAR)
+        edit_button = Gtk.ToolButton()
+        edit_button.set_icon_name("edit-symbolic")
         Gtk.StyleContext.add_class(edit_button.get_style_context(),
                                    "image-button")
         edit_button.set_tooltip_text(_("Modify Selected Source"))
         edit_button.connect("clicked", self.on_edit_button_clicked)
 
-        action_bar = Gtk.ActionBar()
+        action_bar = Gtk.Toolbar()
+        action_bar.set_icon_size(Gtk.IconSize.SMALL_TOOLBAR)
         Gtk.StyleContext.add_class(action_bar.get_style_context(),
                                    "inline-toolbar")
-        action_bar.add(edit_button)
-        action_bar.add(add_button)
+        action_bar.insert(edit_button, 0)
+        action_bar.insert(add_button, 0)
         list_grid.attach(action_bar, 0, 1, 1, 1)
 
         self.generate_entries(self.ppa.get_isv())
