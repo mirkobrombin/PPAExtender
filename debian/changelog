@@ -1,19 +1,6 @@
-repoman (1.0.2) bionic; urgency=medium
-
-  * Change inline-toolbar to be a toolbar instead of an action bar
-
- -- Ian Santopietro <ian@system76.com>  Fri, 10 Aug 2018 15:41:32 -0600
-
-repoman (1.0.1) bionic; urgency=medium
+repoman (0.0.7) bionic; urgency=medium
 
   * Rebrand
   * Remove inline-toolbar styling because it is broken
 
  -- Ian Santopietro <ian@system76.com>  Wed, 08 Aug 2018 15:20:34 -0600
- 
-repoman (1.0.0) bionic; urgency=medium
-
-  * Rebrand
-  * Initial Release
-
- -- Ian Santopietro <ian@system76.com>  Thu, 22 Mar 2018 09:57:14 -0600
