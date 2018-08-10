@@ -15,6 +15,7 @@ setup(
         ('share/metainfo', ['data/repoman.appdata.xml']),
         ('share/polkit-1/actions', ['data/org.pop.pkexec.repoman.policy']),
         ('share/repoman', ['data/style.css']),
+        ('share/applications', ['data/repoman.desktop']),
         ('share/repoman/po/es/LC_MESSAGES', ['po/es/repoman.mo']),
         ('share/repoman/po/sv/LC_MESSAGES', ['po/sv/repoman.mo']),
         ('lib/repoman', ['repoman.pkexec']),
