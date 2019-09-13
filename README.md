@@ -1,14 +1,7 @@
 # PPAExtender
 ![](https://i.imgur.com/m2WKCaR.png)
 
-Sorry, I moved the project to GitLab because of the Microsoft's acquisition of GitHub.
+This application has reached the **end of life**.
+We are creating a new version completely written from scratch, more information [here](https://github.com/linuxhubsubpixel/ppaextender).
 
-## New location
-https://gitlab.com/brombinmirko/PPAExtender
-
-![Moved to GitLab](https://i.imgur.com/wGgvnPq.png)
-
-## More info for Microsoft+GitHub?
-- https://blogs.microsoft.com/blog/2018/06/04/microsoft-github-empowering-developers/
-- https://blog.github.com/2018-06-04-github-microsoft/
-- Italians only: https://linuxhub.it/pausacaffe-lopen-source-non-e-in-vendita/
+There is a fork for **Pop!_OS**, created by isantop [here](https://github.com/pop-os/repoman).
