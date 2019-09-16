@@ -72,6 +72,7 @@ class Updates(Gtk.Box):
         self.checks_grid.set_margin_top(24)
         self.checks_grid.set_margin_right(12)
         self.checks_grid.set_margin_bottom(12)
+        self.checks_grid.set_row_spacing(12)
         updates_grid.attach(self.checks_grid, 0, 2, 1, 1)
 
         separator = Gtk.HSeparator()

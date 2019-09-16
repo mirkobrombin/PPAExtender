@@ -69,6 +69,7 @@ class Settings(Gtk.Box):
         self.checks_grid.set_margin_top(24)
         self.checks_grid.set_margin_right(12)
         self.checks_grid.set_margin_bottom(12)
+        self.checks_grid.set_row_spacing(12)
         settings_grid.attach(self.checks_grid, 0, 2, 1, 1)
 
         developer_options = Gtk.Expander()
@@ -80,6 +81,7 @@ class Settings(Gtk.Box):
         self.developer_grid.set_margin_top(12)
         self.developer_grid.set_margin_right(12)
         self.developer_grid.set_margin_bottom(12)
+        self.developer_grid.set_row_spacing(12)
         developer_options.add(self.developer_grid)
 
         developer_label = Gtk.Label(_("These options are those which are primarily of interest to developers."))
