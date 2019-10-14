@@ -36,3 +36,7 @@ separator {
   color: transparent;
   background-color: transparent;
 }
+
+.dialog-vbox {
+	padding: 12px;
+}
