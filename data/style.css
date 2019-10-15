@@ -1,3 +1,16 @@
+.inline-toolbar button.flat {
+	border-radius: 9999px;
+	border: none;
+	background-color: transparent;
+	background-image: none;
+	box-shadow: none;
+	-gtk-outline-radius: 9999px;
+}
+
+.inline-toolbar button.flat:hover {
+	background-color: alpha(@theme_fg_color, 0.2);
+}
+
 #Title {
 	padding-top: 50px;
 	font-size: 18px;
@@ -22,4 +35,8 @@
 separator {
   color: transparent;
   background-color: transparent;
+}
+
+.dialog-vbox {
+	padding: 12px;
 }
