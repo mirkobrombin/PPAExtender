@@ -29,10 +29,7 @@ gettext.textdomain("repoman")
 _ = gettext.gettext
 
 class Settings(Gtk.Box):
-
-
-
-
+    
     def __init__(self, parent):
         Gtk.Box.__init__(self, False, 0)
 
@@ -61,7 +58,9 @@ class Settings(Gtk.Box):
 
         sources_label = Gtk.Label(_("Official sources are those provided by %s and its developers. It's recommended to leave these sources enabled.") % self.os_name)
         sources_label.set_line_wrap(True)
+        sources_label.set_justify(Gtk.Justification.FILL)
         sources_label.set_halign(Gtk.Align.START)
+        Gtk.StyleContext.add_class(sources_label.get_style_context(), "description")
         settings_grid.attach(sources_label, 0, 1, 1, 1)
 
         self.checks_grid = Gtk.VBox()
@@ -86,7 +85,6 @@ class Settings(Gtk.Box):
 
         developer_label = Gtk.Label(_("These options are those which are primarily of interest to developers."))
         developer_label.set_line_wrap(True)
-        developer_label.set_margin_bottom(12)
         self.developer_grid.add(developer_label)
         self.developer_grid.add(self.source_check)
         self.developer_grid.add(self.proposed_check)
