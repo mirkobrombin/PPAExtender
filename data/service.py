@@ -97,8 +97,31 @@ class PPA(dbus.service.Object):
         except:
             self.exc = sys.exc_info()
             raise RepomanException(self.exc[1])
-        
 
+    @dbus.service.method(
+        'org.pop-os.repoman.Interface',
+        in_signature='ss', out_signature='i',
+        sender_keyword='sender', connection_keyword='conn'
+    )
+    def modify_repo(self, old_repo, new_repo, sender=None, conn=None):
+        self._check_polkit_privilege(
+            sender, conn, 'org.pop-os.repoman.modifysources'
+        )
+
+        try:
+            index = self.sp.sourceslist.index(old_repo)
+            file = self.sp.sourceslist.list[index].file
+            new_source_entry = SourceEntry(new_repo, file)
+            self.sp.sourceslist[index] = new_source_entry
+            self.sp.sourceslist.save()
+            self.cache.open()
+            self.cache.update()
+            self.cache.open(None)
+            self.sp.reload_sourceslist()
+        except:
+            self.exc = sys.exc_info()
+            raise RepomanException(self.exc[1])
+        
     
     @dbus.service.method(
         "ro.santopiet.repoman.Interface",
