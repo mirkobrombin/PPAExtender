@@ -1,22 +1,25 @@
 #!/usr/bin/python3
 
 from distutils.core import setup
+from distutils.command.install import install
+from distutils.core import Command
+import sys
 
 setup(
-    name='Repoman',
-    version='1.0.2',
-    author='Ian Santopietro',
-    description='Easily manage PPAs',
-    url='https://github.com/isantop/repoman',
-    license='GNU GPL3',
-    scripts=['repoman/repoman'],
+    name = 'repoman',
+    version = '1.1.0',
+    description = 'Easily manage software sources',
+    url = 'https://github.com/pop-os/repoman',
+    license = 'GNU GPL3',
     packages=['repoman'],
-    data_files=[
-        ('share/metainfo', ['data/repoman.appdata.xml']),
-        ('share/polkit-1/actions', ['data/org.pop.pkexec.repoman.policy']),
-        ('share/repoman', ['data/style.css']),
-        ('share/repoman/po/es/LC_MESSAGES', ['po/es/repoman.mo']),
-        ('share/repoman/po/sv/LC_MESSAGES', ['po/sv/repoman.mo']),
-        ('lib/repoman', ['repoman.pkexec']),
+    data_files = [
+        ('/usr/share/metainfo', ['data/repoman.appdata.xml']),
+        ('/usr/share/dbus-1/system-services', ['data/org.pop-os.repoman.service']),
+        ('/usr/share/polkit-1/actions', ['data/org.pop-os.repoman.policy']),
+        ('/etc/dbus-1/system.d/', ['data/org.pop-os.repoman.conf']),
+        ('/usr/share/applications', ['data/repoman.desktop']),
+        ('/usr/share/repoman', ['data/style.css']),
+        ('/usr/lib/repoman', ['add-del-ppa.py', 'data/repoman.pkexec'])
     ],
+    scripts = ['repoman/repoman'],
 )
