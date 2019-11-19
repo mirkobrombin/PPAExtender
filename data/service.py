@@ -136,3 +136,12 @@ class PPA(dbus.service.Object):
                     (sender, conn, pid, privilege, str(details)))
             raise PermissionDeniedByPolicy(privilege)
 
+if __name__ == '__main__':
+    dbus.mainloop.glib.DBusGMainLoop(set_as_default=True)
+    
+    bus = dbus.SystemBus()
+    name = dbus.service.BusName("org.pop-os.repoman", bus)
+    object = PPA(bus, '/PPA')
+
+    mainloop = GObject.MainLoop()
+    mainloop.run()
