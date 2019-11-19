@@ -19,6 +19,7 @@
     along with Repoman.  If not, see <http://www.gnu.org/licenses/>.
 '''
 
+import dbus
 import sys
 import logging
 import gi
@@ -29,6 +30,8 @@ from aptsources.sourceslist import SourceEntry
 gi.require_version('Gtk', '3.0')
 from gi.repository import GObject, GLib
 
+bus = dbus.SystemBus()
+privileged_object = bus.get_object('org.pop-os.repoman', 'PPA')
 GLib.threads_init()
 
 class RemoveThread(threading.Thread):
@@ -51,11 +54,7 @@ class RemoveThread(threading.Thread):
     def run(self):
         self.log.info( "Removing PPA %s" % (self.ppa) )
         try:
-            self.sp.remove_source(self.ppa, remove_source_code=True)
-            self.sp.sourceslist.save()
-            self.cache.open()
-            self.cache.update()
-            self.cache.open(None)
+            privileged_object.delete_repo(self.ppa)
             self.sp.reload_sourceslist()
         except:
             self.exc = sys.exc_info()
@@ -70,7 +69,6 @@ class RemoveThread(threading.Thread):
                          message, "error")
 
 class AddThread(threading.Thread):
-    cache = apt.Cache()
     exc = None
 
     def __init__(self, parent, url, sp):
@@ -90,11 +88,7 @@ class AddThread(threading.Thread):
         self.log.info("Adding PPA %s" % (self.url))
 
         try:
-            self.sp.add_source_from_line(self.url)
-            self.sp.sourceslist.save()
-            self.cache.open()
-            self.cache.update()
-            self.cache.open(None)
+            privileged_object.add_repo(self.url)
             self.sp.reload_sourceslist()
         except:
             self.exc = sys.exc_info()
@@ -127,14 +121,7 @@ class ModifyThread(threading.Thread):
 
     def run(self):
         try:
-            index = self.sp.sourceslist.list.index(self.old_source)
-            file = self.sp.sourceslist.list[index].file
-            self.new_source_entry = SourceEntry(self.new_source,file)
-            self.sp.sourceslist.list[index] = self.new_source_entry
-            self.sp.sourceslist.save()
-            self.cache.open()
-            self.cache.update()
-            self.cache.open(None)
+            privileged_object.modify_repo(old_source, new_source)
             self.sp.reload_sourceslist()
         except:
             self.exc = sys.exc_info()
@@ -154,7 +141,6 @@ class PPA:
     invalid = "Not a valid PPA"
     valid = "Valid PPA found"
     sources_path = "/etc/apt/sources.list.d/"
-    cache = apt.Cache()
     sp = SoftwareProperties()
 
     def __init__(self, parent):
