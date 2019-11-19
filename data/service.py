@@ -33,3 +33,12 @@ from softwareproperties.SoftwareProperties import SoftwareProperties
 from aptsources.sourceslist import SourceEntry
 
 GLib.threads_init()
+
+class RepomanException(dbus.DBusException):
+    _dbus_error_name = 'org.pop-os.repoman.RepomanException'
+
+class PermissionDeniedByPolicy(dbus.DBusException):
+    _dbus_error_name = 'org.pop-os.repoman.PermissionDeniedByPolicy'
+
+class AptException(Exception):
+    pass
