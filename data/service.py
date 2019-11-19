@@ -68,7 +68,7 @@ class PPA(dbus.service.Object):
         in_signature='', out_signature='',
         sender_keyword='sender', connection_keyword='conn'
     )
-    def Exit(self, sender=None, conn=None):
+    def exit(self, sender=None, conn=None):
         mainloop.quit()
 
     @classmethod
