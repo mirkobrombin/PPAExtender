@@ -31,7 +31,7 @@ gi.require_version('Gtk', '3.0')
 from gi.repository import GObject, GLib
 
 bus = dbus.SystemBus()
-privileged_object = bus.get_object('org.pop-os.repoman', 'PPA')
+privileged_object = bus.get_object('org.pop_os.repoman', '/PPA')
 GLib.threads_init()
 
 class RemoveThread(threading.Thread):

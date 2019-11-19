@@ -14,12 +14,12 @@ setup(
     packages=['repoman'],
     data_files = [
         ('/usr/share/metainfo', ['data/repoman.appdata.xml']),
-        ('/usr/share/dbus-1/system-services', ['data/org.pop-os.repoman.service']),
-        ('/usr/share/polkit-1/actions', ['data/org.pop-os.repoman.policy']),
-        ('/etc/dbus-1/system.d/', ['data/org.pop-os.repoman.conf']),
+        ('/usr/share/dbus-1/system-services', ['data/org.pop_os.repoman.service']),
+        ('/usr/share/polkit-1/actions', ['data/org.pop_os.repoman.policy']),
+        ('/etc/dbus-1/system.d/', ['data/org.pop_os.repoman.conf']),
         ('/usr/share/applications', ['data/repoman.desktop']),
         ('/usr/share/repoman', ['data/style.css']),
-        ('/usr/lib/repoman', ['add-del-ppa.py', 'data/repoman.pkexec'])
+        ('/usr/lib/repoman', ['data/service.py', 'data/repoman.pkexec'])
     ],
     scripts = ['repoman/repoman'],
 )

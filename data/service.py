@@ -36,10 +36,10 @@ from aptsources.sourceslist import SourceEntry
 GLib.threads_init()
 
 class RepomanException(dbus.DBusException):
-    _dbus_error_name = 'org.pop-os.repoman.RepomanException'
+    _dbus_error_name = 'org.pop_os.repoman.RepomanException'
 
 class PermissionDeniedByPolicy(dbus.DBusException):
-    _dbus_error_name = 'org.pop-os.repoman.PermissionDeniedByPolicy'
+    _dbus_error_name = 'org.pop_os.repoman.PermissionDeniedByPolicy'
 
 class AptException(Exception):
     pass
@@ -56,13 +56,13 @@ class PPA(dbus.service.Object):
         self.cache = apt.Cache()
     
     @dbus.service.method(
-        'org.pop-os.repoman.Interface',
+        'org.pop_os.repoman.Interface',
         in_signature='s', out_signature='i',
         sender_keyword='sender', connection_keyword='conn'
     )
     def add_repo(self, line, sender=None, conn=None):
         self._check_polkit_privilege(
-            sender, conn, 'org.pop-os.repoman.modifysources'
+            sender, conn, 'org.pop_os.repoman.modifysources'
         )
 
         try:
@@ -78,13 +78,13 @@ class PPA(dbus.service.Object):
             raise RepomanException(self.exc[1])
     
     @dbus.service.method(
-        'org.pop-os.repoman.Interface',
+        'org.pop_os.repoman.Interface',
         in_signature='s', out_signature='i',
         sender_keyword='sender', connection_keyword='conn'
     )
     def delete_repo(self, repo, sender=None, conn=None):
         self._check_polkit_privilege(
-            sender, conn, 'org.pop-os.repoman.modifysources'
+            sender, conn, 'org.pop_os.repoman.modifysources'
         )
         
         try:
@@ -100,13 +100,13 @@ class PPA(dbus.service.Object):
             raise RepomanException(self.exc[1])
 
     @dbus.service.method(
-        'org.pop-os.repoman.Interface',
+        'org.pop_os.repoman.Interface',
         in_signature='ss', out_signature='i',
         sender_keyword='sender', connection_keyword='conn'
     )
     def modify_repo(self, old_repo, new_repo, sender=None, conn=None):
         self._check_polkit_privilege(
-            sender, conn, 'org.pop-os.repoman.modifysources'
+            sender, conn, 'org.pop_os.repoman.modifysources'
         )
 
         try:
@@ -125,13 +125,13 @@ class PPA(dbus.service.Object):
             raise RepomanException(self.exc[1])
     
     @dbus.service.method(
-        'org.pop-os.repoman.Interface',
+        'org.pop_os.repoman.Interface',
         in_signature='b', out_signature='i',
         sender_keyword='sender', connection_keyword='conn'
     )
     def set_source_code_enabled(self, enabled, sender=None, conn=None):
         self._check_polkit_privilege(
-            sender, conn, 'org.pop-os.repoman.modifysources'
+            sender, conn, 'org.pop_os.repoman.modifysources'
         )
 
         if enabled:
@@ -141,13 +141,13 @@ class PPA(dbus.service.Object):
         return 0
     
     @dbus.service.method(
-        'org.pop-os.repoman.Interface',
+        'org.pop_os.repoman.Interface',
         in_signature='sb', out_signature='i',
         sender_keyword='sender', connection_keyword='conn'
     )
     def set_child_enabled(self, child, enabled, sender=None, conn=None):
         self._check_polkit_privilege(
-            sender, conn, 'org.pop-os.repoman.modifysources'
+            sender, conn, 'org.pop_os.repoman.modifysources'
         )
 
         if enabled:
@@ -157,13 +157,13 @@ class PPA(dbus.service.Object):
         return 0
     
     @dbus.service.method(
-        'org.pop-os.repoman.Interface',
+        'org.pop_os.repoman.Interface',
         in_signature='sb', out_signature='i',
         sender_keyword='sender', connection_keyword='conn'
     )
     def set_comp_enabled(self, comp, enabled, sender=None, conn=None):
         self._check_polkit_privilege(
-            sender, conn, 'org.pop-os.repoman.modifysources'
+            sender, conn, 'org.pop_os.repoman.modifysources'
         )
 
         if enabled:
@@ -249,7 +249,7 @@ if __name__ == '__main__':
     dbus.mainloop.glib.DBusGMainLoop(set_as_default=True)
     
     bus = dbus.SystemBus()
-    name = dbus.service.BusName("org.pop-os.repoman", bus)
+    name = dbus.service.BusName("org.pop_os.repoman", bus)
     object = PPA(bus, '/PPA')
 
     mainloop = GObject.MainLoop()
