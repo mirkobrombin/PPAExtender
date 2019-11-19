@@ -200,10 +200,7 @@ class PPA:
 
     # Enable/Disable source code
     def set_source_code_enabled(self, enabled):
-        if enabled == True:
-            self.sp.enable_source_code_sources()
-        elif enabled == False:
-            self.sp.disable_source_code_sources()
+        privileged_object.set_source_code_enabled(enabled)
         return 0
 
     def get_line(self, isdisabled, rtype, archs, uri, version, component):
