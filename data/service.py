@@ -42,3 +42,24 @@ class PermissionDeniedByPolicy(dbus.DBusException):
 
 class AptException(Exception):
     pass
+
+class PPA(dbus.service.Object):
+    def __init__(self, conn=None, object_path=None, bus_name=None):
+        dbus.service.Object.__init__(self, conn, object_path, bus_name)
+
+        # These are used by PolKit to check privileges
+        self.dbus_info = None
+        self.polkit = None
+        self.enforce_polkit = True
+        self.sp = SoftwareProperties()
+    
+    @dbus.service.method(
+        'org.pop-os.repoman.Interface',
+        in_signature='s', out_signature='i',
+        sender_keyword='sender', connection_keyword='conn'
+    )
+    def add_repo(self, line, sender=None, conn=None):
+        self._check_polkit_privilege(
+            sender, conn, 'org.pop-os.repoman.modifysources'
+        )
+        
