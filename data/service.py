@@ -94,6 +94,7 @@ class PPA(dbus.service.Object):
             self.cache.update()
             self.cache.open(None)
             self.sp.reload_sourceslist()
+            return 0
         except:
             self.exc = sys.exc_info()
             raise RepomanException(self.exc[1])
@@ -118,10 +119,26 @@ class PPA(dbus.service.Object):
             self.cache.update()
             self.cache.open(None)
             self.sp.reload_sourceslist()
+            return 0
         except:
             self.exc = sys.exc_info()
             raise RepomanException(self.exc[1])
-        
+    
+    @dbus.service.method(
+        'org.pop-os.repoman.Interface',
+        in_signature='b', out_signature='i',
+        sender_keyword='sender', connection_keyword='conn'
+    )
+    def set_source_code_enabled(self, enabled, sender=None, conn=None):
+        self._check_polkit_privilege(
+            sender, conn, 'org.pop-os.repoman.modifysources'
+        )
+
+        if enabled:
+            self.sp.enable_source_code_sources()
+        else:
+            self.sp.disable_source_code_sources()
+        return 0
     
     @dbus.service.method(
         "ro.santopiet.repoman.Interface",
