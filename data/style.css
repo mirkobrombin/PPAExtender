@@ -16,18 +16,22 @@
 	font-size: 18px;
 	padding-bottom: 5px;
 }
+
 #Description {
 	font-size: 10px;	
 	padding-bottom: 15px;
 }
+
 #Validate {
 	color: #0066cc;
 	padding-top: 10px;
 	font-weight: bold;
 }
+
 #Validate.success {
 	color: #009933;
 }
+
 #Validate.error {
 	color: #ff3300;
 }
@@ -39,4 +43,13 @@ separator {
 
 .dialog-vbox {
 	padding: 12px;
+}
+
+.description {
+  padding-top: 4px;
+  padding-bottom: 4px;
+}
+
+.list_window {
+  margin-top: 10px;
 }

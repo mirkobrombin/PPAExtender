@@ -62,9 +62,10 @@ class Updates(Gtk.Box):
         updates_grid.attach(updates_title, 0, 0, 1, 1)
 
         updates_label = Gtk.Label(_("These sources control how %s checks for updates. It is recommended to leave these sources enabled.") % self.os_name)
-
         updates_label.set_line_wrap(True)
+        updates_label.set_justify(Gtk.Justification.FILL)
         updates_label.set_halign(Gtk.Align.START)
+        Gtk.StyleContext.add_class(updates_label.get_style_context(), "description")
         updates_grid.attach(updates_label, 0, 1, 1, 1)
 
         self.checks_grid = Gtk.VBox()
