@@ -155,6 +155,22 @@ class PPA(dbus.service.Object):
         else:
             self.sp.disable_child_source(child)
         return 0
+    
+    @dbus.service.method(
+        'org.pop-os.repoman.Interface',
+        in_signature='sb', out_signature='i',
+        sender_keyword='sender', connection_keyword='conn'
+    )
+    def set_comp_enabled(self, comp, enabled, sender=None, conn=None):
+        self._check_polkit_privilege(
+            sender, conn, 'org.pop-os.repoman.modifysources'
+        )
+
+        if enabled:
+            self.sp.enable_component(comp)
+        else:
+            self.sp.disable_component(comp)
+        return 0
 
     @dbus.service.method(
         "ro.santopiet.repoman.Interface",
