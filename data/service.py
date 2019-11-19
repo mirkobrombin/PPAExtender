@@ -21,6 +21,7 @@
 import gi
 from gi.repository import GObject, GLib
 
+import apt
 import dbus
 import dbus.service
 import dbus.mainloop.glib
@@ -52,6 +53,7 @@ class PPA(dbus.service.Object):
         self.polkit = None
         self.enforce_polkit = True
         self.sp = SoftwareProperties()
+        self.cache = apt.Cache()
     
     @dbus.service.method(
         'org.pop-os.repoman.Interface',
@@ -62,6 +64,41 @@ class PPA(dbus.service.Object):
         self._check_polkit_privilege(
             sender, conn, 'org.pop-os.repoman.modifysources'
         )
+
+        try:
+            self.sp.add_source_from_line(line)
+            self.sp.sourceslist.save()
+            self.cache.open()
+            self.cache.update()
+            self.cache.open(None)
+            self.sp.reload_sourceslist()
+            return 0
+        except:
+            self.exc = sys.exc_info()
+            raise RepomanException(self.exc[1])
+    
+    @dbus.service.method(
+        'org.pop-os.repoman.Interface',
+        in_signature='s', out_signature='i',
+        sender_keyword='sender', connection_keyword='conn'
+    )
+    def delete_repo(self, repo, sender=None, conn=None):
+        self._check_polkit_privilege(
+            sender, conn, 'org.pop-os.repoman.modifysources'
+        )
+        
+        try:
+            self.sp.remove_source(repo, remove_source_code=True)
+            self.sp.sourceslist.save()
+            self.cache.open()
+            self.cache.update()
+            self.cache.open(None)
+            self.sp.reload_sourceslist()
+        except:
+            self.exc = sys.exc_info()
+            raise RepomanException(self.exc[1])
+        
+
     
     @dbus.service.method(
         "ro.santopiet.repoman.Interface",
