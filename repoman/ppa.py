@@ -190,18 +190,12 @@ class PPA:
 
     # Enable/Disable a component
     def set_comp_enabled(self, comp, enabled):
-        if enabled == True:
-            self.sp.enable_component(comp)
-        else:
-            self.sp.disable_component(comp)
+        privileged_object.set_comp_enabled(comp, enabled)
         return 0
 
     # Enable/Disable a child repo
     def set_child_enabled(self, child, enabled):
-        if enabled == True:
-            self.sp.enable_child_source(child)
-        else:
-            self.sp.disable_child_source(child)
+        privileged_object.set_child_enabled(child, enabled)
         return 0
 
     # Enable/Disable source code
