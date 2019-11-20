@@ -173,7 +173,7 @@ class PPA(dbus.service.Object):
         return 0
 
     @dbus.service.method(
-        "ro.santopiet.repoman.Interface",
+        "org.pop_os.repoman.Interface",
         in_signature='', out_signature='',
         sender_keyword='sender', connection_keyword='conn'
     )

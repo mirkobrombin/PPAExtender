@@ -108,7 +108,6 @@ class ModifyThread(threading.Thread):
     def __init__(self, parent, old_source, new_source, sp):
         threading.Thread.__init__(self)
         self.parent = parent
-        print(old_source)
         self.old_source = old_source
         self.new_source = new_source
         self.sp = sp
@@ -122,7 +121,8 @@ class ModifyThread(threading.Thread):
 
     def run(self):
         try:
-            privileged_object.modify_repo(self.old_source, self.new_source)
+            print(self.old_source.__str__(), self.new_source)
+            privileged_object.modify_repo(self.old_source.__str__(), self.new_source)
             self.sp.reload_sourceslist()
         except:
             self.exc = sys.exc_info()
