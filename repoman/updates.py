@@ -163,5 +163,5 @@ class Updates(Gtk.Box):
 
     def on_child_toggled(self, checkbutton, child):
         enabled = checkbutton.get_active()
-        self.ppa.set_child_enabled(child, enabled)
+        self.ppa.set_child_enabled(child.name, enabled)
 
