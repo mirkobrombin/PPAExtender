@@ -121,7 +121,6 @@ class ModifyThread(threading.Thread):
 
     def run(self):
         try:
-            print(self.old_source.__str__(), self.new_source)
             privileged_object.modify_repo(self.old_source.__str__(), self.new_source)
             self.sp.reload_sourceslist()
         except:
