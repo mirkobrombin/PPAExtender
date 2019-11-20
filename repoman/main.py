@@ -19,11 +19,15 @@
     along with Repoman.  If not, see <http://www.gnu.org/licenses/>.
 '''
 
+import dbus
 import logging
 import gi
 gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk, Gdk
 from .window import Window
+
+bus = dbus.SystemBus()
+privileged_object = bus.get_object('org.pop_os.repoman', '/PPA')
 
 class Application(Gtk.Application):
 
@@ -38,13 +42,17 @@ class Application(Gtk.Application):
 
         self.win = Window()
         self.win.set_default_size(700, 400)
-        self.win.connect("delete-event", Gtk.main_quit)
+        self.win.connect("delete-event", self.application_quit)
         self.win.show_all()
         self.win.stack.updates.noti_grid.hide()
         self.win.stack.updates.notifications_title.hide()
         self.win.stack.updates.notifications_label.hide()
 
         Gtk.main()
+    
+    def application_quit(self, widget, data=None):
+        privileged_object.exit()
+        Gtk.main_quit()
 
 app = Application()
 
