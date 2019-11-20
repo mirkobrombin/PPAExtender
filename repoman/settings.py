@@ -179,6 +179,6 @@ class Settings(Gtk.Box):
 
     def on_proposed_check_toggled(self, checkbutton, comp):
         enabled = checkbutton.get_active()
-        self.ppa.set_child_enabled(comp, enabled)
+        self.ppa.set_child_enabled(comp.name, enabled)
         return 0
     
