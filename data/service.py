@@ -110,10 +110,11 @@ class PPA(dbus.service.Object):
         )
 
         try:
-            index = self.sp.sourceslist.index(old_repo)
+            old_source = self._find_source_from_string(old_repo)
+            index = self.sp.sourceslist.list.index(old_source)
             file = self.sp.sourceslist.list[index].file
             new_source_entry = SourceEntry(new_repo, file)
-            self.sp.sourceslist[index] = new_source_entry
+            self.sp.sourceslist.list[index] = new_source_entry
             self.sp.sourceslist.save()
             self.cache.open()
             self.cache.update()
@@ -179,6 +180,16 @@ class PPA(dbus.service.Object):
     )
     def exit(self, sender=None, conn=None):
         mainloop.quit()
+
+    def _find_source_from_string(self, line):
+        # ensure that we have a current list, it might have been changed underneath
+        # us
+        self.sp.reload_sourceslist()
+
+        for source in self.sp.sourceslist.list:
+            if str(source) == line:
+                return source
+        return None
 
     @classmethod
     def _log_in_file(klass, filename, string):
