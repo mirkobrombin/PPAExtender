@@ -56,6 +56,9 @@ class RemoveThread(threading.Thread):
         try:
             privileged_object.delete_repo(self.ppa)
             self.sp.reload_sourceslist()
+        except dbus.exceptions.DBusException:
+            self.exc = sys.exc_info()
+            self.log.warn(self.exc[1])
         except:
             self.exc = sys.exc_info()
             self.throw_error(self.exc[1])
@@ -90,6 +93,9 @@ class AddThread(threading.Thread):
         try:
             privileged_object.add_repo(self.url)
             self.sp.reload_sourceslist()
+        except dbus.exceptions.DBusException:
+            self.exc = sys.exc_info()
+            self.log.warn(self.exc[1])
         except:
             self.exc = sys.exc_info()
             self.throw_error(self.exc[1])
@@ -123,6 +129,9 @@ class ModifyThread(threading.Thread):
         try:
             privileged_object.modify_repo(self.old_source.__str__(), self.new_source)
             self.sp.reload_sourceslist()
+        except dbus.exceptions.DBusException:
+            self.exc = sys.exc_info()
+            self.log.warn(self.exc[1])
         except:
             self.exc = sys.exc_info()
             self.throw_error(self.exc[1])
