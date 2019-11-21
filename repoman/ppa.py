@@ -61,6 +61,7 @@ class RemoveThread(threading.Thread):
             self.log.warn(self.exc[1])
         except:
             self.exc = sys.exc_info()
+            self.log.warn(self.exc[1])
             self.throw_error(self.exc[1])
         isv_list = self.sp.get_isv_sources()
         GObject.idle_add(self.parent.parent.stack.list_all.generate_entries, isv_list)
@@ -98,6 +99,7 @@ class AddThread(threading.Thread):
             self.log.warn(self.exc[1])
         except:
             self.exc = sys.exc_info()
+            self.log.warn(self.exc[1])
             self.throw_error(self.exc[1])
         isv_list = self.sp.get_isv_sources()
         GObject.idle_add(self.parent.parent.parent.stack.list_all.generate_entries, isv_list)
@@ -134,6 +136,7 @@ class ModifyThread(threading.Thread):
             self.log.warn(self.exc[1])
         except:
             self.exc = sys.exc_info()
+            self.log.warn(self.exc[1])
             self.throw_error(self.exc[1])
         isv_list = self.sp.get_isv_sources()
         GObject.idle_add(self.parent.parent.parent.stack.list_all.generate_entries, isv_list)
