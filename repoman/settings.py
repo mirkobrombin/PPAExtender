@@ -19,6 +19,7 @@
     along with Repoman.  If not, see <http://www.gnu.org/licenses/>.
 '''
 
+import dbus
 import gi
 gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk
@@ -169,16 +170,25 @@ class Settings(Gtk.Box):
 
     def on_component_toggled(self, checkbutton, comp):
         enabled = checkbutton.get_active()
-        self.ppa.set_comp_enabled(comp, enabled)
+        try:
+            self.ppa.set_comp_enabled(comp, enabled)
+        except dbus.exceptions.DBusException:
+            self.show_distro()
         return 0
 
     def on_source_check_toggled(self, checkbutton):
         enabled = checkbutton.get_active()
-        self.ppa.set_source_code_enabled(enabled)
+        try:
+            self.ppa.set_source_code_enabled(enabled)
+        except dbus.exceptions.DBusException:
+            self.show_distro()
         return 0
 
     def on_proposed_check_toggled(self, checkbutton, comp):
         enabled = checkbutton.get_active()
-        self.ppa.set_child_enabled(comp.name, enabled)
+        try:
+            self.ppa.set_child_enabled(comp.name, enabled)
+        except dbus.exceptions.DBusException:
+            self.show_distro()
         return 0
     
