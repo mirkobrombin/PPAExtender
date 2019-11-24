@@ -1,4 +1,5 @@
 # PPAExtender
+There is a new version under development [HERE](https://github.com/linuxhubsubpixel/ppaextender).
 ![](https://i.imgur.com/m2WKCaR.png)
 
 This application has reached the **end of life**.
