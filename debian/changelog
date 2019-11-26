@@ -1,3 +1,10 @@
+repoman (1.1.0) UNRELEASED; urgency=medium
+
+  * Switching to PolicyKit to handle permissions on-demand, avoiding
+    the need to run the GUI as root.
+
+ -- Ian Santopietro <ian@akira.local>  Tue, 19 Nov 2019 14:40:02 -0700
+
 repoman (1.0.2) bionic; urgency=medium
 
   * Minor fix for inline toolbar padding in Pop V3

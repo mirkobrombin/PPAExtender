@@ -19,6 +19,7 @@
     along with Repoman.  If not, see <http://www.gnu.org/licenses/>.
 '''
 
+import dbus
 import sys
 import logging
 import gi
@@ -29,6 +30,8 @@ from aptsources.sourceslist import SourceEntry
 gi.require_version('Gtk', '3.0')
 from gi.repository import GObject, GLib
 
+bus = dbus.SystemBus()
+privileged_object = bus.get_object('org.pop_os.repoman', '/PPA')
 GLib.threads_init()
 
 class RemoveThread(threading.Thread):
@@ -51,14 +54,14 @@ class RemoveThread(threading.Thread):
     def run(self):
         self.log.info( "Removing PPA %s" % (self.ppa) )
         try:
-            self.sp.remove_source(self.ppa, remove_source_code=True)
-            self.sp.sourceslist.save()
-            self.cache.open()
-            self.cache.update()
-            self.cache.open(None)
+            privileged_object.delete_repo(self.ppa)
             self.sp.reload_sourceslist()
+        except dbus.exceptions.DBusException:
+            self.exc = sys.exc_info()
+            self.log.warn(self.exc[1])
         except:
             self.exc = sys.exc_info()
+            self.log.warn(self.exc[1])
             self.throw_error(self.exc[1])
         isv_list = self.sp.get_isv_sources()
         GObject.idle_add(self.parent.parent.stack.list_all.generate_entries, isv_list)
@@ -70,7 +73,6 @@ class RemoveThread(threading.Thread):
                          message, "error")
 
 class AddThread(threading.Thread):
-    cache = apt.Cache()
     exc = None
 
     def __init__(self, parent, url, sp):
@@ -90,14 +92,14 @@ class AddThread(threading.Thread):
         self.log.info("Adding PPA %s" % (self.url))
 
         try:
-            self.sp.add_source_from_line(self.url)
-            self.sp.sourceslist.save()
-            self.cache.open()
-            self.cache.update()
-            self.cache.open(None)
+            privileged_object.add_repo(self.url)
             self.sp.reload_sourceslist()
+        except dbus.exceptions.DBusException:
+            self.exc = sys.exc_info()
+            self.log.warn(self.exc[1])
         except:
             self.exc = sys.exc_info()
+            self.log.warn(self.exc[1])
             self.throw_error(self.exc[1])
         isv_list = self.sp.get_isv_sources()
         GObject.idle_add(self.parent.parent.parent.stack.list_all.generate_entries, isv_list)
@@ -127,17 +129,14 @@ class ModifyThread(threading.Thread):
 
     def run(self):
         try:
-            index = self.sp.sourceslist.list.index(self.old_source)
-            file = self.sp.sourceslist.list[index].file
-            self.new_source_entry = SourceEntry(self.new_source,file)
-            self.sp.sourceslist.list[index] = self.new_source_entry
-            self.sp.sourceslist.save()
-            self.cache.open()
-            self.cache.update()
-            self.cache.open(None)
+            privileged_object.modify_repo(self.old_source.__str__(), self.new_source)
             self.sp.reload_sourceslist()
+        except dbus.exceptions.DBusException:
+            self.exc = sys.exc_info()
+            self.log.warn(self.exc[1])
         except:
             self.exc = sys.exc_info()
+            self.log.warn(self.exc[1])
             self.throw_error(self.exc[1])
         isv_list = self.sp.get_isv_sources()
         GObject.idle_add(self.parent.parent.parent.stack.list_all.generate_entries, isv_list)
@@ -154,7 +153,6 @@ class PPA:
     invalid = "Not a valid PPA"
     valid = "Valid PPA found"
     sources_path = "/etc/apt/sources.list.d/"
-    cache = apt.Cache()
     sp = SoftwareProperties()
 
     def __init__(self, parent):
@@ -204,26 +202,17 @@ class PPA:
 
     # Enable/Disable a component
     def set_comp_enabled(self, comp, enabled):
-        if enabled == True:
-            self.sp.enable_component(comp)
-        else:
-            self.sp.disable_component(comp)
+        privileged_object.set_comp_enabled(comp, enabled)
         return 0
 
     # Enable/Disable a child repo
     def set_child_enabled(self, child, enabled):
-        if enabled == True:
-            self.sp.enable_child_source(child)
-        else:
-            self.sp.disable_child_source(child)
+        privileged_object.set_child_enabled(child, enabled)
         return 0
 
     # Enable/Disable source code
     def set_source_code_enabled(self, enabled):
-        if enabled == True:
-            self.sp.enable_source_code_sources()
-        elif enabled == False:
-            self.sp.disable_source_code_sources()
+        privileged_object.set_source_code_enabled(enabled)
         return 0
 
     def get_line(self, isdisabled, rtype, archs, uri, version, component):

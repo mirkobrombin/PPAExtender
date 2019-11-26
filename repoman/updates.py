@@ -19,6 +19,7 @@
     along with Repoman.  If not, see <http://www.gnu.org/licenses/>.
 '''
 
+import dbus
 import logging
 import gi
 gi.require_version('Gtk', '3.0')
@@ -163,5 +164,8 @@ class Updates(Gtk.Box):
 
     def on_child_toggled(self, checkbutton, child):
         enabled = checkbutton.get_active()
-        self.ppa.set_child_enabled(child, enabled)
+        try:
+            self.ppa.set_child_enabled(child.name, enabled)
+        except dbus.exceptions.DBusException:
+            self.show_updates()
 
