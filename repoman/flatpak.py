@@ -47,10 +47,6 @@ class AddDialog(Gtk.Dialog):
                              modal=1, use_header_bar=header)
 
         self.log = logging.getLogger("repoman.FPAddDialog")
-        handler = logging.StreamHandler()
-        formatter = logging.Formatter('%(asctime)s %(name)-12s %(levelname)-8s %(message)s')
-        handler.setFormatter(formatter)
-        self.log.addHandler(handler)
 
 
         content_area = self.get_content_area()
@@ -164,10 +160,6 @@ class DeleteDialog(Gtk.Dialog):
                              modal=1, use_header_bar=header)
 
         self.log = logging.getLogger("repoman.FPDeleteDialog")
-        handler = logging.StreamHandler()
-        formatter = logging.Formatter('%(asctime)s %(name)-12s %(levelname)-8s %(message)s')
-        handler.setFormatter(formatter)
-        self.log.addHandler(handler)
 
 
         content_area = self.get_content_area()
