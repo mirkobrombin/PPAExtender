@@ -82,7 +82,6 @@ class List(Gtk.Box):
         self.view.append_column(column)
         self.view.set_hexpand(True)
         self.view.set_vexpand(True)
-        self.view.connect("row-activated", self.on_row_activated)
         tree_selection = self.view.get_selection()
         tree_selection.connect('changed', self.on_row_change)
         list_window.add(self.view)
