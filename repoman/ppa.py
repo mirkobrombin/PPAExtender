@@ -56,6 +56,7 @@ class RemoveThread(threading.Thread):
         except dbus.exceptions.DBusException:
             self.exc = sys.exc_info()
             self.log.warn(self.exc[1])
+            self.throw_error(f'Could not delete source {str(self.ppa)}')
         except:
             self.exc = sys.exc_info()
             self.log.warn(self.exc[1])
@@ -91,6 +92,7 @@ class AddThread(threading.Thread):
         except dbus.exceptions.DBusException:
             self.exc = sys.exc_info()
             self.log.warn(self.exc[1])
+            self.throw_error(f'Could not add source {self.url}')
         except:
             self.exc = sys.exc_info()
             self.log.warn(self.exc[1])
@@ -125,6 +127,7 @@ class ModifyThread(threading.Thread):
         except dbus.exceptions.DBusException:
             self.exc = sys.exc_info()
             self.log.warn(self.exc[1])
+            self.throw_error(f'Could not modify source {str(self.old_source)}')
         except:
             self.exc = sys.exc_info()
             self.log.warn(self.exc[1])

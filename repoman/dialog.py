@@ -33,15 +33,19 @@ class ErrorDialog(Gtk.Dialog):
 
     def __init__(self, parent, dialog_title, dialog_icon,
                  message_title, message_text):
-        Gtk.Dialog.__init__(self, dialog_title, parent, 0, "hg",
-                            (Gtk.STOCK_CLOSE, Gtk.ResponseType.OK),
-                            modal=1)
+        settings = Gtk.Settings.get_default()
+        header = settings.props.gtk_dialogs_use_header
+                 
+        super().__init__(use_header_bar=header, modal=1)
 
         self.log = logging.getLogger("repoman.ErrorDialog")
         handler = logging.StreamHandler()
         formatter = logging.Formatter('%(asctime)s %(name)-12s %(levelname)-8s %(message)s')
         handler.setFormatter(formatter)
         self.log.addHandler(handler)
+        
+        self.add_button(Gtk.STOCK_CLOSE, Gtk.ResponseType.OK)
+        
 
 
         content_area = self.get_content_area()
@@ -59,7 +63,8 @@ class ErrorDialog(Gtk.Dialog):
                                                    Gtk.IconSize.DIALOG)
         content_grid.attach(error_image, 0, 0, 1, 2)
 
-        dialog_label = Gtk.Label(message_title)
+        dialog_label = Gtk.Label()
+        dialog_label.set_markup(f'<b>{message_title}</b>')
         dialog_message = Gtk.Label(message_text)
         content_grid.attach(dialog_label, 1, 0, 1, 1)
         content_grid.attach(dialog_message, 1, 1, 1, 1)

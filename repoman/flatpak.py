@@ -19,6 +19,9 @@
     along with Repoman.  If not, see <http://www.gnu.org/licenses/>.
 '''
 
+from subprocess import CalledProcessError
+from sys import exc_info
+
 import gi
 import logging
 gi.require_version('Gtk', '3.0')
@@ -26,6 +29,9 @@ gi.require_version('Pango', '1.0')
 from gi.repository import Gtk, GObject, Pango
 
 import pyflatpak as flatpak
+from pyflatpak.remotes import AddRemoteError, DeleteRemoteError
+
+from .dialog import ErrorDialog
 
 import gettext
 gettext.bindtextdomain('repoman', '/usr/share/repoman/po')
@@ -303,7 +309,20 @@ class Flatpak(Gtk.Box):
         response = dialog.run()
         
         if response == Gtk.ResponseType.OK:
-            flatpak.remotes.delete_remote(remote)
+            try:
+                flatpak.remotes.delete_remote(remote)
+            except DeleteRemoteError as e:
+                err = exc_info()
+                self.log.exception(err)
+                edialog = ErrorDialog(
+                    dialog,
+                    'Couldn\'t remove remote',
+                    'dialog-error',
+                    'Couldn\'t remove remote',
+                    err[1]
+                )
+                edialog.run()
+                edialog.destroy()
         
         dialog.destroy()
         self.generate_entries()
@@ -341,8 +360,22 @@ class Flatpak(Gtk.Box):
             name = dialog.name_entry.get_text()
             url = dialog.url_entry.get_text()
             self.log.info('Adding flatpak source %s at %s', name, url)
+            try:
+                flatpak.remotes.add_remote(name, url)
+            except AddRemoteError as e:
+                err = exc_info()
+                self.log.exception(err)
+                edialog = ErrorDialog(
+                    dialog,
+                    'Couldn\'t add remote',
+                    'dialog-error',
+                    'Couldn\'t add remote',
+                    err[1]
+                )
+                edialog.run()
+                edialog.destroy()
+            
             dialog.destroy()
-            flatpak.remotes.add_remote(name, url)
         else:
             dialog.destroy()
         
