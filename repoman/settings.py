@@ -87,6 +87,7 @@ class Settings(Gtk.Box):
         developer_label = Gtk.Label(_("These options are those which are primarily of interest to developers."))
         developer_label.set_line_wrap(True)
         developer_label.set_halign(Gtk.Align.START)
+        developer_label.set_margin_start(5)
         self.developer_grid.add(developer_label)
         self.developer_grid.add(self.source_check)
         self.developer_grid.add(self.proposed_check)
