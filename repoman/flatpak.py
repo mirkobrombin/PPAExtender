@@ -103,7 +103,6 @@ class AddDialog(Gtk.Dialog):
             pass
     
     def on_name_entry_changed(self, entry, data=None):
-        print(data)
         # Filter out some special characters, which may not be allowed by spec
         # and are likely to cause frustration for users who later use the 
         # Flatpak CLI.
