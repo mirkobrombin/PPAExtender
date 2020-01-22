@@ -19,6 +19,7 @@
     along with Repoman.  If not, see <http://www.gnu.org/licenses/>.
 '''
 
+from os.path import splitext
 from subprocess import CalledProcessError
 from sys import exc_info
 
@@ -54,7 +55,6 @@ class AddDialog(Gtk.Dialog):
 
         self.log = logging.getLogger("repoman.FPAddDialog")
 
-
         content_area = self.get_content_area()
 
         content_grid = Gtk.Grid()
@@ -72,21 +72,13 @@ class AddDialog(Gtk.Dialog):
         Gtk.StyleContext.add_class(add_title.get_style_context(), "h2")
         content_grid.attach(add_title, 0, 0, 2, 1)
 
-        self.name_entry = Gtk.Entry()
-        self.name_entry.set_placeholder_text(_("Source Name"))
-        self.name_entry.set_activates_default(True)
-        self.name_entry.connect(_("changed"), self.on_name_entry_changed)
-        self.name_entry.set_width_chars(20)
-        self.name_entry.set_margin_top(12)
-        content_grid.attach(self.name_entry, 0, 1, 1, 1)
-
         self.url_entry = Gtk.Entry()
         self.url_entry.set_placeholder_text(_("URL"))
         self.url_entry.set_activates_default(True)
         self.url_entry.connect(_("changed"), self.on_url_entry_changed)
         self.url_entry.set_width_chars(50)
         self.url_entry.set_margin_top(12)
-        content_grid.attach(self.url_entry, 1, 1, 1, 1)
+        content_grid.attach(self.url_entry, 0, 1, 1, 1)
 
         self.add_button = self.get_widget_for_response(Gtk.ResponseType.OK)
         self.add_button.set_sensitive(False)
@@ -107,47 +99,13 @@ class AddDialog(Gtk.Dialog):
             self.add_button.set_sensitive(entry_valid)
         except TypeError:
             pass
-    
-    def on_name_entry_changed(self, entry, data=None):
-        # Filter out some special characters, which may not be allowed by spec
-        # and are likely to cause frustration for users who later use the 
-        # Flatpak CLI.
-        replacements = {
-            ' ': '-',
-            '%': '',
-            '(': '',
-            ')': '',
-            '{': '',
-            '}': '',
-            '[': '',
-            ']': '',
-            '#': '',
-            '~': '',
-            '"': '',
-            "'": '',
-            '\\': '',
-            '/': '',
-            '|': '',
-            '&': '',
-            '`': '',
-            '*': '',
-            ';': '',
-            ':': ''
-        }
-        # Store the cursor position so we can return to it later
-        pos = entry.get_position()
 
-        entry_text = entry.get_text()
-        self.log.debug('Validating name: %s, cursor at %s', entry_text, pos)
-
-        # Perform the filtering:
-        for char in replacements:
-            if char in entry_text:
-                entry_text = entry_text.replace(char, replacements[char])
-                entry.set_text(entry_text)
-                if char is " ":
-                    pos += 1
-                GObject.idle_add(entry.set_position, pos)
+    def on_insert_emoji(self, entry, data=None):
+        """ We hook into this and return True. This should prevent the entry
+        from showing the emoji picker.
+        """
+        self.log.debug('Not Showing Emoji')
+        return True
 
 class DeleteDialog(Gtk.Dialog):
 
@@ -357,8 +315,8 @@ class Flatpak(Gtk.Box):
         self.log.debug('Response type: %s', response)
 
         if response == Gtk.ResponseType.OK:
-            name = dialog.name_entry.get_text()
             url = dialog.url_entry.get_text()
+            name = splitext(url.split('/')[-1])[0]
             self.log.info('Adding flatpak source %s at %s', name, url)
             try:
                 flatpak.remotes.add_remote(name, url)
