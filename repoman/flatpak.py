@@ -269,7 +269,7 @@ class Flatpak(Gtk.Box):
         if response == Gtk.ResponseType.OK:
             try:
                 flatpak.remotes.delete_remote(remote)
-            except DeleteRemoteError as e:
+            except DeleteRemoteError:
                 err = exc_info()
                 self.log.exception(err)
                 edialog = ErrorDialog(
@@ -320,7 +320,7 @@ class Flatpak(Gtk.Box):
             self.log.info('Adding flatpak source %s at %s', name, url)
             try:
                 flatpak.remotes.add_remote(name, url)
-            except AddRemoteError as e:
+            except AddRemoteError:
                 err = exc_info()
                 self.log.exception(err)
                 edialog = ErrorDialog(
