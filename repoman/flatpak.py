@@ -315,7 +315,7 @@ class Flatpak(Gtk.Box):
         self.log.debug('Response type: %s', response)
 
         if response == Gtk.ResponseType.OK:
-            url = dialog.url_entry.get_text()
+            url = dialog.url_entry.get_text().strip()
             name = splitext(url.split('/')[-1])[0]
             self.log.info('Adding flatpak source %s at %s', name, url)
             try:
