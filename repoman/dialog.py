@@ -37,6 +37,7 @@ class ErrorDialog(Gtk.Dialog):
         header = settings.props.gtk_dialogs_use_header
                  
         super().__init__(use_header_bar=header, modal=1)
+        self.set_deletable(False)
 
         self.log = logging.getLogger("repoman.ErrorDialog")
         handler = logging.StreamHandler()
