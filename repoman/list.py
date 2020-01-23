@@ -25,7 +25,7 @@ gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk
 from softwareproperties.SoftwareProperties import SoftwareProperties
 from .ppa import PPA
-from .dialog import AddDialog, EditDialog
+from .dialog import AddDialog, EditDialog, ErrorDialog
 import gettext
 gettext.bindtextdomain('repoman', '/usr/share/repoman/po')
 gettext.textdomain("repoman")
@@ -45,11 +45,8 @@ class List(Gtk.Box):
         self.settings = Gtk.Settings()
 
         self.log = logging.getLogger("repoman.List")
-        handler = logging.StreamHandler()
-        formatter = logging.Formatter('%(asctime)s %(name)-12s %(levelname)-8s %(message)s')
-        handler.setFormatter(formatter)
-        self.log.addHandler(handler)
-        self.log.setLevel(logging.WARNING)
+        self.log.debug('Logging established')
+
 
         self.content_grid = Gtk.Grid()
         self.content_grid.set_margin_left(12)
@@ -85,7 +82,6 @@ class List(Gtk.Box):
         self.view.append_column(column)
         self.view.set_hexpand(True)
         self.view.set_vexpand(True)
-        self.view.connect("row-activated", self.on_row_activated)
         tree_selection = self.view.get_selection()
         tree_selection.connect('changed', self.on_row_change)
         list_window.add(self.view)
@@ -213,9 +209,12 @@ class List(Gtk.Box):
             self.ppa_name = value
 
     def throw_error_dialog(self, message, msg_type):
-        if msg_type == "error":
-            msg_type = Gtk.MessageType.ERROR
-        dialog = Gtk.MessageDialog(self.parent.parent, 0, msg_type,
-                                   Gtk.ButtonsType.CLOSE, message)
+        dialog = ErrorDialog(
+                    self.parent,
+                    'Couldn\'t add source',
+                    'dialog-error',
+                    'Couldn\'t add source',
+                    message
+                )
         dialog.run()
         dialog.destroy()

@@ -24,6 +24,12 @@ import logging
 import gi
 gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk, Gdk
+
+try:
+    from systemd.journal import JournalHandler
+except ImportError:
+    JournalHandler = False
+
 from .window import Window
 
 bus = dbus.SystemBus()
@@ -32,13 +38,6 @@ privileged_object = bus.get_object('org.pop_os.repoman', '/PPA')
 class Application(Gtk.Application):
 
     def do_activate(self):
-
-        self.log = logging.getLogger("repoman.Updates")
-        handler = logging.StreamHandler()
-        formatter = logging.Formatter('%(asctime)s %(name)-12s %(levelname)-8s %(message)s')
-        handler.setFormatter(formatter)
-        self.log.addHandler(handler)
-        self.log.setLevel(logging.WARNING)
 
         self.win = Window()
         self.win.set_default_size(700, 400)
