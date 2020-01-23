@@ -45,11 +45,8 @@ class RemoveThread(threading.Thread):
         self.sp = sp
 
         self.log = logging.getLogger("repoman.PPA.RemoveThread")
-        handler = logging.StreamHandler()
-        formatter = logging.Formatter('%(asctime)s %(name)-12s %(levelname)-8s %(message)s')
-        handler.setFormatter(formatter)
-        self.log.addHandler(handler)
-        self.log.setLevel(logging.WARNING)
+        self.log.debug('Logging established')
+
 
     def run(self):
         self.log.info( "Removing PPA %s" % (self.ppa) )
@@ -59,6 +56,7 @@ class RemoveThread(threading.Thread):
         except dbus.exceptions.DBusException:
             self.exc = sys.exc_info()
             self.log.warn(self.exc[1])
+            self.throw_error(f'Could not delete source {str(self.ppa)}')
         except:
             self.exc = sys.exc_info()
             self.log.warn(self.exc[1])
@@ -82,11 +80,8 @@ class AddThread(threading.Thread):
         self.sp = sp
 
         self.log = logging.getLogger("repoman.PPA.AddThread")
-        handler = logging.StreamHandler()
-        formatter = logging.Formatter('%(asctime)s %(name)-12s %(levelname)-8s %(message)s')
-        handler.setFormatter(formatter)
-        self.log.addHandler(handler)
-        self.log.setLevel(logging.WARNING)
+        self.log.debug('Logging established')
+
 
     def run(self):
         self.log.info("Adding PPA %s" % (self.url))
@@ -97,6 +92,7 @@ class AddThread(threading.Thread):
         except dbus.exceptions.DBusException:
             self.exc = sys.exc_info()
             self.log.warn(self.exc[1])
+            self.throw_error(f'Could not add source {self.url}')
         except:
             self.exc = sys.exc_info()
             self.log.warn(self.exc[1])
@@ -121,11 +117,8 @@ class ModifyThread(threading.Thread):
         self.sp = sp
 
         self.log = logging.getLogger("repoman.PPA.ModifyThread")
-        handler = logging.StreamHandler()
-        formatter = logging.Formatter('%(asctime)s %(name)-12s %(levelname)-8s %(message)s')
-        handler.setFormatter(formatter)
-        self.log.addHandler(handler)
-        self.log.setLevel(logging.WARNING)
+        self.log.debug('Logging established')
+
 
     def run(self):
         try:
@@ -134,6 +127,7 @@ class ModifyThread(threading.Thread):
         except dbus.exceptions.DBusException:
             self.exc = sys.exc_info()
             self.log.warn(self.exc[1])
+            self.throw_error(f'Could not modify source {str(self.old_source)}')
         except:
             self.exc = sys.exc_info()
             self.log.warn(self.exc[1])
@@ -158,12 +152,9 @@ class PPA:
     def __init__(self, parent):
         self.parent = parent
 
-        self.log = logging.getLogger("repoman.Updates")
-        handler = logging.StreamHandler()
-        formatter = logging.Formatter('%(asctime)s %(name)-12s %(levelname)-8s %(message)s')
-        handler.setFormatter(formatter)
-        self.log.addHandler(handler)
-        self.log.setLevel(logging.WARNING)
+        self.log = logging.getLogger("repoman.PPA")
+        self.log.debug('Logging established')
+
 
     # Returns a list of all 3rd-party software sources.
     def get_isv(self):
