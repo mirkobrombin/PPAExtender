@@ -16,7 +16,6 @@ Depends: ${python3:Depends}, ${misc:Depends},
          software-properties-common,
          gir1.2-gtk-3.0,
          python-requests,
-Recommends: python3-pyflatpak
 Description: Repoman
  Hey man, let's go do crimes. Yeah, let's install software and not pay.
 
