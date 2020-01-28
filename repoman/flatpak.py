@@ -156,6 +156,60 @@ class DeleteDialog(Gtk.Dialog):
 
         self.show_all()
 
+class InfoDialog(Gtk.Dialog):
+
+    def __init__(self, parent, remote, name, option):
+        self.remote = remote
+        self.option = option
+
+        settings = Gtk.Settings.get_default()
+        header = settings.props.gtk_dialogs_use_header
+        super().__init__(
+            _(f'{name}'),
+            parent, 
+            0,
+            (
+                Gtk.STOCK_CLOSE, Gtk.ResponseType.OK
+            ),
+            modal=1,
+            user_header_bar=header
+        )
+        self.log = logging.getLogger('repoman.FPInfoDialog')
+
+        content_area = self.get_content_area()
+        headerbar = self.get_header_bar()
+
+        content_grid = Gtk.Grid()
+        content_grid.set_margin_top(24)
+        content_grid.set_margin_bottom(24)
+        content_grid.set_margin_start(24)
+        content_grid.set_margin_end(24)
+        content_grid.set_column_spacing(12)
+        content_grid.set_row_spacing(6)
+        content_area.add(content_grid)
+
+        remote_title = flatpak.remotes.remotes[self.option][self.remote]['title']
+        description = flatpak.remotes.remotes[self.option][self.remote]['about']
+        url = flatpak.remotes.remotes[self.option][self.remote]['url']
+
+        title_label = Gtk.Label()
+        title_label.set_line_wrap(True)
+        title_label.set_markup(f'<b>{remote_title}</b>')
+        content_grid.attach(title_label, 0, 1, 1, 1)
+
+        name_label = Gtk.Label()
+        name_label.set_markup(f'<i><small>{self.remote}</small></i>')
+        content_grid.attach(name_label, 0, 2, 1, 1)
+
+        description_label = Gtk.Label()
+        description_label.set_line_wrap(True)
+        description_label.set_text(description)
+        content_grid.attach(description_label, 0, 3, 1, 1)
+
+        url_button = Gtk.Button.new_with_label(_('Homepage'))
+        url_button.set_uri(url)
+        content_grid.attach(url_button, 0, 4, 1, 1)
+
 class Flatpak(Gtk.Box):
 
     listiter_count = 0
