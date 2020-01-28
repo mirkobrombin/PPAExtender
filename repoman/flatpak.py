@@ -292,7 +292,7 @@ class Flatpak(Gtk.Box):
         add_button.set_tooltip_text(_("Add New Source"))
         add_button.connect("clicked", self.on_add_button_clicked)
 
-        # edit button
+        # delete button
         delete_button = Gtk.ToolButton()
         delete_button.set_icon_name("edit-delete-symbolic")
         Gtk.StyleContext.add_class(delete_button.get_style_context(),
