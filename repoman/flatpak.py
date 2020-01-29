@@ -211,7 +211,7 @@ class InfoDialog(Gtk.Dialog):
         content_grid.attach(description_label, 0, 3, 1, 1)
 
         self.show_all()
-        
+
         url_button = Gtk.LinkButton.new_with_label(_('Homepage'))
         url_button.set_uri(url)
         content_grid.attach(url_button, 0, 4, 1, 1)
@@ -294,7 +294,7 @@ class Flatpak(Gtk.Box):
 
         # info button
         info_button = Gtk.ToolButton()
-        info_button.set_icon_name('emblem-system-symbolic')
+        info_button.set_icon_name('help-info-symbolic')
         Gtk.StyleContext.add_class(add_button.get_style_context(),
                                    "image-button")
         info_button.set_tooltip_text(_('Remote Info'))
