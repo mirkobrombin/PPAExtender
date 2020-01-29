@@ -168,18 +168,18 @@ class InfoDialog(Gtk.Dialog):
             _(f'{name}'),
             parent, 
             0,
-            (
-                Gtk.STOCK_CLOSE, Gtk.ResponseType.OK
-            ),
             modal=1,
-            user_header_bar=header
+            use_header_bar=header
         )
         self.log = logging.getLogger('repoman.FPInfoDialog')
+
+        self.set_resizable(False)
 
         content_area = self.get_content_area()
         headerbar = self.get_header_bar()
 
         content_grid = Gtk.Grid()
+        content_grid.set_halign(Gtk.Align.CENTER)
         content_grid.set_margin_top(24)
         content_grid.set_margin_bottom(24)
         content_grid.set_margin_start(24)
@@ -202,13 +202,20 @@ class InfoDialog(Gtk.Dialog):
         content_grid.attach(name_label, 0, 2, 1, 1)
 
         description_label = Gtk.Label()
+        description_label.set_margin_top(18)
+        description_label.set_margin_bottom(12)
         description_label.set_line_wrap(True)
+        description_label.set_max_width_chars(36)
+        description_label.set_width_chars(36)
         description_label.set_text(description)
         content_grid.attach(description_label, 0, 3, 1, 1)
 
-        url_button = Gtk.Button.new_with_label(_('Homepage'))
+        self.show_all()
+        
+        url_button = Gtk.LinkButton.new_with_label(_('Homepage'))
         url_button.set_uri(url)
         content_grid.attach(url_button, 0, 4, 1, 1)
+
 
 class Flatpak(Gtk.Box):
 
@@ -260,13 +267,6 @@ class Flatpak(Gtk.Box):
         name_column = Gtk.TreeViewColumn(_('Source'), name_renderer, markup=1)
         # name_column.set_resizable(True)
         self.view.append_column(name_column)
-        
-        about_renderer = Gtk.CellRendererText()
-        about_renderer.props.wrap_mode = Pango.WrapMode.WORD_CHAR
-        about_renderer.props.wrap_width = 240
-        about_column = Gtk.TreeViewColumn(_('About'), about_renderer, markup=2)
-        about_column.set_expand(True)
-        self.view.append_column(about_column)
 
         url_renderer = Gtk.CellRendererText()
         url_column = Gtk.TreeViewColumn(_('URL'), url_renderer, markup=3)
@@ -292,6 +292,14 @@ class Flatpak(Gtk.Box):
         add_button.set_tooltip_text(_("Add New Source"))
         add_button.connect("clicked", self.on_add_button_clicked)
 
+        # info button
+        info_button = Gtk.ToolButton()
+        info_button.set_icon_name('emblem-system-symbolic')
+        Gtk.StyleContext.add_class(add_button.get_style_context(),
+                                   "image-button")
+        info_button.set_tooltip_text(_('Remote Info'))
+        info_button.connect('clicked', self.on_info_button_clicked)
+
         # delete button
         delete_button = Gtk.ToolButton()
         delete_button.set_icon_name("edit-delete-symbolic")
@@ -305,6 +313,7 @@ class Flatpak(Gtk.Box):
         Gtk.StyleContext.add_class(action_bar.get_style_context(),
                                    "inline-toolbar")
         action_bar.insert(delete_button, 0)
+        action_bar.insert(info_button, 0)
         action_bar.insert(add_button, 0)
         list_grid.attach(action_bar, 0, 1, 1, 1)
 
@@ -312,9 +321,7 @@ class Flatpak(Gtk.Box):
 
     def on_delete_button_clicked(self, widget):
         remote = self.get_selected_remote(0)
-        name = self.get_selected_remote(1)
-        name = name.replace('<b>', '')
-        name = name.replace('</b>', '')
+        name = self.strip_bold_from_name(self.get_selected_remote(1))
         self.log.info('Deleting remote %s', remote)
 
         dialog = DeleteDialog(self.parent.parent, name)
@@ -338,6 +345,20 @@ class Flatpak(Gtk.Box):
         
         dialog.destroy()
         self.generate_entries()
+    
+    def on_info_button_clicked(self, widget):
+        remote = self.get_selected_remote(0)
+        name = self.strip_bold_from_name(self.get_selected_remote(1))
+        option = self.get_selected_remote(4)
+
+        dialog = InfoDialog(self.parent.parent, remote, name, option)
+        response = dialog.run()
+        dialog.destroy()
+    
+    def strip_bold_from_name(self, name):
+        name = name.replace('<b>', '')
+        name = name.replace('</b>', '')
+        return name
     
     def get_selected_remote(self, index):
         selection = self.view.get_selection()
