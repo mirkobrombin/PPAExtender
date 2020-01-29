@@ -212,6 +212,9 @@ class InfoDialog(Gtk.Dialog):
 
         self.show_all()
 
+        # This is currently broken, so we don't show the button. 
+        # It will require support in pyflatpak for getting the repo
+        # homepage.
         url_button = Gtk.LinkButton.new_with_label(_('Homepage'))
         url_button.set_uri(url)
         content_grid.attach(url_button, 0, 4, 1, 1)
