@@ -156,6 +156,70 @@ class DeleteDialog(Gtk.Dialog):
 
         self.show_all()
 
+class InfoDialog(Gtk.Dialog):
+
+    def __init__(self, parent, remote, name, option):
+        self.remote = remote
+        self.option = option
+
+        settings = Gtk.Settings.get_default()
+        header = settings.props.gtk_dialogs_use_header
+        super().__init__(
+            _(f'{name}'),
+            parent, 
+            0,
+            modal=1,
+            use_header_bar=header
+        )
+        self.log = logging.getLogger('repoman.FPInfoDialog')
+
+        self.set_resizable(False)
+
+        content_area = self.get_content_area()
+        headerbar = self.get_header_bar()
+
+        content_grid = Gtk.Grid()
+        content_grid.set_halign(Gtk.Align.CENTER)
+        content_grid.set_margin_top(24)
+        content_grid.set_margin_bottom(24)
+        content_grid.set_margin_start(24)
+        content_grid.set_margin_end(24)
+        content_grid.set_column_spacing(12)
+        content_grid.set_row_spacing(6)
+        content_area.add(content_grid)
+
+        remote_title = flatpak.remotes.remotes[self.option][self.remote]['title']
+        description = flatpak.remotes.remotes[self.option][self.remote]['about']
+        url = flatpak.remotes.remotes[self.option][self.remote]['url']
+
+        title_label = Gtk.Label()
+        title_label.set_line_wrap(True)
+        title_label.set_markup(f'<b>{remote_title}</b>')
+        content_grid.attach(title_label, 0, 1, 1, 1)
+
+        name_label = Gtk.Label()
+        name_label.set_markup(f'<i><small>{self.remote}</small></i>')
+        content_grid.attach(name_label, 0, 2, 1, 1)
+
+        description_label = Gtk.Label()
+        description_label.set_margin_top(18)
+        description_label.set_margin_bottom(12)
+        description_label.set_line_wrap(True)
+        description_label.set_max_width_chars(36)
+        description_label.set_width_chars(36)
+        description_label.set_text(description)
+        content_grid.attach(description_label, 0, 3, 1, 1)
+
+        self.show_all()
+
+        # This is currently broken, so we don't show the button. 
+        # It will require support in pyflatpak for getting the repo
+        # homepage.
+        url_button = Gtk.LinkButton.new_with_label(_('Homepage'))
+        url_button.set_uri(url)
+        content_grid.attach(url_button, 0, 4, 1, 1)
+
+
 class Flatpak(Gtk.Box):
 
     listiter_count = 0
@@ -206,13 +270,6 @@ class Flatpak(Gtk.Box):
         name_column = Gtk.TreeViewColumn(_('Source'), name_renderer, markup=1)
         # name_column.set_resizable(True)
         self.view.append_column(name_column)
-        
-        about_renderer = Gtk.CellRendererText()
-        about_renderer.props.wrap_mode = Pango.WrapMode.WORD_CHAR
-        about_renderer.props.wrap_width = 240
-        about_column = Gtk.TreeViewColumn(_('About'), about_renderer, markup=2)
-        about_column.set_expand(True)
-        self.view.append_column(about_column)
 
         url_renderer = Gtk.CellRendererText()
         url_column = Gtk.TreeViewColumn(_('URL'), url_renderer, markup=3)
@@ -238,7 +295,15 @@ class Flatpak(Gtk.Box):
         add_button.set_tooltip_text(_("Add New Source"))
         add_button.connect("clicked", self.on_add_button_clicked)
 
-        # edit button
+        # info button
+        info_button = Gtk.ToolButton()
+        info_button.set_icon_name('help-info-symbolic')
+        Gtk.StyleContext.add_class(add_button.get_style_context(),
+                                   "image-button")
+        info_button.set_tooltip_text(_('Remote Info'))
+        info_button.connect('clicked', self.on_info_button_clicked)
+
+        # delete button
         delete_button = Gtk.ToolButton()
         delete_button.set_icon_name("edit-delete-symbolic")
         Gtk.StyleContext.add_class(delete_button.get_style_context(),
@@ -251,6 +316,7 @@ class Flatpak(Gtk.Box):
         Gtk.StyleContext.add_class(action_bar.get_style_context(),
                                    "inline-toolbar")
         action_bar.insert(delete_button, 0)
+        action_bar.insert(info_button, 0)
         action_bar.insert(add_button, 0)
         list_grid.attach(action_bar, 0, 1, 1, 1)
 
@@ -258,9 +324,7 @@ class Flatpak(Gtk.Box):
 
     def on_delete_button_clicked(self, widget):
         remote = self.get_selected_remote(0)
-        name = self.get_selected_remote(1)
-        name = name.replace('<b>', '')
-        name = name.replace('</b>', '')
+        name = self.strip_bold_from_name(self.get_selected_remote(1))
         self.log.info('Deleting remote %s', remote)
 
         dialog = DeleteDialog(self.parent.parent, name)
@@ -284,6 +348,20 @@ class Flatpak(Gtk.Box):
         
         dialog.destroy()
         self.generate_entries()
+    
+    def on_info_button_clicked(self, widget):
+        remote = self.get_selected_remote(0)
+        name = self.strip_bold_from_name(self.get_selected_remote(1))
+        option = self.get_selected_remote(4)
+
+        dialog = InfoDialog(self.parent.parent, remote, name, option)
+        response = dialog.run()
+        dialog.destroy()
+    
+    def strip_bold_from_name(self, name):
+        name = name.replace('<b>', '')
+        name = name.replace('</b>', '')
+        return name
     
     def get_selected_remote(self, index):
         selection = self.view.get_selection()
