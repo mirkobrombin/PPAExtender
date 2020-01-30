@@ -114,9 +114,9 @@ class List(Gtk.Box):
         action_bar.set_icon_size(Gtk.IconSize.SMALL_TOOLBAR)
         Gtk.StyleContext.add_class(action_bar.get_style_context(),
                                    "inline-toolbar")
+        action_bar.insert(delete_button, 0)
         action_bar.insert(edit_button, 0)
         action_bar.insert(add_button, 0)
-        action_bar.insert(delete_button, 0)
         list_grid.attach(action_bar, 0, 1, 1, 1)
 
         self.generate_entries(self.ppa.get_isv())
