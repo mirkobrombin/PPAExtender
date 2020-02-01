@@ -217,10 +217,7 @@ class InfoDialog(Gtk.Dialog):
         description_label.set_width_chars(36)
         description_label.set_text(description)
         content_grid.attach(description_label, 0, 3, 1, 1)
-
-        # This is currently broken, so we don't show the button. 
-        # It will require support in pyflatpak for getting the repo
-        # homepage.
+        
         url_button = Gtk.LinkButton.new_with_label(_('Homepage'))
         url_button.set_uri(url)
         content_grid.attach(url_button, 0, 4, 1, 1)
