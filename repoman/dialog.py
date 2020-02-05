@@ -40,14 +40,8 @@ class ErrorDialog(Gtk.Dialog):
         self.set_deletable(False)
 
         self.log = logging.getLogger("repoman.ErrorDialog")
-        handler = logging.StreamHandler()
-        formatter = logging.Formatter('%(asctime)s %(name)-12s %(levelname)-8s %(message)s')
-        handler.setFormatter(formatter)
-        self.log.addHandler(handler)
         
         self.add_button(Gtk.STOCK_CLOSE, Gtk.ResponseType.OK)
-        
-
 
         content_area = self.get_content_area()
 
@@ -89,11 +83,6 @@ class DeleteDialog(Gtk.Dialog):
                              modal=1, use_header_bar=header)
 
         self.log = logging.getLogger("repoman.DeleteDialog")
-        handler = logging.StreamHandler()
-        formatter = logging.Formatter('%(asctime)s %(name)-12s %(levelname)-8s %(message)s')
-        handler.setFormatter(formatter)
-        self.log.addHandler(handler)
-
 
         content_area = self.get_content_area()
 
@@ -141,11 +130,6 @@ class AddDialog(Gtk.Dialog):
                              modal=1, use_header_bar=header)
 
         self.log = logging.getLogger("repoman.AddDialog")
-        handler = logging.StreamHandler()
-        formatter = logging.Formatter('%(asctime)s %(name)-12s %(levelname)-8s %(message)s')
-        handler.setFormatter(formatter)
-        self.log.addHandler(handler)
-
 
         self.ppa = PPA(parent)
 
@@ -219,11 +203,6 @@ class EditDialog(Gtk.Dialog):
                              modal=1, use_header_bar=header)
 
         self.log = logging.getLogger("repoman.EditDialog")
-        handler = logging.StreamHandler()
-        formatter = logging.Formatter('%(asctime)s %(name)-12s %(levelname)-8s %(message)s')
-        handler.setFormatter(formatter)
-        self.log.addHandler(handler)
-
 
         self.ppa = PPA(self)
         self.parent = parent
@@ -305,7 +284,6 @@ class EditDialog(Gtk.Dialog):
         action_area.add(separator2)
         separator2.show()
         action_area.props.layout_style = Gtk.ButtonBoxStyle.START
-
 
         self.show_all()
 
