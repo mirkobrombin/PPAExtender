@@ -193,12 +193,7 @@ class InfoDialog(Gtk.Dialog):
 
         remote_title = self.remote_data['title']
         description = self.remote_data['about']
-        # FIXME: Pyflatpak has a bug, we want to work around this if present
-        # See https://github.com/pop-os/pyflatpak/issues/4
-        try:
-            url = self.remote_data['homepage']
-        except KeyError:
-            url = self.remote_data['hompage']
+        url = self.remote_data['homepage']
 
         title_label = Gtk.Label()
         title_label.set_line_wrap(True)
