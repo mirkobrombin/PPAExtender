@@ -82,9 +82,8 @@ class List(Gtk.Box):
         self.view.append_column(column)
         self.view.set_hexpand(True)
         self.view.set_vexpand(True)
-        tree_selection = self.view.get_selection()
-        tree_selection.connect('changed', self.on_row_change)
-        self.view.connect('cursor-changed', self.on_view_cursor_change)
+        self.tree_selection = self.view.get_selection()
+        self.tree_selection.connect('changed', self.on_row_selected)
         list_window.add(self.view)
 
         # add button
@@ -243,21 +242,15 @@ class List(Gtk.Box):
                                                            [source_pretty, str(source)])
         self.add_button.set_sensitive(True)
 
-    def on_row_change(self, widget):
+    def on_row_selected(self, widget):
         (model, pathlist) = widget.get_selected_rows()
-        if pathlist:
-            for path in pathlist :
-                tree_iter = model.get_iter(path)
-                value = model.get_value(tree_iter,1)
-                self.ppa_name = value
-    
-    def on_view_cursor_change(self, widget, data=None):
-        model, pathlist = self.view.get_selection().get_selected_rows()
-        self.log.debug('View change; get_selection=%s', pathlist)
-
         if pathlist:
             self.edit_button.set_sensitive(True)
             self.delete_button.set_sensitive(True)
+            for path in pathlist :
+                tree_iter = model.get_iter(path)
+                value = model.get_value(tree_iter,1)
+                self.remote_name = value
         else:
             self.edit_button.set_sensitive(False)
             self.delete_button.set_sensitive(False)

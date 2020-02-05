@@ -263,13 +263,11 @@ class Flatpak(Gtk.Box):
 
         self.remote_liststore = Gtk.ListStore(str, str, str, str, str)
         self.view = Gtk.TreeView(self.remote_liststore)
-        self.view.connect('cursor-changed', self.on_view_cursor_change)
         
         name_renderer = Gtk.CellRendererText()
         name_renderer.props.wrap_mode = Pango.WrapMode.WORD_CHAR
         name_renderer.props.wrap_width = 120
         name_column = Gtk.TreeViewColumn(_('Source'), name_renderer, markup=1)
-        # name_column.set_resizable(True)
         self.view.append_column(name_column)
 
         url_renderer = Gtk.CellRendererText()
@@ -284,8 +282,8 @@ class Flatpak(Gtk.Box):
 
         self.view.set_hexpand(True)
         self.view.set_vexpand(True)
-        tree_selection = self.view.get_selection()
-        tree_selection.connect('changed', self.on_row_change)
+        self.tree_selection = self.view.get_selection()
+        self.tree_selection.connect('changed', self.on_row_selected)
         list_window.add(self.view)
 
         # add button
@@ -449,21 +447,15 @@ class Flatpak(Gtk.Box):
             )
         self.add_button.set_sensitive(True)
 
-    def on_row_change(self, widget):
+    def on_row_selected(self, widget):
         (model, pathlist) = widget.get_selected_rows()
         if pathlist:
+            self.info_button.set_sensitive(True)
+            self.delete_button.set_sensitive(True)
             for path in pathlist :
                 tree_iter = model.get_iter(path)
                 value = model.get_value(tree_iter,1)
                 self.remote_name = value
-    
-    def on_view_cursor_change(self, widget, data=None):
-        model, pathlist = self.view.get_selection().get_selected_rows()
-        self.log.debug('View change; get_selection=%s', pathlist)
-
-        if pathlist:
-            self.info_button.set_sensitive(True)
-            self.delete_button.set_sensitive(True)
         else:
             self.info_button.set_sensitive(False)
             self.delete_button.set_sensitive(False)
