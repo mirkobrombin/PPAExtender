@@ -68,9 +68,9 @@ class RemoveThread(threading.Thread):
 
         self.sp.reload_sourceslist()
         isv_list = self.sp.get_isv_sources()
-        GObject.idle_add(self.parent.parent.stack.list_all.generate_entries, isv_list)
-        GObject.idle_add(self.parent.parent.stack.list_all.view.set_sensitive, True)
-        GObject.idle_add(self.parent.parent.hbar.spinner.stop)
+        GObject.idle_add(self.parent.parent.parent.stack.list_all.generate_entries, isv_list)
+        GObject.idle_add(self.parent.parent.parent.stack.list_all.view.set_sensitive, True)
+        GObject.idle_add(self.parent.parent.parent.hbar.spinner.stop)
 
     def throw_error(self, message):
         GObject.idle_add(self.parent.parent.stack.list_all.throw_error_dialog,
@@ -269,8 +269,8 @@ class PPA:
 
     # Starts a new thread to remove a repository
     def remove(self, ppa):
-        self.parent.parent.hbar.spinner.start()
-        self.parent.parent.stack.list_all.view.set_sensitive(False)
+        self.parent.parent.parent.hbar.spinner.start()
+        self.parent.parent.parent.stack.list_all.view.set_sensitive(False)
         RemoveThread(self.parent, self.sources_path, ppa, self.sp).start()
 
     # Validate if a line appears to be a valid apt line or ppa.
