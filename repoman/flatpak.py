@@ -161,6 +161,7 @@ class InfoDialog(Gtk.Dialog):
     def __init__(self, parent, remote, name, option):
         self.remote = remote
         self.option = option
+        self.remote_data = flatpak.remotes.remotes[option][remote]
 
         settings = Gtk.Settings.get_default()
         header = settings.props.gtk_dialogs_use_header
@@ -172,6 +173,8 @@ class InfoDialog(Gtk.Dialog):
             use_header_bar=header
         )
         self.log = logging.getLogger('repoman.FPInfoDialog')
+
+        self.log.debug('Data for remote %s: %s', remote, self.remote_data)
 
         self.set_resizable(False)
 
@@ -188,9 +191,9 @@ class InfoDialog(Gtk.Dialog):
         content_grid.set_row_spacing(6)
         content_area.add(content_grid)
 
-        remote_title = flatpak.remotes.remotes[self.option][self.remote]['title']
-        description = flatpak.remotes.remotes[self.option][self.remote]['about']
-        url = flatpak.remotes.remotes[self.option][self.remote]['url']
+        remote_title = self.remote_data['title']
+        description = self.remote_data['about']
+        url = self.remote_data['homepage']
 
         title_label = Gtk.Label()
         title_label.set_line_wrap(True)
@@ -209,16 +212,12 @@ class InfoDialog(Gtk.Dialog):
         description_label.set_width_chars(36)
         description_label.set_text(description)
         content_grid.attach(description_label, 0, 3, 1, 1)
-
-        self.show_all()
-
-        # This is currently broken, so we don't show the button. 
-        # It will require support in pyflatpak for getting the repo
-        # homepage.
+        
         url_button = Gtk.LinkButton.new_with_label(_('Homepage'))
         url_button.set_uri(url)
         content_grid.attach(url_button, 0, 4, 1, 1)
 
+        self.show_all()
 
 class Flatpak(Gtk.Box):
 
