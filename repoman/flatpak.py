@@ -29,7 +29,7 @@ import logging
 gi.require_version('Gtk', '3.0')
 gi.require_version('Pango', '1.0')
 gi.require_version('Flatpak', '1.0')
-from gi.repository import Gtk, GObject, Gio, Pango
+from gi.repository import Gtk, GObject, GLib, Gio, Pango
 from gi.repository import Flatpak as flatpak
 
 from .dialog import ErrorDialog
@@ -103,8 +103,13 @@ class AddDialog(Gtk.Dialog):
         self.show_all()
 
     def on_url_entry_changed(self, entry):
-        entry_text = entry.get_text()
-        entry_valid = flatpak.validate(entry_text)
+        entry_text = entry.get_text().strip()
+        entry_list = entry_text.split('.')
+        if entry_list[-1] == 'flatpakrepo':
+            entry_valid = True
+        else:
+            entry_valid = False
+
         try:
             self.add_button.set_sensitive(entry_valid)
         except TypeError:
@@ -421,27 +426,41 @@ class Flatpak(Gtk.Box):
             self.delete_button.set_sensitive(False)
             url = dialog.url_entry.get_text().strip()
             name = splitext(url.split('/')[-1])[0]
-            self.log.info('Adding flatpak source %s at %s', name, url)
-            try:
-                flatpak.remotes.add_remote(name, url)
-            except AddRemoteError:
-                err = exc_info()
-                self.log.exception(err)
-                edialog = ErrorDialog(
-                    dialog,
-                    'Couldn\'t add remote',
-                    'dialog-error',
-                    'Couldn\'t add remote',
-                    err[1]
-                )
-                edialog.run()
-                edialog.destroy()
-            
+            self.log.info('Adding flatpakrepo %s at %s', name, url)
+            self.add_repo_name = name            
             dialog.destroy()
+            self.get_repo_file(url)
         else:
             dialog.destroy()
         
         self.generate_entries()
+
+    def get_repo_file(self, url):
+        """Downloads a flatpakrepo file to add to the system.
+
+        Arguments:
+            url (str): The URL of the flatpakrepo file to add.
+        """
+        self.log.debug('Fetching .flatpakrepo file: %s', url)
+        _repofile = Gio.File.new_for_uri(url)
+        _repofile.load_contents_async(None, self.on_file_ready, None)
+    
+    def on_file_ready(self, source_object, result, user_data):
+        try:
+            a, content, b = source_object.load_contents_finish(result)
+
+        except GLib.GError as e:
+            self.log.debug('Could not fetch flatpakrepo, %s', e.message)
+            content = None
+
+        else:
+            _repofile = GLib.Bytes.new(content)
+            new_remote = flatpak.Remote.new_from_file(self.add_repo_name, _repofile)
+            fp_user_inst.add_remote(new_remote, True, None)
+
+        finally:
+            self.add_button.set_sensitive(True)
+            self.generate_entries()
 
     def generate_entries(self):
         self.remote_liststore.clear()
