@@ -19,7 +19,8 @@
     along with Repoman.  If not, see <http://www.gnu.org/licenses/>.
 '''
 
-from os.path import splitext
+from os.path import splitext, join
+from pathlib import Path
 from subprocess import CalledProcessError
 from sys import exc_info
 
@@ -27,10 +28,9 @@ import gi
 import logging
 gi.require_version('Gtk', '3.0')
 gi.require_version('Pango', '1.0')
-from gi.repository import Gtk, GObject, Pango
-
-import pyflatpak as flatpak
-from pyflatpak.remotes import AddRemoteError, DeleteRemoteError
+gi.require_version('Flatpak', '1.0')
+from gi.repository import Gtk, GObject, Gio, Pango
+from gi.repository import Flatpak as flatpak
 
 from .dialog import ErrorDialog
 
@@ -38,6 +38,16 @@ import gettext
 gettext.bindtextdomain('repoman', '/usr/share/repoman/po')
 gettext.textdomain("repoman")
 _ = gettext.gettext
+
+# Get User Installation
+fp_user_path = join(Path.home(), '.local', 'share', 'flatpak')
+fp_user_file = Gio.File.new_for_path(fp_user_path)
+fp_user_inst = flatpak.Installation.new_for_path(fp_user_file, True, None)
+
+# Get System Installation
+fp_sys_path = join('var', 'lib', 'flatpak')
+fp_sys_file = Gio.File.new_for_path(fp_sys_path)
+fp_sys_inst = flatpak.Installation.new_for_path(fp_sys_file, False, None)
 
 class AddDialog(Gtk.Dialog):
 
@@ -158,23 +168,36 @@ class DeleteDialog(Gtk.Dialog):
 
 class InfoDialog(Gtk.Dialog):
 
-    def __init__(self, parent, remote, name, option):
-        self.remote = remote
-        self.option = option
-        self.remote_data = flatpak.remotes.remotes[option][remote]
+    def __init__(self, parent, name, option):
+        if option.lower() == 'user':
+            self.installation = fp_user_inst
+        else:
+            self.installation = fp_sys_inst
+        
+        self.remote = self.installation.get_remote_by_name(name, None)
+
+        if self.remote.get_title():
+            title = self.remote.get_title()
+        else:
+            title = name
+        name = self.remote.get_name()
+        description = name
+        if self.remote.get_comment():
+            description = self.remote.get_comment()
+        if self.remote.get_description():
+            description = self.remote.get_description()
+        url = self.remote.get_homepage()
 
         settings = Gtk.Settings.get_default()
         header = settings.props.gtk_dialogs_use_header
         super().__init__(
-            _(f'{name}'),
+            _(f'{title}'),
             parent, 
             0,
             modal=1,
             use_header_bar=header
         )
-        self.log = logging.getLogger('repoman.FPInfoDialog')
-
-        self.log.debug('Data for remote %s: %s', remote, self.remote_data)
+        self.log = logging.getLogger(f'repoman.info-{name}')
 
         self.set_resizable(False)
 
@@ -191,17 +214,13 @@ class InfoDialog(Gtk.Dialog):
         content_grid.set_row_spacing(6)
         content_area.add(content_grid)
 
-        remote_title = self.remote_data['title']
-        description = self.remote_data['about']
-        url = self.remote_data['homepage']
-
         title_label = Gtk.Label()
         title_label.set_line_wrap(True)
-        title_label.set_markup(f'<b>{remote_title}</b>')
+        title_label.set_markup(f'<b>{title}</b>')
         content_grid.attach(title_label, 0, 1, 1, 1)
 
         name_label = Gtk.Label()
-        name_label.set_markup(f'<i><small>{self.remote}</small></i>')
+        name_label.set_markup(f'<i><small>{name}</small></i>')
         content_grid.attach(name_label, 0, 2, 1, 1)
 
         description_label = Gtk.Label()
@@ -213,9 +232,10 @@ class InfoDialog(Gtk.Dialog):
         description_label.set_text(description)
         content_grid.attach(description_label, 0, 3, 1, 1)
         
-        url_button = Gtk.LinkButton.new_with_label(_('Homepage'))
-        url_button.set_uri(url)
-        content_grid.attach(url_button, 0, 4, 1, 1)
+        if url:
+            url_button = Gtk.LinkButton.new_with_label(_('Homepage'))
+            url_button.set_uri(url)
+            content_grid.attach(url_button, 0, 4, 1, 1)
 
         self.show_all()
 
@@ -354,11 +374,10 @@ class Flatpak(Gtk.Box):
         self.generate_entries()
     
     def on_info_button_clicked(self, widget):
-        remote = self.get_selected_remote(0)
-        name = self.strip_bold_from_name(self.get_selected_remote(1))
+        name = self.get_selected_remote(0)
         option = self.get_selected_remote(4)
 
-        dialog = InfoDialog(self.parent.parent, remote, name, option)
+        dialog = InfoDialog(self.parent.parent, name, option)
         response = dialog.run()
         dialog.destroy()
     
@@ -427,23 +446,34 @@ class Flatpak(Gtk.Box):
     def generate_entries(self):
         self.remote_liststore.clear()
 
-        # remote_liststore = []
-        remotes = {}
-        for option in flatpak.remotes.remotes:
-            for remote in flatpak.remotes.remotes[option]:
-                remotes[remote] = flatpak.remotes.remotes[option][remote]
+        for remote in fp_user_inst.list_remotes():
+            if remote.get_title():
+                title = remote.get_title()
+            else:
+                title = remote.get_name()
+
+            self.remote_liststore.append([
+                remote.get_name(),
+                f'<b>{title}</b>',
+                remote.get_comment(),
+                remote.get_url(),
+                'User'
+            ])
         
-        for remote in remotes:
-            # remote_liststore.append(
-            self.remote_liststore.append(
-                [
-                    remotes[remote]["name"],
-                    f'<b>{remotes[remote]["title"]}</b>',
-                    remotes[remote]["about"],
-                    remotes[remote]["url"],
-                    remotes[remote]["option"]
-                ]
-            )
+        for remote in fp_sys_inst.list_remotes():
+            if remote.get_title():
+                title = remote.get_title()
+            else:
+                title = remote.get_name()
+
+            self.remote_liststore.append([
+                remote.get_name(),
+                f'<b>{title}</b>',
+                remote.get_comment(),
+                remote.get_url(),
+                'System'
+            ])
+        
         self.add_button.set_sensitive(True)
 
     def on_row_selected(self, widget):
