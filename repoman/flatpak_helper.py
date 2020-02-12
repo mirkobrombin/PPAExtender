@@ -113,6 +113,11 @@ def get_installed_refs_for_option(option):
     installation = get_installation_for_type(option)
     return installation.list_installed_refs()
 
+def strip_bold_from_name(name):
+    name = name.replace('<b>', '')
+    name = name.replace('</b>', '')
+    return name
+
 def validate_flatpakrepo(url):
     """ Validate that url looks like a valid flatpakrepo file.
 

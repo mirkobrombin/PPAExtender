@@ -84,6 +84,7 @@ class Flatpak(Gtk.Box):
         self.view = Gtk.TreeView(self.remote_liststore)
         
         name_renderer = Gtk.CellRendererText()
+        name_renderer.props.weight = 700
         name_renderer.props.wrap_mode = Pango.WrapMode.WORD_CHAR
         name_renderer.props.wrap_width = 120
         name_column = Gtk.TreeViewColumn(_('Source'), name_renderer, markup=1)
@@ -150,23 +151,21 @@ class Flatpak(Gtk.Box):
         self.view.set_sensitive(False)
 
     def on_delete_button_clicked(self, widget):
-        name = self.get_selected_remote(0)
-        title = self.strip_bold_from_name(self.get_selected_remote(1))
-        option = self.get_selected_remote(4)
-        installation = helper.get_installation_for_type(option)
-        self.log.info('Deleting remote %s', name)
+        remote = self.get_selected_remote()
+        installation = helper.get_installation_for_type(remote[4])
+        self.log.info('Deleting remote %s', remote[0])
         removed_refs = []
         for ref in installation.list_installed_refs():
-            if ref.get_origin() == name:
+            if ref.get_origin() == remote[0]:
                 self.log.warning(
                     'Removing %s will remove ref %s (%s)',
-                    name,
+                    remote[0],
                     ref.get_name(),
                     ref.get_appdata_name()
                 )
                 removed_refs.append(ref)
 
-        dialog = DeleteDialog(self.parent.parent, title, 'flatpak')
+        dialog = DeleteDialog(self.parent.parent, remote[1], 'flatpak')
         response = dialog.run()
         
         if response == Gtk.ResponseType.OK:
@@ -174,28 +173,24 @@ class Flatpak(Gtk.Box):
             self.parent.parent.hbar.spinner.start()
             self.set_items_insensitive()
             
-            helper.delete_remote(self, name, option)
+            helper.delete_remote(self, remote[0], remote[4])
         else:
             dialog.destroy()
     
     def on_info_button_clicked(self, widget):
-        name = self.get_selected_remote(0)
-        option = self.get_selected_remote(4)
+        remote = self.get_selected_remote()
 
-        dialog = InfoDialog(self.parent.parent, name, option)
+        dialog = InfoDialog(self.parent.parent, remote[0], remote[4])
         dialog.run()
         dialog.destroy()
     
-    def strip_bold_from_name(self, name):
-        name = name.replace('<b>', '')
-        name = name.replace('</b>', '')
-        return name
-    
-    def get_selected_remote(self, index):
+    def get_selected_remote(self):
         selection = self.view.get_selection()
         (model, pathlist) = selection.get_selected_rows()
         tree_iter = model.get_iter(pathlist[0])
-        value = model.get_value(tree_iter, index)
+        value = tuple(
+            model.get_value(tree_iter, index) for index in range(0, 5)
+        )
         self.log.debug('Current selection: %s', value)
         return value
 
@@ -213,8 +208,6 @@ class Flatpak(Gtk.Box):
             helper.add_remote(self, name, url, 'User')
         else:
             dialog.destroy()
-        
-        self.generate_entries()
 
     def generate_entries(self):
         self.remote_liststore.clear()
@@ -230,7 +223,7 @@ class Flatpak(Gtk.Box):
 
                 self.remote_liststore.append([
                     remote.get_name(),
-                    f'<b>{title}</b>',
+                    title,
                     remote.get_comment(),
                     remote.get_url(),
                     option
@@ -253,11 +246,8 @@ class Flatpak(Gtk.Box):
 
     def throw_error_dialog(self, message, msg_type):
         dialog = ErrorDialog(
-            self.parent,
-            'Couldn\'t add source',
-            'dialog-error',
-            'Couldn\'t add source',
-            message
+            self.parent, 'Couldn\'t add source', 'dialog-error',
+            'Couldn\'t add source', message
         )
         dialog.run()
         dialog.destroy()

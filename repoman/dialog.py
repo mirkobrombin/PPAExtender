@@ -149,8 +149,9 @@ class DeleteDialog(Gtk.Dialog):
         settings = Gtk.Settings.get_default()
 
         header = settings.props.gtk_dialogs_use_header
+        d_title = flatpak_helper.strip_bold_from_name(title)
 
-        Gtk.Dialog.__init__(self, _(f'Remove {title}'), parent, 0,
+        Gtk.Dialog.__init__(self, _(f'Remove {d_title}'), parent, 0,
                             (Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL,
                              Gtk.STOCK_REMOVE, Gtk.ResponseType.OK),
                              modal=1, use_header_bar=header)
@@ -393,4 +394,3 @@ class InfoDialog(Gtk.Dialog):
             content_grid.attach(url_button, 0, 4, 1, 1)
 
         self.show_all()
-        
