@@ -1,3 +1,9 @@
+repoman (1.2.1) eoan; urgency=medium
+
+  * Refactor for easier development and better performance
+
+ -- Ian Santopietro <ian@system76.com>  Wed, 12 Feb 2020 14:33:46 -0700
+
 repoman (1.2.0) eoan; urgency=medium
 
   * Switching to PolicyKit to handle permissions on-demand, avoiding
