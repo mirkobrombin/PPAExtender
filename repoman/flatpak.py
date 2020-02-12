@@ -305,7 +305,9 @@ class Flatpak(Gtk.Box):
         list_grid = Gtk.Grid()
         self.content_grid.attach(list_grid, 0, 2, 1, 1)
         list_window = Gtk.ScrolledWindow()
-        Gtk.StyleContext.add_class(list_window.get_style_context(), "list_window")
+        Gtk.StyleContext.add_class(
+            list_window.get_style_context(), "list_window"
+        )
         list_grid.attach(list_window, 0, 0, 1, 1)
 
         self.remote_liststore = Gtk.ListStore(str, str, str, str, str)
@@ -413,7 +415,9 @@ class Flatpak(Gtk.Box):
             self.delete_button.set_sensitive(False)
             self.view.set_sensitive(False)
             
-            remove_thread = RemoveThread(self, remote, removed_refs, installation)
+            remove_thread = RemoveThread(
+                self, remote, removed_refs, installation
+            )
             remove_thread.start()
         else:
             dialog.destroy()
