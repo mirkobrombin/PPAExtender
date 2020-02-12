@@ -1,9 +1,13 @@
-repoman (1.1.0) UNRELEASED; urgency=medium
+repoman (1.2.0) eoan; urgency=medium
 
+  [ Ian Santopietro ]
   * Switching to PolicyKit to handle permissions on-demand, avoiding
     the need to run the GUI as root.
 
- -- Ian Santopietro <ian@akira.local>  Tue, 19 Nov 2019 14:40:02 -0700
+  [ Ian Santopiero ]
+  * Adding Flatpak Support for managing flatpak remotes.
+
+ -- Ian Santopiero <ian@system76.com>  Wed, 12 Feb 2020 10:02:40 -0700
 
 repoman (1.0.2) bionic; urgency=medium
 
