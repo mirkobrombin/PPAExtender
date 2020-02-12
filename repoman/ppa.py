@@ -276,7 +276,10 @@ class PPA:
     # Validate if a line appears to be a valid apt line or ppa.
     def validate(self, line):
 
-        if line.startswith("deb"):
+        if line.endswith('.flatpakrepo'):
+            return False
+
+        elif line.startswith("deb"):
             if "http" in line:
                 return True
 

@@ -19,6 +19,9 @@
     along with Repoman.  If not, see <http://www.gnu.org/licenses/>.
 '''
 
+# Initial Imports
+
+# Trimmed imports
 import gi
 import logging
 from os.path import splitext
@@ -26,205 +29,13 @@ gi.require_version('Gtk', '3.0')
 gi.require_version('Pango', '1.0')
 from gi.repository import Gtk, GObject, GLib, Gio, Pango
 
-from .dialog import ErrorDialog
-import flatpak_helper as helper
+from .dialog import ErrorDialog, AddDialog, DeleteDialog, InfoDialog
+from . import flatpak_helper as helper
 
 import gettext
 gettext.bindtextdomain('repoman', '/usr/share/repoman/po')
 gettext.textdomain("repoman")
 _ = gettext.gettext
-
-class AddDialog(Gtk.Dialog):
-
-    remote_name = False
-
-    def __init__(self, parent):
-
-        settings = Gtk.Settings.get_default()
-        header = settings.props.gtk_dialogs_use_header
-
-        Gtk.Dialog.__init__(self, _("Add Source"), parent, 0,
-                            (Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL,
-                             Gtk.STOCK_ADD, Gtk.ResponseType.OK),
-                             modal=1, use_header_bar=header)
-
-        self.log = logging.getLogger("repoman.FPAddDialog")
-
-        content_area = self.get_content_area()
-
-        content_grid = Gtk.Grid()
-        content_grid.set_margin_top(12)
-        content_grid.set_margin_left(12)
-        content_grid.set_margin_right(12)
-        content_grid.set_margin_bottom(12)
-        content_grid.set_row_spacing(6)
-        content_grid.set_column_spacing(6)
-        content_grid.set_halign(Gtk.Align.CENTER)
-        content_grid.set_hexpand(True)
-        content_area.add(content_grid)
-
-        add_title = Gtk.Label(_("Enter Source Details"))
-        Gtk.StyleContext.add_class(add_title.get_style_context(), "h2")
-        content_grid.attach(add_title, 0, 0, 2, 1)
-
-        self.url_entry = Gtk.Entry()
-        self.url_entry.set_placeholder_text(_("URL"))
-        self.url_entry.set_activates_default(True)
-        self.url_entry.connect(_("changed"), self.on_url_entry_changed)
-        self.url_entry.set_width_chars(50)
-        self.url_entry.set_margin_top(12)
-        content_grid.attach(self.url_entry, 0, 1, 1, 1)
-
-        self.add_button = self.get_widget_for_response(Gtk.ResponseType.OK)
-        self.add_button.set_sensitive(False)
-
-        self.cancel_button = self.get_widget_for_response(Gtk.ResponseType.CANCEL)
-        self.cancel_button.grab_focus()
-
-        Gtk.StyleContext.add_class(self.add_button.get_style_context(),
-                                   "suggested-action")
-        self.add_button.grab_default()
-
-        self.show_all()
-
-    def on_url_entry_changed(self, entry):
-        entry_text = entry.get_text().strip()
-        entry_list = entry_text.split('.')
-        if entry_list[-1] == 'flatpakrepo':
-            entry_valid = True
-        else:
-            entry_valid = False
-
-        try:
-            self.add_button.set_sensitive(entry_valid)
-        except TypeError:
-            pass
-
-    def on_insert_emoji(self, entry, data=None):
-        """ We hook into this and return True. This should prevent the entry
-        from showing the emoji picker.
-        """
-        self.log.debug('Not Showing Emoji')
-        return True
-
-class DeleteDialog(Gtk.Dialog):
-
-    ppa_name = False
-
-    def __init__(self, parent, remote_name):
-
-        settings = Gtk.Settings.get_default()
-
-        header = settings.props.gtk_dialogs_use_header
-
-        Gtk.Dialog.__init__(self, _(f"Remove {remote_name}"), parent, 0,
-                            (Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL,
-                             Gtk.STOCK_REMOVE, Gtk.ResponseType.OK),
-                             modal=1, use_header_bar=header)
-
-        self.log = logging.getLogger("repoman.FPDeleteDialog")
-
-
-        content_area = self.get_content_area()
-
-        content_grid = Gtk.Grid()
-        content_grid.set_margin_top(24)
-        content_grid.set_margin_left(24)
-        content_grid.set_margin_right(24)
-        content_grid.set_margin_bottom(24)
-        content_grid.set_column_spacing(12)
-        content_grid.set_row_spacing(6)
-        content_area.add(content_grid)
-
-        delete_image = Gtk.Image.new_from_icon_name("dialog-warning-symbolic",
-                                                Gtk.IconSize.DIALOG)
-        delete_image.props.valign = Gtk.Align.START
-        content_grid.attach(delete_image, 0, 0, 1, 2)
-
-        delete_label = Gtk.Label(_("Are you sure you want to remove this source?"))
-        Gtk.StyleContext.add_class(delete_label.get_style_context(), "h2")
-        content_grid.attach(delete_label, 1, 0, 1, 1)
-
-        delete_explain = Gtk.Label(_("If you remove this source, you will need to add it again to continue using it. Any software you've installed from this source will be removed."))
-        delete_explain.props.wrap = True
-        delete_explain.set_max_width_chars(50)
-        delete_explain.set_xalign(0)
-        content_grid.attach(delete_explain, 1, 1, 1, 1)
-
-        Gtk.StyleContext.add_class(self.get_widget_for_response(Gtk.ResponseType.OK).get_style_context(),
-                                   "destructive-action")
-
-        self.show_all()
-
-class InfoDialog(Gtk.Dialog):
-
-    def __init__(self, parent, name, option):
-        self.installation = helper.get_installation_for_type(option)
-        
-        self.remote = self.installation.get_remote_by_name(name, None)
-
-        if self.remote.get_title():
-            title = self.remote.get_title()
-        else:
-            title = name
-        name = self.remote.get_name()
-        description = name
-        if self.remote.get_comment():
-            description = self.remote.get_comment()
-        if self.remote.get_description():
-            description = self.remote.get_description()
-        url = self.remote.get_homepage()
-
-        settings = Gtk.Settings.get_default()
-        header = settings.props.gtk_dialogs_use_header
-        super().__init__(
-            _(f'{title}'),
-            parent, 
-            0,
-            modal=1,
-            use_header_bar=header
-        )
-        self.log = logging.getLogger(f'repoman.info-{name}')
-
-        self.set_resizable(False)
-
-        content_area = self.get_content_area()
-        headerbar = self.get_header_bar()
-
-        content_grid = Gtk.Grid()
-        content_grid.set_halign(Gtk.Align.CENTER)
-        content_grid.set_margin_top(24)
-        content_grid.set_margin_bottom(24)
-        content_grid.set_margin_start(24)
-        content_grid.set_margin_end(24)
-        content_grid.set_column_spacing(12)
-        content_grid.set_row_spacing(6)
-        content_area.add(content_grid)
-
-        title_label = Gtk.Label()
-        title_label.set_line_wrap(True)
-        title_label.set_markup(f'<b>{title}</b>')
-        content_grid.attach(title_label, 0, 1, 1, 1)
-
-        name_label = Gtk.Label()
-        name_label.set_markup(f'<i><small>{name}</small></i>')
-        content_grid.attach(name_label, 0, 2, 1, 1)
-
-        description_label = Gtk.Label()
-        description_label.set_margin_top(18)
-        description_label.set_margin_bottom(12)
-        description_label.set_line_wrap(True)
-        description_label.set_max_width_chars(36)
-        description_label.set_width_chars(36)
-        description_label.set_text(description)
-        content_grid.attach(description_label, 0, 3, 1, 1)
-        
-        if url:
-            url_button = Gtk.LinkButton.new_with_label(_('Homepage'))
-            url_button.set_uri(url)
-            content_grid.attach(url_button, 0, 4, 1, 1)
-
-        self.show_all()
 
 class Flatpak(Gtk.Box):
 
@@ -349,7 +160,7 @@ class Flatpak(Gtk.Box):
                 )
                 removed_refs.append(ref)
 
-        dialog = DeleteDialog(self.parent.parent, title)
+        dialog = DeleteDialog(self.parent.parent, title, 'flatpak')
         response = dialog.run()
         
         if response == Gtk.ResponseType.OK:
@@ -386,56 +197,32 @@ class Flatpak(Gtk.Box):
         return value
 
     def on_add_button_clicked(self, widget):
-        dialog = AddDialog(self.parent.parent)
+        dialog = AddDialog(self.parent.parent, 'flatpak')
         response = dialog.run()
         self.log.debug('Response type: %s', response)
 
         if response == Gtk.ResponseType.OK:
+            url = dialog.repo_entry.get_text().strip()
+            name = splitext(url.split('/')[-1])[0]
+            dialog.destroy()
             self.add_button.set_sensitive(False)
             self.info_button.set_sensitive(False)
             self.delete_button.set_sensitive(False)
-            url = dialog.url_entry.get_text().strip()
-            name = splitext(url.split('/')[-1])[0]
+            self.view.set_sensitive(False)
             self.log.info('Adding flatpakrepo %s at %s', name, url)
-            self.add_repo_name = name            
-            dialog.destroy()
-            self.get_repo_file(url)
+            helper.add_remote(self, name, url, 'User')
         else:
             dialog.destroy()
         
         self.generate_entries()
 
-    def get_repo_file(self, url):
-        """Downloads a flatpakrepo file to add to the system.
-
-        Arguments:
-            url (str): The URL of the flatpakrepo file to add.
-        """
-        self.log.debug('Fetching .flatpakrepo file: %s', url)
-        _repofile = Gio.File.new_for_uri(url)
-        _repofile.load_contents_async(None, self.on_file_ready, None)
-    
-    def on_file_ready(self, source_object, result, user_data):
-        try:
-            a, content, b = source_object.load_contents_finish(result)
-
-        except GLib.GError as e:
-            self.log.debug('Could not fetch flatpakrepo, %s', e.args)
-            content = None
-
-        else:
-            _repofile = GLib.Bytes.new(content)
-            helper.add_remote(self.add_repo_name, _repofile)
-
-        finally:
-            self.add_button.set_sensitive(True)
-            self.generate_entries()
-
     def generate_entries(self):
         self.remote_liststore.clear()
 
         for option in ['User', 'System']:
+            self.log.debug('Getting %s remotes', option)
             for remote in helper.get_remotes(option):
+                self.log.debug('Found remote: %s', remote.get_name())
                 if remote.get_title():
                     title = remote.get_title()
                 else:
@@ -465,9 +252,12 @@ class Flatpak(Gtk.Box):
             self.delete_button.set_sensitive(False)
 
     def throw_error_dialog(self, message, msg_type):
-        if msg_type == "error":
-            msg_type = Gtk.MessageType.ERROR
-        dialog = Gtk.MessageDialog(self.parent.parent, 0, msg_type,
-                                   Gtk.ButtonsType.CLOSE, message)
+        dialog = ErrorDialog(
+            self.parent,
+            'Couldn\'t add source',
+            'dialog-error',
+            'Couldn\'t add source',
+            message
+        )
         dialog.run()
         dialog.destroy()

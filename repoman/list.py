@@ -133,7 +133,7 @@ class List(Gtk.Box):
         self.do_delete(value)
     
     def do_delete(self, repo):
-        dialog = DeleteDialog(self.parent.parent)
+        dialog = DeleteDialog(self.parent.parent, 'Source', 'apt')
         response = dialog.run()
 
         if response == Gtk.ResponseType.OK:
@@ -202,14 +202,14 @@ class List(Gtk.Box):
 
     def on_add_button_clicked(self, widget):
         #self.ppa.remove(self.ppa_name)
-        dialog = AddDialog(self.parent.parent)
+        dialog = AddDialog(self.parent.parent, 'apt')
         response = dialog.run()
 
         if response == Gtk.ResponseType.OK:
             self.add_button.set_sensitive(False)
             self.edit_button.set_sensitive(False)
             self.delete_button.set_sensitive(False)
-            url = dialog.ppa_entry.get_text()
+            url = dialog.repo_entry.get_text().strip()
             dialog.destroy()
             self.ppa.add(url)
         else:

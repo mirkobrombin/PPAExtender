@@ -23,11 +23,13 @@ import logging
 import gi
 gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk
-from .ppa import PPA
 import gettext
 gettext.bindtextdomain('repoman', '/usr/share/repoman/po')
 gettext.textdomain("repoman")
 _ = gettext.gettext
+
+from . import flatpak_helper 
+from .ppa import PPA
 
 class ErrorDialog(Gtk.Dialog):
 
@@ -66,23 +68,95 @@ class ErrorDialog(Gtk.Dialog):
 
         self.show_all()
 
+class AddDialog(Gtk.Dialog):
+
+    ppa_name = False
+
+    def __init__(self, parent, kind):
+
+        settings = Gtk.Settings.get_default()
+        header = settings.props.gtk_dialogs_use_header
+
+        Gtk.Dialog.__init__(self, _("Add Source"), parent, 0,
+                            (Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL,
+                             Gtk.STOCK_ADD, Gtk.ResponseType.OK),
+                             modal=1, use_header_bar=header)
+
+        self.log = logging.getLogger("repoman.AddDialog")
+        self.kind = kind
+        self.ppa = PPA(parent)
+
+        content_area = self.get_content_area()
+
+        content_grid = Gtk.Grid()
+        content_grid.set_margin_top(24)
+        content_grid.set_margin_left(12)
+        content_grid.set_margin_right(12)
+        content_grid.set_margin_bottom(12)
+        content_grid.set_row_spacing(6)
+        content_grid.set_halign(Gtk.Align.CENTER)
+        content_grid.set_hexpand(True)
+        content_area.add(content_grid)
+
+        add_title = Gtk.Label(_("Enter Source Details"))
+        Gtk.StyleContext.add_class(add_title.get_style_context(), "h2")
+        content_grid.attach(add_title, 0, 0, 1, 1)
+
+        add_label = Gtk.Label(_("e.g. ppa:mirkobrombin/ppa"))
+        content_grid.attach(add_label, 0, 1, 1, 1)
+
+        self.repo_entry = Gtk.Entry()
+        self.repo_entry.set_placeholder_text(_("Source Line"))
+        self.repo_entry.set_activates_default(True)
+        self.repo_entry.connect(_("changed"), self.on_entry_changed)
+        self.repo_entry.set_width_chars(50)
+        self.repo_entry.set_margin_top(12)
+        content_grid.attach(self.repo_entry, 0, 2, 1, 1)
+
+        self.add_button = self.get_widget_for_response(Gtk.ResponseType.OK)
+        self.add_button.set_sensitive(False)
+
+        Gtk.StyleContext.add_class(self.add_button.get_style_context(),
+                                   "suggested-action")
+        self.add_button.grab_default()
+
+        self.show_all()
+
+    def on_entry_changed(self, widget):
+        entry_text = widget.get_text().strip()
+        entry_valid = False
+        self.log.debug('Using %s validator', self.kind)
+
+        # Validate differently based on APT vs Flatpak
+        if self.kind == 'apt':
+            entry_valid = self.ppa.validate(entry_text)
+
+        elif self.kind == 'flatpak':
+            entry_valid = flatpak_helper.validate_flatpakrepo(entry_text)
+        
+        # Set the add button's sensitivity based on the results of validation.
+        try:
+            self.add_button.set_sensitive(entry_valid)
+        except TypeError:
+            pass
 
 class DeleteDialog(Gtk.Dialog):
 
     ppa_name = False
 
-    def __init__(self, parent):
+    def __init__(self, parent, title, kind):
 
         settings = Gtk.Settings.get_default()
 
         header = settings.props.gtk_dialogs_use_header
 
-        Gtk.Dialog.__init__(self, _("Remove Source"), parent, 0,
+        Gtk.Dialog.__init__(self, _(f'Remove {title}'), parent, 0,
                             (Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL,
                              Gtk.STOCK_REMOVE, Gtk.ResponseType.OK),
                              modal=1, use_header_bar=header)
 
         self.log = logging.getLogger("repoman.DeleteDialog")
+        self.kind = kind
 
         content_area = self.get_content_area()
 
@@ -100,83 +174,40 @@ class DeleteDialog(Gtk.Dialog):
         delete_image.props.valign = Gtk.Align.START
         content_grid.attach(delete_image, 0, 0, 1, 2)
 
-        delete_label = Gtk.Label(_("Are you sure you want to remove this source?"))
+        delete_label = Gtk.Label(
+            _("Are you sure you want to remove this source?")
+        )
         Gtk.StyleContext.add_class(delete_label.get_style_context(), "h2")
         content_grid.attach(delete_label, 1, 0, 1, 1)
 
-        delete_explain = Gtk.Label(_("If you remove this source, you will need to add it again to continue using it. Any software you've installed from this source will remain installed."))
+        if kind == 'apt':
+            delete_explain = Gtk.Label(
+                _(
+                    'If you remove this source, you will need to add it again '
+                    'to continue using it. Any software you\'ve installed from '
+                    'this source will remain installed.'
+                )
+            )
+
+        elif kind == 'flatpak':
+            delete_explain = Gtk.Label(
+                _(
+                    'If you remove this source, you will need to add it again '
+                    'to continue using it. Any software you\'ve installed from '
+                    'this source will be removed.'
+                )
+            )
         delete_explain.props.wrap = True
         delete_explain.set_max_width_chars(50)
         delete_explain.set_xalign(0)
         content_grid.attach(delete_explain, 1, 1, 1, 1)
 
-        Gtk.StyleContext.add_class(self.get_widget_for_response(Gtk.ResponseType.OK).get_style_context(),
-                                   "destructive-action")
+        remove_button = self.get_widget_for_response(Gtk.ResponseType.OK)
+        Gtk.StyleContext.add_class(
+            remove_button.get_style_context(), "destructive-action"
+        )
 
         self.show_all()
-
-class AddDialog(Gtk.Dialog):
-
-    ppa_name = False
-
-    def __init__(self, parent):
-
-        settings = Gtk.Settings.get_default()
-        header = settings.props.gtk_dialogs_use_header
-
-        Gtk.Dialog.__init__(self, _("Add Source"), parent, 0,
-                            (Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL,
-                             Gtk.STOCK_ADD, Gtk.ResponseType.OK),
-                             modal=1, use_header_bar=header)
-
-        self.log = logging.getLogger("repoman.AddDialog")
-
-        self.ppa = PPA(parent)
-
-        content_area = self.get_content_area()
-
-        content_grid = Gtk.Grid()
-        content_grid.set_margin_top(24)
-        content_grid.set_margin_left(12)
-        content_grid.set_margin_right(12)
-        content_grid.set_margin_bottom(12)
-        content_grid.set_row_spacing(6)
-        content_grid.set_halign(Gtk.Align.CENTER)
-        content_grid.set_hexpand(True)
-        content_area.add(content_grid)
-
-        add_title = Gtk.Label(_("Enter Source Line"))
-        Gtk.StyleContext.add_class(add_title.get_style_context(), "h2")
-        content_grid.attach(add_title, 0, 0, 1, 1)
-
-        add_label = Gtk.Label(_("e.g. ppa:mirkobrombin/ppa"))
-        content_grid.attach(add_label, 0, 1, 1, 1)
-
-        self.ppa_entry = Gtk.Entry()
-        self.ppa_entry.set_placeholder_text(_("Source Line"))
-        self.ppa_entry.set_activates_default(True)
-        self.ppa_entry.connect(_("changed"), self.on_entry_changed)
-        self.ppa_entry.set_width_chars(50)
-        self.ppa_entry.set_margin_top(12)
-        content_grid.attach(self.ppa_entry, 0, 2, 1, 1)
-
-        self.add_button = self.get_widget_for_response(Gtk.ResponseType.OK)
-        self.add_button.set_sensitive(False)
-
-        Gtk.StyleContext.add_class(self.add_button.get_style_context(),
-                                   "suggested-action")
-        self.add_button.grab_default()
-
-        self.show_all()
-
-    def on_entry_changed(self, widget):
-        entry_text = widget.get_text()
-        entry_valid = self.ppa.validate(entry_text)
-        try:
-            self.add_button.set_sensitive(entry_valid)
-        except TypeError:
-            pass
-
 
 class EditDialog(Gtk.Dialog):
 
@@ -292,3 +323,74 @@ class EditDialog(Gtk.Dialog):
             action_area.remove(cancel_button)
             action_area.add(cancel_button)
             action_area.add(save_button)
+
+class InfoDialog(Gtk.Dialog):
+
+    def __init__(self, parent, name, option):
+        self.installation = flatpak_helper.get_installation_for_type(option)
+        
+        self.remote = self.installation.get_remote_by_name(name, None)
+
+        if self.remote.get_title():
+            title = self.remote.get_title()
+        else:
+            title = name
+        name = self.remote.get_name()
+        description = name
+        if self.remote.get_comment():
+            description = self.remote.get_comment()
+        if self.remote.get_description():
+            description = self.remote.get_description()
+        url = self.remote.get_homepage()
+
+        settings = Gtk.Settings.get_default()
+        header = settings.props.gtk_dialogs_use_header
+        super().__init__(
+            _(f'{title}'),
+            parent, 
+            0,
+            modal=1,
+            use_header_bar=header
+        )
+        self.log = logging.getLogger(f'repoman.info-{name}')
+
+        self.set_resizable(False)
+
+        content_area = self.get_content_area()
+        headerbar = self.get_header_bar()
+
+        content_grid = Gtk.Grid()
+        content_grid.set_halign(Gtk.Align.CENTER)
+        content_grid.set_margin_top(24)
+        content_grid.set_margin_bottom(24)
+        content_grid.set_margin_start(24)
+        content_grid.set_margin_end(24)
+        content_grid.set_column_spacing(12)
+        content_grid.set_row_spacing(6)
+        content_area.add(content_grid)
+
+        title_label = Gtk.Label()
+        title_label.set_line_wrap(True)
+        title_label.set_markup(f'<b>{title}</b>')
+        content_grid.attach(title_label, 0, 1, 1, 1)
+
+        name_label = Gtk.Label()
+        name_label.set_markup(f'<i><small>{name}</small></i>')
+        content_grid.attach(name_label, 0, 2, 1, 1)
+
+        description_label = Gtk.Label()
+        description_label.set_margin_top(18)
+        description_label.set_margin_bottom(12)
+        description_label.set_line_wrap(True)
+        description_label.set_max_width_chars(36)
+        description_label.set_width_chars(36)
+        description_label.set_text(description)
+        content_grid.attach(description_label, 0, 3, 1, 1)
+        
+        if url:
+            url_button = Gtk.LinkButton.new_with_label(_('Homepage'))
+            url_button.set_uri(url)
+            content_grid.attach(url_button, 0, 4, 1, 1)
+
+        self.show_all()
+        
