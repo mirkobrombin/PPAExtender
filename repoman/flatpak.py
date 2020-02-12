@@ -143,6 +143,12 @@ class Flatpak(Gtk.Box):
 
         self.generate_entries()
 
+    def set_items_insensitive(self):
+        self.add_button.set_sensitive(False)
+        self.info_button.set_sensitive(False)
+        self.delete_button.set_sensitive(False)
+        self.view.set_sensitive(False)
+
     def on_delete_button_clicked(self, widget):
         name = self.get_selected_remote(0)
         title = self.strip_bold_from_name(self.get_selected_remote(1))
@@ -166,10 +172,7 @@ class Flatpak(Gtk.Box):
         if response == Gtk.ResponseType.OK:
             dialog.destroy()
             self.parent.parent.hbar.spinner.start()
-            self.add_button.set_sensitive(False)
-            self.info_button.set_sensitive(False)
-            self.delete_button.set_sensitive(False)
-            self.view.set_sensitive(False)
+            self.set_items_insensitive()
             
             helper.delete_remote(self, name, option)
         else:
@@ -205,10 +208,7 @@ class Flatpak(Gtk.Box):
             url = dialog.repo_entry.get_text().strip()
             name = splitext(url.split('/')[-1])[0]
             dialog.destroy()
-            self.add_button.set_sensitive(False)
-            self.info_button.set_sensitive(False)
-            self.delete_button.set_sensitive(False)
-            self.view.set_sensitive(False)
+            self.set_items_insensitive()
             self.log.info('Adding flatpakrepo %s at %s', name, url)
             helper.add_remote(self, name, url, 'User')
         else:
