@@ -1,10 +1,7 @@
 repoman (1.2.0) eoan; urgency=medium
 
-  [ Ian Santopietro ]
   * Switching to PolicyKit to handle permissions on-demand, avoiding
     the need to run the GUI as root.
-
-  [ Ian Santopiero ]
   * Adding Flatpak Support for managing flatpak remotes.
 
  -- Ian Santopiero <ian@system76.com>  Wed, 12 Feb 2020 10:02:40 -0700
