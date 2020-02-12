@@ -19,58 +19,20 @@
     along with Repoman.  If not, see <http://www.gnu.org/licenses/>.
 '''
 
-from os.path import splitext, join
-from pathlib import Path
-from subprocess import CalledProcessError
-from sys import exc_info
-from threading import Thread
-
 import gi
 import logging
+from os.path import splitext
 gi.require_version('Gtk', '3.0')
 gi.require_version('Pango', '1.0')
-gi.require_version('Flatpak', '1.0')
 from gi.repository import Gtk, GObject, GLib, Gio, Pango
-from gi.repository import Flatpak as flatpak
 
 from .dialog import ErrorDialog
+import flatpak_helper as helper
 
 import gettext
 gettext.bindtextdomain('repoman', '/usr/share/repoman/po')
 gettext.textdomain("repoman")
 _ = gettext.gettext
-
-# Get User Installation
-fp_user_path = join(Path.home(), '.local', 'share', 'flatpak')
-fp_user_file = Gio.File.new_for_path(fp_user_path)
-fp_user_inst = flatpak.Installation.new_for_path(fp_user_file, True, None)
-
-# Get System Installation
-fp_sys_path = join('var', 'lib', 'flatpak')
-fp_sys_file = Gio.File.new_for_path(fp_sys_path)
-fp_sys_inst = flatpak.Installation.new_for_path(fp_sys_file, False, None)
-
-class RemoveThread(Thread):
-
-    def __init__(self, parent, remote, refs, installation):
-        super().__init__()
-        self.installation = installation
-        self.parent = parent
-        self.remote = self.installation.get_remote_by_name(remote)
-        self.refs = refs
-    
-    def run(self):
-        for ref in self.refs:
-            self.installation.uninstall(
-                ref.get_kind(),
-                ref.get_name(),
-                None,
-                ref.get_branch()
-            )
-        self.installation.remove_remote(self.remote.get_name())
-        GObject.idle_add(self.parent.parent.parent.stack.flatpak.generate_entries)
-        GObject.idle_add(self.parent.parent.parent.stack.flatpak.view.set_sensitive, True)
-        GObject.idle_add(self.parent.parent.parent.hbar.spinner.stop)
 
 class AddDialog(Gtk.Dialog):
 
@@ -197,10 +159,7 @@ class DeleteDialog(Gtk.Dialog):
 class InfoDialog(Gtk.Dialog):
 
     def __init__(self, parent, name, option):
-        if option.lower() == 'user':
-            self.installation = fp_user_inst
-        else:
-            self.installation = fp_sys_inst
+        self.installation = helper.get_installation_for_type(option)
         
         self.remote = self.installation.get_remote_by_name(name, None)
 
@@ -373,29 +332,15 @@ class Flatpak(Gtk.Box):
 
         self.generate_entries()
 
-    def get_installation_for_type(self, option):
-        """ Gets the installation for the given type.
-
-        Arguments:
-            option (str): The type to get, 'user' or 'system'
-        
-        Returns:
-            The requested :obj:`Flatpak.Installation`
-        """
-        if option.lower() == 'user':
-            return fp_user_inst
-        else:
-            return fp_sys_inst
-
     def on_delete_button_clicked(self, widget):
-        remote = self.get_selected_remote(0)
-        name = self.strip_bold_from_name(self.get_selected_remote(1))
+        name = self.get_selected_remote(0)
+        title = self.strip_bold_from_name(self.get_selected_remote(1))
         option = self.get_selected_remote(4)
-        installation = self.get_installation_for_type(option)
-        self.log.info('Deleting remote %s', remote)
+        installation = helper.get_installation_for_type(option)
+        self.log.info('Deleting remote %s', name)
         removed_refs = []
         for ref in installation.list_installed_refs():
-            if ref.get_origin() == remote:
+            if ref.get_origin() == name:
                 self.log.warning(
                     'Removing %s will remove ref %s (%s)',
                     name,
@@ -404,7 +349,7 @@ class Flatpak(Gtk.Box):
                 )
                 removed_refs.append(ref)
 
-        dialog = DeleteDialog(self.parent.parent, name)
+        dialog = DeleteDialog(self.parent.parent, title)
         response = dialog.run()
         
         if response == Gtk.ResponseType.OK:
@@ -415,10 +360,7 @@ class Flatpak(Gtk.Box):
             self.delete_button.set_sensitive(False)
             self.view.set_sensitive(False)
             
-            remove_thread = RemoveThread(
-                self, remote, removed_refs, installation
-            )
-            remove_thread.start()
+            helper.delete_remote(self, name, option)
         else:
             dialog.destroy()
     
@@ -427,7 +369,7 @@ class Flatpak(Gtk.Box):
         option = self.get_selected_remote(4)
 
         dialog = InfoDialog(self.parent.parent, name, option)
-        response = dialog.run()
+        dialog.run()
         dialog.destroy()
     
     def strip_bold_from_name(self, name):
@@ -442,22 +384,6 @@ class Flatpak(Gtk.Box):
         value = model.get_value(tree_iter, index)
         self.log.debug('Current selection: %s', value)
         return value
-
-    def on_row_activated(self, widget, data1, data2):
-        remote = self.get_selected_remote(0)
-        name = self.get_selected_remote(1)
-        name = name.replace('<b>', '')
-        name = name.replace('</b>', '')
-        self.log.info('Deleting remote %s', remote)
-
-        dialog = DeleteDialog(self.parent.parent, name)
-        response = dialog.run()
-        
-        if response == Gtk.ResponseType.OK:
-            flatpak.remotes.delete_remote(remote)
-        
-        dialog.destroy()
-        self.generate_entries()
 
     def on_add_button_clicked(self, widget):
         dialog = AddDialog(self.parent.parent)
@@ -494,13 +420,12 @@ class Flatpak(Gtk.Box):
             a, content, b = source_object.load_contents_finish(result)
 
         except GLib.GError as e:
-            self.log.debug('Could not fetch flatpakrepo, %s', e.message)
+            self.log.debug('Could not fetch flatpakrepo, %s', e.args)
             content = None
 
         else:
             _repofile = GLib.Bytes.new(content)
-            new_remote = flatpak.Remote.new_from_file(self.add_repo_name, _repofile)
-            fp_user_inst.add_remote(new_remote, True, None)
+            helper.add_remote(self.add_repo_name, _repofile)
 
         finally:
             self.add_button.set_sensitive(True)
@@ -509,33 +434,20 @@ class Flatpak(Gtk.Box):
     def generate_entries(self):
         self.remote_liststore.clear()
 
-        for remote in fp_user_inst.list_remotes():
-            if remote.get_title():
-                title = remote.get_title()
-            else:
-                title = remote.get_name()
+        for option in ['User', 'System']:
+            for remote in helper.get_remotes(option):
+                if remote.get_title():
+                    title = remote.get_title()
+                else:
+                    title = remote.get_name()
 
-            self.remote_liststore.append([
-                remote.get_name(),
-                f'<b>{title}</b>',
-                remote.get_comment(),
-                remote.get_url(),
-                'User'
-            ])
-        
-        for remote in fp_sys_inst.list_remotes():
-            if remote.get_title():
-                title = remote.get_title()
-            else:
-                title = remote.get_name()
-
-            self.remote_liststore.append([
-                remote.get_name(),
-                f'<b>{title}</b>',
-                remote.get_comment(),
-                remote.get_url(),
-                'System'
-            ])
+                self.remote_liststore.append([
+                    remote.get_name(),
+                    f'<b>{title}</b>',
+                    remote.get_comment(),
+                    remote.get_url(),
+                    option
+                ])
         
         self.add_button.set_sensitive(True)
 
