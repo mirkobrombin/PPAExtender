@@ -23,6 +23,7 @@ from os.path import splitext, join
 from pathlib import Path
 from subprocess import CalledProcessError
 from sys import exc_info
+from threading import Thread
 
 import gi
 import logging
@@ -48,6 +49,28 @@ fp_user_inst = flatpak.Installation.new_for_path(fp_user_file, True, None)
 fp_sys_path = join('var', 'lib', 'flatpak')
 fp_sys_file = Gio.File.new_for_path(fp_sys_path)
 fp_sys_inst = flatpak.Installation.new_for_path(fp_sys_file, False, None)
+
+class RemoveThread(Thread):
+
+    def __init__(self, parent, remote, refs, installation):
+        super().__init__()
+        self.installation = installation
+        self.parent = parent
+        self.remote = self.installation.get_remote_by_name(remote)
+        self.refs = refs
+    
+    def run(self):
+        for ref in self.refs:
+            self.installation.uninstall(
+                ref.get_kind(),
+                ref.get_name(),
+                None,
+                ref.get_branch()
+            )
+        self.installation.remove_remote(self.remote.get_name())
+        GObject.idle_add(self.parent.parent.parent.stack.flatpak.generate_entries)
+        GObject.idle_add(self.parent.parent.parent.stack.flatpak.view.set_sensitive, True)
+        GObject.idle_add(self.parent.parent.parent.hbar.spinner.stop)
 
 class AddDialog(Gtk.Dialog):
 
@@ -348,35 +371,52 @@ class Flatpak(Gtk.Box):
 
         self.generate_entries()
 
+    def get_installation_for_type(self, option):
+        """ Gets the installation for the given type.
+
+        Arguments:
+            option (str): The type to get, 'user' or 'system'
+        
+        Returns:
+            The requested :obj:`Flatpak.Installation`
+        """
+        if option.lower() == 'user':
+            return fp_user_inst
+        else:
+            return fp_sys_inst
+
     def on_delete_button_clicked(self, widget):
         remote = self.get_selected_remote(0)
         name = self.strip_bold_from_name(self.get_selected_remote(1))
+        option = self.get_selected_remote(4)
+        installation = self.get_installation_for_type(option)
         self.log.info('Deleting remote %s', remote)
+        removed_refs = []
+        for ref in installation.list_installed_refs():
+            if ref.get_origin() == remote:
+                self.log.warning(
+                    'Removing %s will remove ref %s (%s)',
+                    name,
+                    ref.get_name(),
+                    ref.get_appdata_name()
+                )
+                removed_refs.append(ref)
 
         dialog = DeleteDialog(self.parent.parent, name)
         response = dialog.run()
         
         if response == Gtk.ResponseType.OK:
+            dialog.destroy()
+            self.parent.parent.hbar.spinner.start()
             self.add_button.set_sensitive(False)
             self.info_button.set_sensitive(False)
             self.delete_button.set_sensitive(False)
-            try:
-                flatpak.remotes.delete_remote(remote)
-            except DeleteRemoteError:
-                err = exc_info()
-                self.log.exception(err)
-                edialog = ErrorDialog(
-                    dialog,
-                    'Couldn\'t remove remote',
-                    'dialog-error',
-                    'Couldn\'t remove remote',
-                    err[1]
-                )
-                edialog.run()
-                edialog.destroy()
-        
-        dialog.destroy()
-        self.generate_entries()
+            self.view.set_sensitive(False)
+            
+            remove_thread = RemoveThread(self, remote, removed_refs, installation)
+            remove_thread.start()
+        else:
+            dialog.destroy()
     
     def on_info_button_clicked(self, widget):
         name = self.get_selected_remote(0)
