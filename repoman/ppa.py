@@ -24,15 +24,13 @@ import sys
 import logging
 import gi
 import apt
-import threading, queue, time
+import threading
 from softwareproperties.SoftwareProperties import SoftwareProperties
-from aptsources.sourceslist import SourceEntry
 gi.require_version('Gtk', '3.0')
 from gi.repository import GObject, GLib
 
 bus = dbus.SystemBus()
 privileged_object = bus.get_object('org.pop_os.repoman', '/PPA')
-GLib.threads_init()
 
 class RemoveThread(threading.Thread):
     cache = apt.Cache()

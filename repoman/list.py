@@ -34,7 +34,6 @@ _ = gettext.gettext
 class List(Gtk.Box):
 
     listiter_count = 0
-    ppa_name = False
 
     def __init__(self, parent):
         self.sp = SoftwareProperties()
@@ -201,7 +200,6 @@ class List(Gtk.Box):
             dialog.destroy()
 
     def on_add_button_clicked(self, widget):
-        #self.ppa.remove(self.ppa_name)
         dialog = AddDialog(self.parent.parent, 'apt')
         response = dialog.run()
 

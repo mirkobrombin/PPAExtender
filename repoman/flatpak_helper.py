@@ -20,14 +20,11 @@
 
 import gi
 import logging
-from os.path import splitext, join
+from os.path import join
 from pathlib import Path
-from subprocess import CalledProcessError
-from sys import exc_info
 from threading import Thread
 
 gi.require_version('Flatpak', '1.0')
-
 from gi.repository import GObject, Gio, Flatpak, GLib
 
 log = logging.getLogger('repoman.flatpak-helper')

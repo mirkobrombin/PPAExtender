@@ -19,9 +19,6 @@
     along with Repoman.  If not, see <http://www.gnu.org/licenses/>.
 '''
 
-# Initial Imports
-
-# Trimmed imports
 import gi
 import logging
 from os.path import splitext
