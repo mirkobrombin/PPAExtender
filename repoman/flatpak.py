@@ -178,7 +178,6 @@ class Flatpak(Gtk.Box):
     
     def on_info_button_clicked(self, widget):
         remote = self.get_selected_remote()
-
         dialog = InfoDialog(self.parent.parent, remote[0], remote[4])
         dialog.run()
         dialog.destroy()

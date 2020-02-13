@@ -327,14 +327,12 @@ class InfoDialog(Gtk.Dialog):
 
     def __init__(self, parent, name, option):
         self.installation = flatpak_helper.get_installation_for_type(option)
-        
         self.remote = self.installation.get_remote_by_name(name, None)
 
         if self.remote.get_title():
             title = self.remote.get_title()
         else:
             title = name
-        name = self.remote.get_name()
         description = name
         if self.remote.get_comment():
             description = self.remote.get_comment()
@@ -410,6 +408,9 @@ class InfoDialog(Gtk.Dialog):
             content_grid.attach(url_button, 0, 4, 1, 1)
 
         self.show_all()
+<<<<<<< HEAD
+        
+=======
 
         icon_thread = flatpak_helper.IconThread(self, name, option)
         icon_thread.start()
@@ -425,4 +426,4 @@ class InfoDialog(Gtk.Dialog):
         self.icon.show()
         self.icon_box.add(self.icon)
         self.log.debug('Got latest icon')
-
+>>>>>>> feat(flatpak): Show icons for flatpak remotes
