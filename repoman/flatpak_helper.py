@@ -295,11 +295,11 @@ class IconThread(Thread):
             image = get_image_from_pixbuf(pixbuf)
         
         else:
-            self.icon = Gtk.Image.new_from_icon_name(
+            image = Gtk.Image.new_from_icon_name(
                 'notfound',
                 Gtk.IconSize.SMALL_TOOLBAR
             )
-            self.icon.props.opacity = 0
+            image.props.opacity = 0
     
         if self.dialog:
             GLib.idle_add(self.dialog.set_remote_icon, image)
