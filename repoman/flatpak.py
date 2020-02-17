@@ -47,6 +47,14 @@ class Flatpak(Gtk.Box):
         self.log = logging.getLogger("repoman.Flatpak")
         self.log.debug('Logging established')
 
+        syst_install = helper.get_installation_for_type('system')
+        user_install = helper.get_installation_for_type('user')
+
+        self.log.debug('Setting up installation monitors')
+        self.syst_monitor = syst_install.create_monitor()
+        self.syst_monitor.connect('changed', self.on_installation_changed)
+        self.user_monitor = user_install.create_monitor()
+        self.user_monitor.connect('changed', self.on_installation_changed)
 
         self.content_grid = Gtk.Grid()
         self.content_grid.set_margin_left(12)
@@ -182,6 +190,7 @@ class Flatpak(Gtk.Box):
         dialog = InfoDialog(self.parent.parent, remote[0], remote[4])
         dialog.run()
         dialog.destroy()
+        self.generate_entries()
     
     def get_selected_remote(self):
         selection = self.view.get_selection()
@@ -229,6 +238,11 @@ class Flatpak(Gtk.Box):
                 ])
         
         self.add_button.set_sensitive(True)
+        self.show_all()
+    
+    def on_installation_changed(self, monitor, file, other_file, event_type):
+        self.log.debug('Installation changed, regenerating list')
+        self.generate_entries()
 
     def on_row_selected(self, widget):
         (model, pathlist) = widget.get_selected_rows()
