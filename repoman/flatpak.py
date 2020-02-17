@@ -162,7 +162,9 @@ class Flatpak(Gtk.Box):
                 )
                 removed_refs.append(ref)
 
-        dialog = DeleteDialog(self.parent.parent, remote[1], 'flatpak')
+        dialog = DeleteDialog(
+            self.parent.parent, remote[1], flatpak=True, refs=removed_refs
+        )
         response = dialog.run()
         
         if response == Gtk.ResponseType.OK:
