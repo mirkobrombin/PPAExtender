@@ -72,7 +72,7 @@ class AddDialog(Gtk.Dialog):
 
     ppa_name = False
 
-    def __init__(self, parent, kind):
+    def __init__(self, parent, flatpak=False):
 
         settings = Gtk.Settings.get_default()
         header = settings.props.gtk_dialogs_use_header
@@ -83,7 +83,7 @@ class AddDialog(Gtk.Dialog):
                              modal=1, use_header_bar=header)
 
         self.log = logging.getLogger("repoman.AddDialog")
-        self.kind = kind
+        self.flatpak = flatpak
         self.ppa = PPA(parent)
 
         content_area = self.get_content_area()
@@ -125,15 +125,15 @@ class AddDialog(Gtk.Dialog):
     def on_entry_changed(self, widget):
         entry_text = widget.get_text().strip()
         entry_valid = False
-        self.log.debug('Using %s validator', self.kind)
+        self.log.debug('Using Flatpak validator: %s', self.flatpak)
 
         # Validate differently based on APT vs Flatpak
-        if self.kind == 'apt':
-            entry_valid = self.ppa.validate(entry_text)
-
-        elif self.kind == 'flatpak':
+        if self.flatpak:
             entry_valid = flatpak_helper.validate_flatpakrepo(entry_text)
         
+        else:
+            entry_valid = self.ppa.validate(entry_text)
+
         # Set the add button's sensitivity based on the results of validation.
         try:
             self.add_button.set_sensitive(entry_valid)
@@ -144,7 +144,7 @@ class DeleteDialog(Gtk.Dialog):
 
     ppa_name = False
 
-    def __init__(self, parent, title, kind):
+    def __init__(self, parent, title, flatpak=False, refs=None):
 
         settings = Gtk.Settings.get_default()
 
@@ -156,7 +156,6 @@ class DeleteDialog(Gtk.Dialog):
                              modal=1, use_header_bar=header)
 
         self.log = logging.getLogger("repoman.DeleteDialog")
-        self.kind = kind
 
         content_area = self.get_content_area()
 
@@ -180,17 +179,16 @@ class DeleteDialog(Gtk.Dialog):
         Gtk.StyleContext.add_class(delete_label.get_style_context(), "h2")
         content_grid.attach(delete_label, 1, 0, 1, 1)
 
-        if kind == 'apt':
-            delete_explain = Gtk.Label(
-                _(
-                    'If you remove this source, you will need to add it again '
-                    'to continue using it. Any software you\'ve installed from '
-                    'this source will remain installed.'
-                )
+        delete_explain = Gtk.Label.new(
+            _(
+                'If you remove this source, you will need to add it again '
+                'to continue using it. Any software you\'ve installed from '
+                'this source will remain installed.'
             )
+        )
 
-        elif kind == 'flatpak':
-            delete_explain = Gtk.Label(
+        if flatpak:
+            delete_explain = Gtk.Label.new(
                 _(
                     'If you remove this source, you will need to add it again '
                     'to continue using it. Any software you\'ve installed from '
