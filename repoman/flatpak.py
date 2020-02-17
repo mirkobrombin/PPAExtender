@@ -194,7 +194,7 @@ class Flatpak(Gtk.Box):
         return value
 
     def on_add_button_clicked(self, widget):
-        dialog = AddDialog(self.parent.parent, 'flatpak')
+        dialog = AddDialog(self.parent.parent, flatpak=True)
         response = dialog.run()
         self.log.debug('Response type: %s', response)
 

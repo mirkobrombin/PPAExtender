@@ -132,7 +132,7 @@ class List(Gtk.Box):
         self.do_delete(value)
     
     def do_delete(self, repo):
-        dialog = DeleteDialog(self.parent.parent, 'Source', 'apt')
+        dialog = DeleteDialog(self.parent.parent, 'Source')
         response = dialog.run()
 
         if response == Gtk.ResponseType.OK:
@@ -200,7 +200,7 @@ class List(Gtk.Box):
             dialog.destroy()
 
     def on_add_button_clicked(self, widget):
-        dialog = AddDialog(self.parent.parent, 'apt')
+        dialog = AddDialog(self.parent.parent)
         response = dialog.run()
 
         if response == Gtk.ResponseType.OK:
