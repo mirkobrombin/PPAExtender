@@ -148,22 +148,18 @@ class Flatpak(Gtk.Box):
         self.view.set_sensitive(False)
 
     def on_delete_button_clicked(self, widget):
-        remote = self.get_selected_remote()
-        installation = helper.get_installation_for_type(remote[4])
-        self.log.info('Deleting remote %s', remote[0])
-        removed_refs = []
-        for ref in installation.list_installed_refs():
-            if ref.get_origin() == remote[0]:
-                self.log.warning(
-                    'Removing %s will remove ref %s (%s)',
-                    remote[0],
-                    ref.get_name(),
-                    ref.get_appdata_name()
-                )
-                removed_refs.append(ref)
+        name, title, comment, url, option = self.get_selected_remote()
+        installation = helper.get_installation_for_type(option)
+        self.log.info('Deleting remote %s', name)
+        removed_refs = helper.get_installed_refs_from_remote(name, option)
+        self.log.warning('Removing %s will remove the following refs:')
+        for ref in removed_refs:
+            self.log.warning(
+                '    %s (%s)', ref.get_name(), ref.get_appdata_name()
+            )
 
         dialog = DeleteDialog(
-            self.parent.parent, remote[1], flatpak=True, refs=removed_refs
+            self.parent.parent, title, flatpak=True, refs=removed_refs
         )
         response = dialog.run()
         
@@ -172,14 +168,14 @@ class Flatpak(Gtk.Box):
             self.parent.parent.hbar.spinner.start()
             self.set_items_insensitive()
             
-            helper.delete_remote(self, remote[0], remote[4])
+            helper.delete_remote(self, name, option)
         else:
             dialog.destroy()
     
     def on_info_button_clicked(self, widget):
-        remote = self.get_selected_remote()
+        name, title, comment, url, option = self.get_selected_remote()
 
-        dialog = InfoDialog(self.parent.parent, remote[0], remote[4])
+        dialog = InfoDialog(self.parent.parent, name, option)
         dialog.run()
         dialog.destroy()
     
@@ -187,6 +183,7 @@ class Flatpak(Gtk.Box):
         selection = self.view.get_selection()
         (model, pathlist) = selection.get_selected_rows()
         tree_iter = model.get_iter(pathlist[0])
+        # This tuple is (name, title, comment, url, option)
         value = tuple(
             model.get_value(tree_iter, index) for index in range(0, 5)
         )

@@ -84,6 +84,29 @@ def get_installation_for_type(option):
         log.debug('System installation found.')
         return fp_sys_inst
 
+def get_installed_refs_from_remote(name, option):
+    """Get a list of refs installed from a remote.
+
+    Arguments:
+        name (str): The name of the remote to look on
+        option (str): Whether this is a `user` or `system` remote.
+    
+    Returns:
+        [`Flatpak.Remote`] The list of remotes.
+    """
+    installation = get_installation_for_type(option)
+    refs = []
+
+    for ref in installation.list_installed_refs_by_kind(Flatpak.RefKind.APP):
+        if ref.get_origin() == name:
+            refs.append(ref)
+
+    for ref in installation.list_installed_refs_by_kind(Flatpak.RefKind.RUNTIME):
+        if ref.get_origin() == name:
+            refs.append(ref)
+    
+    return refs
+
 def get_remotes(option):
     """ Get a list of remotes.
 
