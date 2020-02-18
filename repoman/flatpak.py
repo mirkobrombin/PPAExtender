@@ -142,12 +142,14 @@ class Flatpak(Gtk.Box):
         self.generate_entries()
 
     def set_items_insensitive(self):
+        """ Sets all of the buttons in the list to be insensitive/disabled."""
         self.add_button.set_sensitive(False)
         self.info_button.set_sensitive(False)
         self.delete_button.set_sensitive(False)
         self.view.set_sensitive(False)
 
     def on_delete_button_clicked(self, widget):
+        """ Delete selected remote."""
         name, title, comment, url, option = self.get_selected_remote()
         installation = helper.get_installation_for_type(option)
         self.log.info('Deleting remote %s', name)
@@ -173,6 +175,7 @@ class Flatpak(Gtk.Box):
             dialog.destroy()
     
     def on_info_button_clicked(self, widget):
+        """ Display info dialog for the selected remote."""
         name, title, comment, url, option = self.get_selected_remote()
 
         dialog = InfoDialog(self.parent.parent, name, option)
@@ -180,6 +183,11 @@ class Flatpak(Gtk.Box):
         dialog.destroy()
     
     def get_selected_remote(self):
+        """ Get's the currently selected row's data.
+        
+        Returns:
+            (name, title, comment, url, option)
+        """
         selection = self.view.get_selection()
         (model, pathlist) = selection.get_selected_rows()
         tree_iter = model.get_iter(pathlist[0])
@@ -191,6 +199,7 @@ class Flatpak(Gtk.Box):
         return value
 
     def on_add_button_clicked(self, widget):
+        """Show add dialog when button clicked."""
         dialog = AddDialog(self.parent.parent, flatpak=True)
         response = dialog.run()
         self.log.debug('Response type: %s', response)
@@ -206,6 +215,7 @@ class Flatpak(Gtk.Box):
             dialog.destroy()
 
     def generate_entries(self):
+        """ Clear the list of entries and regenerate it."""
         self.remote_liststore.clear()
 
         for option in ['User', 'System']:
@@ -228,6 +238,7 @@ class Flatpak(Gtk.Box):
         self.add_button.set_sensitive(True)
 
     def on_row_selected(self, widget):
+        """Handler when a row is selected."""
         (model, pathlist) = widget.get_selected_rows()
         if pathlist:
             self.info_button.set_sensitive(True)
@@ -240,7 +251,13 @@ class Flatpak(Gtk.Box):
             self.info_button.set_sensitive(False)
             self.delete_button.set_sensitive(False)
 
-    def throw_error_dialog(self, message, msg_type):
+    def throw_error_dialog(self, message, msg_type='error'):
+        """ Display an error message ina graphical dialog.
+
+        Arguments:
+            message (str): The message to display.
+            msg_type (str): The style of the message to display.
+        """
         dialog = ErrorDialog(
             self.parent, 'Couldn\'t add source', 'dialog-error',
             'Couldn\'t add source', message
