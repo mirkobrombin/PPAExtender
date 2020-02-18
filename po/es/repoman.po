@@ -1,0 +1,244 @@
+# REPOMAN POT TRANSLATION TEMPLATE.
+# Copyright (C) 2020 Ian Santopietro
+# This file is distributed under the same license as the REPOMAN package.
+# Ian Santopietro <isantop@gmail.com>, 2020.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: https://github.com/pop-os/repoman/issues\n"
+"POT-Creation-Date: 2020-02-18 16:00-0700\n"
+"PO-Revision-Date: 2020-02-18 16:04-0700\n"
+"Last-Translator: Ian Santopiero <ian@system76.com>\n"
+"Language-Team: Spanish\n"
+"Language: es\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=ASCII\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: ../repoman/dialog.py:80
+msgid "Add Source"
+msgstr "Agregar repositorio"
+
+#: ../repoman/dialog.py:101
+msgid "Enter Source Details"
+msgstr "Ingrese las detalles de repositorio"
+
+#: ../repoman/dialog.py:105
+msgid "e.g. ppa:mirkobrombin/ppa"
+msgstr "p.e. ppa:mirkobrombin/ppa"
+
+#: ../repoman/dialog.py:109
+msgid "Source Line"
+msgstr "Línea de repositorio"
+
+#: ../repoman/dialog.py:111
+msgid "changed"
+msgstr "cambiado"
+
+#: ../repoman/dialog.py:153
+#, python-brace-format
+msgid "Remove {title}"
+msgstr "Eliminar {title}"
+
+#: ../repoman/dialog.py:177
+msgid "Are you sure you want to remove this source?"
+msgstr "¿Estás seguro de que quieres eliminar este repositorio?"
+
+#: ../repoman/dialog.py:184
+msgid ""
+"If you remove this source, you will need to add it again to continue using "
+"it. Any software you've installed from this source will remain installed."
+msgstr ""
+
+#: ../repoman/dialog.py:193
+msgid ""
+"If you remove this source, you will need to add it again to continue using "
+"it. Any software you've installed from this source will be removed."
+msgstr "" 
+"Si elimina este repositorio, deberá agregarlo nuevamente para continuar "
+"usándolo. Cualquier software que haya instalado desde este repositorio "
+"permanecerá instalado."
+
+#: ../repoman/dialog.py:229
+msgid "Modify Source"
+msgstr "Modificar repositorio"
+
+#: ../repoman/dialog.py:253
+msgid "Type:"
+msgstr "Tipo:"
+
+#: ../repoman/dialog.py:255
+msgid "URI:"
+msgstr "URI:"
+
+#: ../repoman/dialog.py:257
+msgid "Version:"
+msgstr "Versión:"
+
+#: ../repoman/dialog.py:259
+msgid "Component:"
+msgstr "Componente:"
+
+#: ../repoman/dialog.py:261
+msgid "Enabled:"
+msgstr "Habilitar:"
+
+#: ../repoman/dialog.py:270
+msgid "Binary"
+msgstr "Binario"
+
+#: ../repoman/dialog.py:271
+msgid "Source code"
+msgstr "Código fuente"
+
+#: ../repoman/dialog.py:347
+#, python-brace-format
+msgid "{title}"
+msgstr "{title}"
+
+#: ../repoman/dialog.py:389
+msgid "Homepage"
+msgstr "Página principal"
+
+#: ../repoman/flatpak.py:60
+msgid "Flatpak Sources"
+msgstr "Repositorios Flatpak"
+
+#: ../repoman/flatpak.py:65
+msgid ""
+"These sources are for software provided via Flatpak. They may present a "
+"security risk. Only add sources that you trust."
+msgstr ""
+"Estos repositorios son para el software proporcionado a través de Flatpak. "
+"Pueden presentar un riesgo de seguridad. Solo agregue repositorios de confianza".
+
+#: ../repoman/flatpak.py:87 ../repoman/list.py:80
+msgid "Source"
+msgstr "Repositorio"
+
+#: ../repoman/flatpak.py:91
+msgid "URL"
+msgstr "URL"
+
+#: ../repoman/flatpak.py:96
+msgid "Type"
+msgstr "Tipo"
+
+#: ../repoman/flatpak.py:112 ../repoman/list.py:94
+msgid "Add New Source"
+msgstr "Agregar repositorio"
+
+#: ../repoman/flatpak.py:121
+msgid "Remote Info"
+msgstr "Información del repositorio"
+
+#: ../repoman/flatpak.py:130
+msgid "Remove Selected Source"
+msgstr "Eliminar repositorio"
+
+#: ../repoman/list.py:59 ../repoman/stack.py:55
+msgid "Extra Sources"
+msgstr "Repositorios adicionales"
+
+#: ../repoman/list.py:64
+msgid ""
+"These sources are for software provided by a third party. They may present a "
+"security risk or can cause system instability. Only add sources that you "
+"trust."
+msgstr ""
+"Estas fuentes son para software proporcionado por un tercero. Pueden presentar "
+"un riesgo de seguridad o pueden causar inestabilidad del sistema. Solo agregue "
+"fuentes en las que confíe".
+
+#: ../repoman/list.py:103 ../repoman/list.py:112
+msgid "Modify Selected Source"
+msgstr "Modificar el repositorio"
+
+#: ../repoman/settings.py:46
+msgid "Include source code"
+msgstr "Incluir código fuente"
+
+#: ../repoman/settings.py:58
+msgid "Official Sources"
+msgstr "Repositorios oficiales"
+
+#: ../repoman/settings.py:63
+#, python-format
+msgid ""
+"Official sources are those provided by %s and its developers. It's "
+"recommended to leave these sources enabled."
+msgstr ""
+"Las fuentes oficiales son las proporcionadas por %s y sus desarrolladores. Se "
+"recomienda dejar estas fuentes habilitadas".
+
+#: ../repoman/settings.py:79
+msgid "Developer Options (Advanced)"
+msgstr "Opciones avanzadas de desarrollador."
+
+#: ../repoman/settings.py:90
+msgid "These options are those which are primarily of interest to developers."
+msgstr ""
+"Estas opciones son aquellas que interesan principalmente a los desarrolladores."
+
+#: ../repoman/settings.py:125
+msgid "Proprietary Drivers for Devices"
+msgstr "Controladores de hardware propietarios"
+
+#: ../repoman/settings.py:127
+msgid "Software with Copyright or Legal Restrictions"
+msgstr "Software con derechos de autor o restricciones legales"
+
+#: ../repoman/stack.py:53
+msgid "Settings"
+msgstr "Configuraciones"
+
+#: ../repoman/stack.py:54
+msgid "Updates"
+msgstr "Actualizaciones"
+
+#: ../repoman/stack.py:57
+msgid "Flatpak"
+msgstr "Flatpak"
+
+#: ../repoman/updates.py:57
+msgid "Update Sources"
+msgstr "Fuentes de actualizaciones"
+
+#: ../repoman/updates.py:62
+#, python-format
+msgid ""
+"These sources control how %s checks for updates. It is recommended to leave "
+"these sources enabled."
+msgstr ""
+"Estas fuentes controlan cómo %s busca actualizaciones. Se recomienda dejar "
+"estas fuentes habilitadas".
+
+#: ../repoman/updates.py:80
+msgid "Update Notifications"
+msgstr "Notificaciones sobre actualizaciones"
+
+#: ../repoman/updates.py:85
+#, python-format
+msgid "Change how %s notifies you about pending software updates."
+msgstr ""
+"Cambia la forma en que %s te notifica sobre las actualizaciones de "
+"software pendientes"
+
+#: ../repoman/updates.py:98
+msgid "Notify about new updates"
+msgstr "Notificarle sobre nuevas actualizaciones"
+
+#: ../repoman/updates.py:102
+msgid "Automatically install important security updates."
+msgstr "Instalar nuevas actualizaciones automáticamente"
+
+#: ../repoman/updates.py:105
+#, python-format
+msgid "Notify about new versions of %s"
+msgstr "Notificar sobre nuevas versiones de %s"
+
+#: ../repoman/updates.py:137
+msgid "Backported Updates"
+msgstr "Actualizaciones soportadas"
