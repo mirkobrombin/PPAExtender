@@ -1,172 +1,229 @@
-# SOME DESCRIPTIVE TITLE.
-# Copyright (C) YEAR ORGANIZATION
-# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+# REPOMAN POT TRANSLATION TEMPLATE.
+# Copyright (C) 2020 Ian Santopietro
+# This file is distributed under the same license as the REPOMAN package.
+# Ian Santopietro <isantop@gmail.com>, 2020.
 #
+#, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2018-01-10 12:38-0700\n"
+"Report-Msgid-Bugs-To: https://github.com/pop-os/repoman/issues\n"
+"POT-Creation-Date: 2020-02-18 16:00-0700\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
 "MIME-Version: 1.0\n"
-"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Type: text/plain; charset=CHARSET\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Generated-By: pygettext.py 1.5\n"
 
-#: ../repoman/dialog.py:72 ../repoman/dialog.py:253
-msgid "Remove Source"
-msgstr ""
-
-#: ../repoman/dialog.py:92
-msgid "Are you sure you want to remove this source?"
-msgstr ""
-
-#: ../repoman/dialog.py:96
-msgid "If you remove this source, you will need to add it again to continue using it. Any software you've installed from this source will remain installed."
-msgstr ""
-
-#: ../repoman/dialog.py:113
+#: ../repoman/dialog.py:80
 msgid "Add Source"
 msgstr ""
 
-#: ../repoman/dialog.py:132
-msgid "Enter Source Line"
+#: ../repoman/dialog.py:101
+msgid "Enter Source Details"
 msgstr ""
 
-#: ../repoman/dialog.py:136
+#: ../repoman/dialog.py:105
 msgid "e.g. ppa:mirkobrombin/ppa"
 msgstr ""
 
-#: ../repoman/dialog.py:140
+#: ../repoman/dialog.py:109
 msgid "Source Line"
 msgstr ""
 
-#: ../repoman/dialog.py:142
+#: ../repoman/dialog.py:111
 msgid "changed"
 msgstr ""
 
+#: ../repoman/dialog.py:153
+#, python-brace-format
+msgid "Remove {title}"
+msgstr ""
+
+#: ../repoman/dialog.py:177
+msgid "Are you sure you want to remove this source?"
+msgstr ""
+
 #: ../repoman/dialog.py:184
+msgid ""
+"If you remove this source, you will need to add it again to continue using "
+"it. Any software you've installed from this source will remain installed."
+msgstr ""
+
+#: ../repoman/dialog.py:193
+msgid ""
+"If you remove this source, you will need to add it again to continue using "
+"it. Any software you've installed from this source will be removed."
+msgstr ""
+
+#: ../repoman/dialog.py:229
 msgid "Modify Source"
 msgstr ""
 
-#: ../repoman/dialog.py:206
-msgid "Type"
+#: ../repoman/dialog.py:253
+msgid "Type:"
 msgstr ""
 
-#: ../repoman/dialog.py:208
-msgid "URI"
+#: ../repoman/dialog.py:255
+msgid "URI:"
 msgstr ""
 
-#: ../repoman/dialog.py:210
-msgid "Version"
+#: ../repoman/dialog.py:257
+msgid "Version:"
 msgstr ""
 
-#: ../repoman/dialog.py:212
-msgid "Component"
+#: ../repoman/dialog.py:259
+msgid "Component:"
 msgstr ""
 
-#: ../repoman/dialog.py:214
-msgid "Enabled"
+#: ../repoman/dialog.py:261
+msgid "Enabled:"
 msgstr ""
 
-#: ../repoman/dialog.py:223
+#: ../repoman/dialog.py:270
 msgid "Binary"
 msgstr ""
 
-#: ../repoman/dialog.py:224
+#: ../repoman/dialog.py:271
 msgid "Source code"
 msgstr ""
 
-#: ../repoman/list.py:56 ../repoman/stack.py:49
-msgid "Extra Sources"
+#: ../repoman/dialog.py:347
+#, python-brace-format
+msgid "{title}"
 msgstr ""
 
-#: ../repoman/list.py:61
-msgid "These sources are for software provided by a third party. They may present a security risk or can cause system instability. Only add sources that you trust."
+#: ../repoman/dialog.py:389
+msgid "Homepage"
 msgstr ""
 
-#: ../repoman/list.py:76
+#: ../repoman/flatpak.py:60
+msgid "Flatpak Sources"
+msgstr ""
+
+#: ../repoman/flatpak.py:65
+msgid ""
+"These sources are for software provided via Flatpak. They may present a "
+"security risk. Only add sources that you trust."
+msgstr ""
+
+#: ../repoman/flatpak.py:87 ../repoman/list.py:80
 msgid "Source"
 msgstr ""
 
-#: ../repoman/list.py:90
+#: ../repoman/flatpak.py:91
+msgid "URL"
+msgstr ""
+
+#: ../repoman/flatpak.py:96
+msgid "Type"
+msgstr ""
+
+#: ../repoman/flatpak.py:112 ../repoman/list.py:94
 msgid "Add New Source"
 msgstr ""
 
-#: ../repoman/list.py:98
+#: ../repoman/flatpak.py:121
+msgid "Remote Info"
+msgstr ""
+
+#: ../repoman/flatpak.py:130
+msgid "Remove Selected Source"
+msgstr ""
+
+#: ../repoman/list.py:59 ../repoman/stack.py:55
+msgid "Extra Sources"
+msgstr ""
+
+#: ../repoman/list.py:64
+msgid ""
+"These sources are for software provided by a third party. They may present a "
+"security risk or can cause system instability. Only add sources that you "
+"trust."
+msgstr ""
+
+#: ../repoman/list.py:103 ../repoman/list.py:112
 msgid "Modify Selected Source"
 msgstr ""
 
-#: ../repoman/settings.py:45
+#: ../repoman/settings.py:46
 msgid "Include source code"
 msgstr ""
 
-#: ../repoman/settings.py:57
+#: ../repoman/settings.py:58
 msgid "Official Sources"
 msgstr ""
 
-# %s = Operating System Name
-#: ../repoman/settings.py:62
-msgid "Official sources are those provided by %s and its developers. It's recommended to leave these sources enabled."
+#: ../repoman/settings.py:63
+#, python-format
+msgid ""
+"Official sources are those provided by %s and its developers. It's "
+"recommended to leave these sources enabled."
 msgstr ""
 
-#: ../repoman/settings.py:75
+#: ../repoman/settings.py:79
 msgid "Developer Options (Advanced)"
 msgstr ""
 
-#: ../repoman/settings.py:85
+#: ../repoman/settings.py:90
 msgid "These options are those which are primarily of interest to developers."
 msgstr ""
 
-#: ../repoman/settings.py:119
+#: ../repoman/settings.py:125
 msgid "Proprietary Drivers for Devices"
 msgstr ""
 
-#: ../repoman/settings.py:121
+#: ../repoman/settings.py:127
 msgid "Software with Copyright or Legal Restrictions"
 msgstr ""
 
-#: ../repoman/stack.py:47
+#: ../repoman/stack.py:53
 msgid "Settings"
 msgstr ""
 
-#: ../repoman/stack.py:48
+#: ../repoman/stack.py:54
 msgid "Updates"
 msgstr ""
 
-#: ../repoman/updates.py:51
+#: ../repoman/stack.py:57
+msgid "Flatpak"
+msgstr ""
+
+#: ../repoman/updates.py:57
 msgid "Update Sources"
 msgstr ""
 
-# %s = Operating System Name
-#: ../repoman/updates.py:56
-msgid "These sources control how %s checks for updates. It is recommended to leave these sources enabled."
+#: ../repoman/updates.py:62
+#, python-format
+msgid ""
+"These sources control how %s checks for updates. It is recommended to leave "
+"these sources enabled."
 msgstr ""
 
-#: ../repoman/updates.py:72
+#: ../repoman/updates.py:80
 msgid "Update Notifications"
 msgstr ""
 
-# %s = Operating System Name
-#: ../repoman/updates.py:77
+#: ../repoman/updates.py:85
+#, python-format
 msgid "Change how %s notifies you about pending software updates."
 msgstr ""
 
-#: ../repoman/updates.py:90
+#: ../repoman/updates.py:98
 msgid "Notify about new updates"
 msgstr ""
 
-#: ../repoman/updates.py:94
+#: ../repoman/updates.py:102
 msgid "Automatically install important security updates."
 msgstr ""
 
-# %s = Operating System Name
-#: ../repoman/updates.py:97
+#: ../repoman/updates.py:105
+#, python-format
 msgid "Notify about new versions of %s"
 msgstr ""
 
-#: ../repoman/updates.py:129
+#: ../repoman/updates.py:137
 msgid "Backported Updates"
 msgstr ""
-
