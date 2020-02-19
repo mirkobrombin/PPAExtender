@@ -13,7 +13,7 @@ msgstr ""
 "Language-Team: Spanish\n"
 "Language: es\n"
 "MIME-Version: 1.0\n"
-"Content-Type: text/plain; charset=ASCII\n"
+"Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
@@ -112,7 +112,7 @@ msgid ""
 "security risk. Only add sources that you trust."
 msgstr ""
 "Estos repositorios son para el software proporcionado a través de Flatpak. "
-"Pueden presentar un riesgo de seguridad. Solo agregue repositorios de confianza".
+"Pueden presentar un riesgo de seguridad. Solo agregue repositorios de confianza."
 
 #: ../repoman/flatpak.py:87 ../repoman/list.py:80
 msgid "Source"
@@ -150,7 +150,7 @@ msgid ""
 msgstr ""
 "Estas fuentes son para software proporcionado por un tercero. Pueden presentar "
 "un riesgo de seguridad o pueden causar inestabilidad del sistema. Solo agregue "
-"fuentes en las que confíe".
+"fuentes en las que confíe."
 
 #: ../repoman/list.py:103 ../repoman/list.py:112
 msgid "Modify Selected Source"
@@ -171,7 +171,7 @@ msgid ""
 "recommended to leave these sources enabled."
 msgstr ""
 "Las fuentes oficiales son las proporcionadas por %s y sus desarrolladores. Se "
-"recomienda dejar estas fuentes habilitadas".
+"recomienda dejar estas fuentes habilitadas."
 
 #: ../repoman/settings.py:79
 msgid "Developer Options (Advanced)"
@@ -213,7 +213,7 @@ msgid ""
 "these sources enabled."
 msgstr ""
 "Estas fuentes controlan cómo %s busca actualizaciones. Se recomienda dejar "
-"estas fuentes habilitadas".
+"estas fuentes habilitadas."
 
 #: ../repoman/updates.py:80
 msgid "Update Notifications"

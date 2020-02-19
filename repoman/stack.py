@@ -29,10 +29,10 @@ try:
     from .flatpak import Flatpak
 except (ImportError, ValueError):
     Flatpak = False
-import gettext
-gettext.bindtextdomain('repoman', '/usr/share/repoman/po')
-gettext.textdomain("repoman")
-_ = gettext.gettext
+
+ 
+ 
+from gettext import gettext as _ 
 
 class Stack(Gtk.Box):
 

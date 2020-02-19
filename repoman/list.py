@@ -26,10 +26,10 @@ from gi.repository import Gtk
 from softwareproperties.SoftwareProperties import SoftwareProperties
 from .ppa import PPA
 from .dialog import AddDialog, EditDialog, ErrorDialog, DeleteDialog
-import gettext
-gettext.bindtextdomain('repoman', '/usr/share/repoman/po')
-gettext.textdomain("repoman")
-_ = gettext.gettext
+
+ 
+ 
+from gettext import gettext as _ 
 
 class List(Gtk.Box):
 

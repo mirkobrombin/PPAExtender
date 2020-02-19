@@ -23,10 +23,9 @@ import logging
 import gi
 gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk
-import gettext
-gettext.bindtextdomain('repoman', '/usr/share/repoman/po')
-gettext.textdomain("repoman")
-_ = gettext.gettext
+ 
+ 
+from gettext import gettext as _ 
 
 from . import flatpak_helper 
 from .ppa import PPA
@@ -108,7 +107,7 @@ class AddDialog(Gtk.Dialog):
         self.repo_entry = Gtk.Entry()
         self.repo_entry.set_placeholder_text(_("Source Line"))
         self.repo_entry.set_activates_default(True)
-        self.repo_entry.connect(_("changed"), self.on_entry_changed)
+        self.repo_entry.connect("changed", self.on_entry_changed)
         self.repo_entry.set_width_chars(50)
         self.repo_entry.set_margin_top(12)
         content_grid.attach(self.repo_entry, 0, 2, 1, 1)

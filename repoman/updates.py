@@ -25,10 +25,10 @@ import gi
 gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk
 from .ppa import PPA
-import gettext
-gettext.bindtextdomain('repoman', '/usr/share/repoman/po')
-gettext.textdomain("repoman")
-_ = gettext.gettext
+
+ 
+ 
+from gettext import gettext as _ 
 
 class Updates(Gtk.Box):
 
