@@ -19,18 +19,19 @@
     along with Repoman.  If not, see <http://www.gnu.org/licenses/>.
 '''
 
-from os.path import splitext
+from os.path import splitext, join
+from pathlib import Path
 from subprocess import CalledProcessError
 from sys import exc_info
+from threading import Thread
 
 import gi
 import logging
 gi.require_version('Gtk', '3.0')
 gi.require_version('Pango', '1.0')
-from gi.repository import Gtk, GObject, Pango
-
-import pyflatpak as flatpak
-from pyflatpak.remotes import AddRemoteError, DeleteRemoteError
+gi.require_version('Flatpak', '1.0')
+from gi.repository import Gtk, GObject, GLib, Gio, Pango
+from gi.repository import Flatpak as flatpak
 
 from .dialog import ErrorDialog
 
@@ -38,6 +39,38 @@ import gettext
 gettext.bindtextdomain('repoman', '/usr/share/repoman/po')
 gettext.textdomain("repoman")
 _ = gettext.gettext
+
+# Get User Installation
+fp_user_path = join(Path.home(), '.local', 'share', 'flatpak')
+fp_user_file = Gio.File.new_for_path(fp_user_path)
+fp_user_inst = flatpak.Installation.new_for_path(fp_user_file, True, None)
+
+# Get System Installation
+fp_sys_path = join('var', 'lib', 'flatpak')
+fp_sys_file = Gio.File.new_for_path(fp_sys_path)
+fp_sys_inst = flatpak.Installation.new_for_path(fp_sys_file, False, None)
+
+class RemoveThread(Thread):
+
+    def __init__(self, parent, remote, refs, installation):
+        super().__init__()
+        self.installation = installation
+        self.parent = parent
+        self.remote = self.installation.get_remote_by_name(remote)
+        self.refs = refs
+    
+    def run(self):
+        for ref in self.refs:
+            self.installation.uninstall(
+                ref.get_kind(),
+                ref.get_name(),
+                None,
+                ref.get_branch()
+            )
+        self.installation.remove_remote(self.remote.get_name())
+        GObject.idle_add(self.parent.parent.parent.stack.flatpak.generate_entries)
+        GObject.idle_add(self.parent.parent.parent.stack.flatpak.view.set_sensitive, True)
+        GObject.idle_add(self.parent.parent.parent.hbar.spinner.stop)
 
 class AddDialog(Gtk.Dialog):
 
@@ -93,8 +126,13 @@ class AddDialog(Gtk.Dialog):
         self.show_all()
 
     def on_url_entry_changed(self, entry):
-        entry_text = entry.get_text()
-        entry_valid = flatpak.validate(entry_text)
+        entry_text = entry.get_text().strip()
+        entry_list = entry_text.split('.')
+        if entry_list[-1] == 'flatpakrepo':
+            entry_valid = True
+        else:
+            entry_valid = False
+
         try:
             self.add_button.set_sensitive(entry_valid)
         except TypeError:
@@ -158,23 +196,36 @@ class DeleteDialog(Gtk.Dialog):
 
 class InfoDialog(Gtk.Dialog):
 
-    def __init__(self, parent, remote, name, option):
-        self.remote = remote
-        self.option = option
-        self.remote_data = flatpak.remotes.remotes[option][remote]
+    def __init__(self, parent, name, option):
+        if option.lower() == 'user':
+            self.installation = fp_user_inst
+        else:
+            self.installation = fp_sys_inst
+        
+        self.remote = self.installation.get_remote_by_name(name, None)
+
+        if self.remote.get_title():
+            title = self.remote.get_title()
+        else:
+            title = name
+        name = self.remote.get_name()
+        description = name
+        if self.remote.get_comment():
+            description = self.remote.get_comment()
+        if self.remote.get_description():
+            description = self.remote.get_description()
+        url = self.remote.get_homepage()
 
         settings = Gtk.Settings.get_default()
         header = settings.props.gtk_dialogs_use_header
         super().__init__(
-            _(f'{name}'),
+            _(f'{title}'),
             parent, 
             0,
             modal=1,
             use_header_bar=header
         )
-        self.log = logging.getLogger('repoman.FPInfoDialog')
-
-        self.log.debug('Data for remote %s: %s', remote, self.remote_data)
+        self.log = logging.getLogger(f'repoman.info-{name}')
 
         self.set_resizable(False)
 
@@ -191,17 +242,13 @@ class InfoDialog(Gtk.Dialog):
         content_grid.set_row_spacing(6)
         content_area.add(content_grid)
 
-        remote_title = self.remote_data['title']
-        description = self.remote_data['about']
-        url = self.remote_data['homepage']
-
         title_label = Gtk.Label()
         title_label.set_line_wrap(True)
-        title_label.set_markup(f'<b>{remote_title}</b>')
+        title_label.set_markup(f'<b>{title}</b>')
         content_grid.attach(title_label, 0, 1, 1, 1)
 
         name_label = Gtk.Label()
-        name_label.set_markup(f'<i><small>{self.remote}</small></i>')
+        name_label.set_markup(f'<i><small>{name}</small></i>')
         content_grid.attach(name_label, 0, 2, 1, 1)
 
         description_label = Gtk.Label()
@@ -213,9 +260,10 @@ class InfoDialog(Gtk.Dialog):
         description_label.set_text(description)
         content_grid.attach(description_label, 0, 3, 1, 1)
         
-        url_button = Gtk.LinkButton.new_with_label(_('Homepage'))
-        url_button.set_uri(url)
-        content_grid.attach(url_button, 0, 4, 1, 1)
+        if url:
+            url_button = Gtk.LinkButton.new_with_label(_('Homepage'))
+            url_button.set_uri(url)
+            content_grid.attach(url_button, 0, 4, 1, 1)
 
         self.show_all()
 
@@ -257,7 +305,9 @@ class Flatpak(Gtk.Box):
         list_grid = Gtk.Grid()
         self.content_grid.attach(list_grid, 0, 2, 1, 1)
         list_window = Gtk.ScrolledWindow()
-        Gtk.StyleContext.add_class(list_window.get_style_context(), "list_window")
+        Gtk.StyleContext.add_class(
+            list_window.get_style_context(), "list_window"
+        )
         list_grid.attach(list_window, 0, 0, 1, 1)
 
         self.remote_liststore = Gtk.ListStore(str, str, str, str, str)
@@ -323,42 +373,60 @@ class Flatpak(Gtk.Box):
 
         self.generate_entries()
 
+    def get_installation_for_type(self, option):
+        """ Gets the installation for the given type.
+
+        Arguments:
+            option (str): The type to get, 'user' or 'system'
+        
+        Returns:
+            The requested :obj:`Flatpak.Installation`
+        """
+        if option.lower() == 'user':
+            return fp_user_inst
+        else:
+            return fp_sys_inst
+
     def on_delete_button_clicked(self, widget):
         remote = self.get_selected_remote(0)
         name = self.strip_bold_from_name(self.get_selected_remote(1))
+        option = self.get_selected_remote(4)
+        installation = self.get_installation_for_type(option)
         self.log.info('Deleting remote %s', remote)
+        removed_refs = []
+        for ref in installation.list_installed_refs():
+            if ref.get_origin() == remote:
+                self.log.warning(
+                    'Removing %s will remove ref %s (%s)',
+                    name,
+                    ref.get_name(),
+                    ref.get_appdata_name()
+                )
+                removed_refs.append(ref)
 
         dialog = DeleteDialog(self.parent.parent, name)
         response = dialog.run()
         
         if response == Gtk.ResponseType.OK:
+            dialog.destroy()
+            self.parent.parent.hbar.spinner.start()
             self.add_button.set_sensitive(False)
             self.info_button.set_sensitive(False)
             self.delete_button.set_sensitive(False)
-            try:
-                flatpak.remotes.delete_remote(remote)
-            except DeleteRemoteError:
-                err = exc_info()
-                self.log.exception(err)
-                edialog = ErrorDialog(
-                    dialog,
-                    'Couldn\'t remove remote',
-                    'dialog-error',
-                    'Couldn\'t remove remote',
-                    err[1]
-                )
-                edialog.run()
-                edialog.destroy()
-        
-        dialog.destroy()
-        self.generate_entries()
+            self.view.set_sensitive(False)
+            
+            remove_thread = RemoveThread(
+                self, remote, removed_refs, installation
+            )
+            remove_thread.start()
+        else:
+            dialog.destroy()
     
     def on_info_button_clicked(self, widget):
-        remote = self.get_selected_remote(0)
-        name = self.strip_bold_from_name(self.get_selected_remote(1))
+        name = self.get_selected_remote(0)
         option = self.get_selected_remote(4)
 
-        dialog = InfoDialog(self.parent.parent, remote, name, option)
+        dialog = InfoDialog(self.parent.parent, name, option)
         response = dialog.run()
         dialog.destroy()
     
@@ -402,48 +470,73 @@ class Flatpak(Gtk.Box):
             self.delete_button.set_sensitive(False)
             url = dialog.url_entry.get_text().strip()
             name = splitext(url.split('/')[-1])[0]
-            self.log.info('Adding flatpak source %s at %s', name, url)
-            try:
-                flatpak.remotes.add_remote(name, url)
-            except AddRemoteError:
-                err = exc_info()
-                self.log.exception(err)
-                edialog = ErrorDialog(
-                    dialog,
-                    'Couldn\'t add remote',
-                    'dialog-error',
-                    'Couldn\'t add remote',
-                    err[1]
-                )
-                edialog.run()
-                edialog.destroy()
-            
+            self.log.info('Adding flatpakrepo %s at %s', name, url)
+            self.add_repo_name = name            
             dialog.destroy()
+            self.get_repo_file(url)
         else:
             dialog.destroy()
         
         self.generate_entries()
 
+    def get_repo_file(self, url):
+        """Downloads a flatpakrepo file to add to the system.
+
+        Arguments:
+            url (str): The URL of the flatpakrepo file to add.
+        """
+        self.log.debug('Fetching .flatpakrepo file: %s', url)
+        _repofile = Gio.File.new_for_uri(url)
+        _repofile.load_contents_async(None, self.on_file_ready, None)
+    
+    def on_file_ready(self, source_object, result, user_data):
+        try:
+            a, content, b = source_object.load_contents_finish(result)
+
+        except GLib.GError as e:
+            self.log.debug('Could not fetch flatpakrepo, %s', e.message)
+            content = None
+
+        else:
+            _repofile = GLib.Bytes.new(content)
+            new_remote = flatpak.Remote.new_from_file(self.add_repo_name, _repofile)
+            fp_user_inst.add_remote(new_remote, True, None)
+
+        finally:
+            self.add_button.set_sensitive(True)
+            self.generate_entries()
+
     def generate_entries(self):
         self.remote_liststore.clear()
 
-        # remote_liststore = []
-        remotes = {}
-        for option in flatpak.remotes.remotes:
-            for remote in flatpak.remotes.remotes[option]:
-                remotes[remote] = flatpak.remotes.remotes[option][remote]
+        for remote in fp_user_inst.list_remotes():
+            if remote.get_title():
+                title = remote.get_title()
+            else:
+                title = remote.get_name()
+
+            self.remote_liststore.append([
+                remote.get_name(),
+                f'<b>{title}</b>',
+                remote.get_comment(),
+                remote.get_url(),
+                'User'
+            ])
         
-        for remote in remotes:
-            # remote_liststore.append(
-            self.remote_liststore.append(
-                [
-                    remotes[remote]["name"],
-                    f'<b>{remotes[remote]["title"]}</b>',
-                    remotes[remote]["about"],
-                    remotes[remote]["url"],
-                    remotes[remote]["option"]
-                ]
-            )
+        for remote in fp_sys_inst.list_remotes():
+            if remote.get_title():
+                title = remote.get_title()
+            else:
+                title = remote.get_name()
+
+            self.remote_liststore.append([
+                remote.get_name(),
+                f'<b>{title}</b>',
+                remote.get_comment(),
+                remote.get_url(),
+                'System'
+            ])
+        
         self.add_button.set_sensitive(True)
 
     def on_row_selected(self, widget):

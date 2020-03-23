@@ -27,7 +27,7 @@ from .updates import Updates
 from .list import List
 try:
     from .flatpak import Flatpak
-except ImportError:
+except (ImportError, ValueError):
     Flatpak = False
 import gettext
 gettext.bindtextdomain('repoman', '/usr/share/repoman/po')
