@@ -19,253 +19,20 @@
     along with Repoman.  If not, see <http://www.gnu.org/licenses/>.
 '''
 
-from os.path import splitext, join
-from pathlib import Path
-from subprocess import CalledProcessError
-from sys import exc_info
-from threading import Thread
-
 import gi
 import logging
+from os.path import splitext
 gi.require_version('Gtk', '3.0')
 gi.require_version('Pango', '1.0')
-gi.require_version('Flatpak', '1.0')
 from gi.repository import Gtk, GObject, GLib, Gio, Pango
-from gi.repository import Flatpak as flatpak
 
-from .dialog import ErrorDialog
+from .dialog import ErrorDialog, AddDialog, DeleteDialog, InfoDialog
+from . import flatpak_helper as helper
 
 import gettext
 gettext.bindtextdomain('repoman', '/usr/share/repoman/po')
 gettext.textdomain("repoman")
 _ = gettext.gettext
-
-# Get User Installation
-fp_user_path = join(Path.home(), '.local', 'share', 'flatpak')
-fp_user_file = Gio.File.new_for_path(fp_user_path)
-fp_user_inst = flatpak.Installation.new_for_path(fp_user_file, True, None)
-
-# Get System Installation
-fp_sys_path = join('var', 'lib', 'flatpak')
-fp_sys_file = Gio.File.new_for_path(fp_sys_path)
-fp_sys_inst = flatpak.Installation.new_for_path(fp_sys_file, False, None)
-
-class RemoveThread(Thread):
-
-    def __init__(self, parent, remote, refs, installation):
-        super().__init__()
-        self.installation = installation
-        self.parent = parent
-        self.remote = self.installation.get_remote_by_name(remote)
-        self.refs = refs
-    
-    def run(self):
-        for ref in self.refs:
-            self.installation.uninstall(
-                ref.get_kind(),
-                ref.get_name(),
-                None,
-                ref.get_branch()
-            )
-        self.installation.remove_remote(self.remote.get_name())
-        GObject.idle_add(self.parent.parent.parent.stack.flatpak.generate_entries)
-        GObject.idle_add(self.parent.parent.parent.stack.flatpak.view.set_sensitive, True)
-        GObject.idle_add(self.parent.parent.parent.hbar.spinner.stop)
-
-class AddDialog(Gtk.Dialog):
-
-    remote_name = False
-
-    def __init__(self, parent):
-
-        settings = Gtk.Settings.get_default()
-        header = settings.props.gtk_dialogs_use_header
-
-        Gtk.Dialog.__init__(self, _("Add Source"), parent, 0,
-                            (Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL,
-                             Gtk.STOCK_ADD, Gtk.ResponseType.OK),
-                             modal=1, use_header_bar=header)
-
-        self.log = logging.getLogger("repoman.FPAddDialog")
-
-        content_area = self.get_content_area()
-
-        content_grid = Gtk.Grid()
-        content_grid.set_margin_top(12)
-        content_grid.set_margin_left(12)
-        content_grid.set_margin_right(12)
-        content_grid.set_margin_bottom(12)
-        content_grid.set_row_spacing(6)
-        content_grid.set_column_spacing(6)
-        content_grid.set_halign(Gtk.Align.CENTER)
-        content_grid.set_hexpand(True)
-        content_area.add(content_grid)
-
-        add_title = Gtk.Label(_("Enter Source Details"))
-        Gtk.StyleContext.add_class(add_title.get_style_context(), "h2")
-        content_grid.attach(add_title, 0, 0, 2, 1)
-
-        self.url_entry = Gtk.Entry()
-        self.url_entry.set_placeholder_text(_("URL"))
-        self.url_entry.set_activates_default(True)
-        self.url_entry.connect(_("changed"), self.on_url_entry_changed)
-        self.url_entry.set_width_chars(50)
-        self.url_entry.set_margin_top(12)
-        content_grid.attach(self.url_entry, 0, 1, 1, 1)
-
-        self.add_button = self.get_widget_for_response(Gtk.ResponseType.OK)
-        self.add_button.set_sensitive(False)
-
-        self.cancel_button = self.get_widget_for_response(Gtk.ResponseType.CANCEL)
-        self.cancel_button.grab_focus()
-
-        Gtk.StyleContext.add_class(self.add_button.get_style_context(),
-                                   "suggested-action")
-        self.add_button.grab_default()
-
-        self.show_all()
-
-    def on_url_entry_changed(self, entry):
-        entry_text = entry.get_text().strip()
-        entry_list = entry_text.split('.')
-        if entry_list[-1] == 'flatpakrepo':
-            entry_valid = True
-        else:
-            entry_valid = False
-
-        try:
-            self.add_button.set_sensitive(entry_valid)
-        except TypeError:
-            pass
-
-    def on_insert_emoji(self, entry, data=None):
-        """ We hook into this and return True. This should prevent the entry
-        from showing the emoji picker.
-        """
-        self.log.debug('Not Showing Emoji')
-        return True
-
-class DeleteDialog(Gtk.Dialog):
-
-    ppa_name = False
-
-    def __init__(self, parent, remote_name):
-
-        settings = Gtk.Settings.get_default()
-
-        header = settings.props.gtk_dialogs_use_header
-
-        Gtk.Dialog.__init__(self, _(f"Remove {remote_name}"), parent, 0,
-                            (Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL,
-                             Gtk.STOCK_REMOVE, Gtk.ResponseType.OK),
-                             modal=1, use_header_bar=header)
-
-        self.log = logging.getLogger("repoman.FPDeleteDialog")
-
-
-        content_area = self.get_content_area()
-
-        content_grid = Gtk.Grid()
-        content_grid.set_margin_top(24)
-        content_grid.set_margin_left(24)
-        content_grid.set_margin_right(24)
-        content_grid.set_margin_bottom(24)
-        content_grid.set_column_spacing(12)
-        content_grid.set_row_spacing(6)
-        content_area.add(content_grid)
-
-        delete_image = Gtk.Image.new_from_icon_name("dialog-warning-symbolic",
-                                                Gtk.IconSize.DIALOG)
-        delete_image.props.valign = Gtk.Align.START
-        content_grid.attach(delete_image, 0, 0, 1, 2)
-
-        delete_label = Gtk.Label(_("Are you sure you want to remove this source?"))
-        Gtk.StyleContext.add_class(delete_label.get_style_context(), "h2")
-        content_grid.attach(delete_label, 1, 0, 1, 1)
-
-        delete_explain = Gtk.Label(_("If you remove this source, you will need to add it again to continue using it. Any software you've installed from this source will be removed."))
-        delete_explain.props.wrap = True
-        delete_explain.set_max_width_chars(50)
-        delete_explain.set_xalign(0)
-        content_grid.attach(delete_explain, 1, 1, 1, 1)
-
-        Gtk.StyleContext.add_class(self.get_widget_for_response(Gtk.ResponseType.OK).get_style_context(),
-                                   "destructive-action")
-
-        self.show_all()
-
-class InfoDialog(Gtk.Dialog):
-
-    def __init__(self, parent, name, option):
-        if option.lower() == 'user':
-            self.installation = fp_user_inst
-        else:
-            self.installation = fp_sys_inst
-        
-        self.remote = self.installation.get_remote_by_name(name, None)
-
-        if self.remote.get_title():
-            title = self.remote.get_title()
-        else:
-            title = name
-        name = self.remote.get_name()
-        description = name
-        if self.remote.get_comment():
-            description = self.remote.get_comment()
-        if self.remote.get_description():
-            description = self.remote.get_description()
-        url = self.remote.get_homepage()
-
-        settings = Gtk.Settings.get_default()
-        header = settings.props.gtk_dialogs_use_header
-        super().__init__(
-            _(f'{title}'),
-            parent, 
-            0,
-            modal=1,
-            use_header_bar=header
-        )
-        self.log = logging.getLogger(f'repoman.info-{name}')
-
-        self.set_resizable(False)
-
-        content_area = self.get_content_area()
-        headerbar = self.get_header_bar()
-
-        content_grid = Gtk.Grid()
-        content_grid.set_halign(Gtk.Align.CENTER)
-        content_grid.set_margin_top(24)
-        content_grid.set_margin_bottom(24)
-        content_grid.set_margin_start(24)
-        content_grid.set_margin_end(24)
-        content_grid.set_column_spacing(12)
-        content_grid.set_row_spacing(6)
-        content_area.add(content_grid)
-
-        title_label = Gtk.Label()
-        title_label.set_line_wrap(True)
-        title_label.set_markup(f'<b>{title}</b>')
-        content_grid.attach(title_label, 0, 1, 1, 1)
-
-        name_label = Gtk.Label()
-        name_label.set_markup(f'<i><small>{name}</small></i>')
-        content_grid.attach(name_label, 0, 2, 1, 1)
-
-        description_label = Gtk.Label()
-        description_label.set_margin_top(18)
-        description_label.set_margin_bottom(12)
-        description_label.set_line_wrap(True)
-        description_label.set_max_width_chars(36)
-        description_label.set_width_chars(36)
-        description_label.set_text(description)
-        content_grid.attach(description_label, 0, 3, 1, 1)
-        
-        if url:
-            url_button = Gtk.LinkButton.new_with_label(_('Homepage'))
-            url_button.set_uri(url)
-            content_grid.attach(url_button, 0, 4, 1, 1)
-
-        self.show_all()
 
 class Flatpak(Gtk.Box):
 
@@ -314,6 +81,7 @@ class Flatpak(Gtk.Box):
         self.view = Gtk.TreeView(self.remote_liststore)
         
         name_renderer = Gtk.CellRendererText()
+        name_renderer.props.weight = 700
         name_renderer.props.wrap_mode = Pango.WrapMode.WORD_CHAR
         name_renderer.props.wrap_width = 120
         name_column = Gtk.TreeViewColumn(_('Source'), name_renderer, markup=1)
@@ -373,169 +141,92 @@ class Flatpak(Gtk.Box):
 
         self.generate_entries()
 
-    def get_installation_for_type(self, option):
-        """ Gets the installation for the given type.
-
-        Arguments:
-            option (str): The type to get, 'user' or 'system'
-        
-        Returns:
-            The requested :obj:`Flatpak.Installation`
-        """
-        if option.lower() == 'user':
-            return fp_user_inst
-        else:
-            return fp_sys_inst
+    def set_items_insensitive(self):
+        self.add_button.set_sensitive(False)
+        self.info_button.set_sensitive(False)
+        self.delete_button.set_sensitive(False)
+        self.view.set_sensitive(False)
 
     def on_delete_button_clicked(self, widget):
-        remote = self.get_selected_remote(0)
-        name = self.strip_bold_from_name(self.get_selected_remote(1))
-        option = self.get_selected_remote(4)
-        installation = self.get_installation_for_type(option)
-        self.log.info('Deleting remote %s', remote)
+        remote = self.get_selected_remote()
+        installation = helper.get_installation_for_type(remote[4])
+        self.log.info('Deleting remote %s', remote[0])
         removed_refs = []
         for ref in installation.list_installed_refs():
-            if ref.get_origin() == remote:
+            if ref.get_origin() == remote[0]:
                 self.log.warning(
                     'Removing %s will remove ref %s (%s)',
-                    name,
+                    remote[0],
                     ref.get_name(),
                     ref.get_appdata_name()
                 )
                 removed_refs.append(ref)
 
-        dialog = DeleteDialog(self.parent.parent, name)
+        dialog = DeleteDialog(
+            self.parent.parent, remote[1], flatpak=True, refs=removed_refs
+        )
         response = dialog.run()
         
         if response == Gtk.ResponseType.OK:
             dialog.destroy()
             self.parent.parent.hbar.spinner.start()
-            self.add_button.set_sensitive(False)
-            self.info_button.set_sensitive(False)
-            self.delete_button.set_sensitive(False)
-            self.view.set_sensitive(False)
+            self.set_items_insensitive()
             
-            remove_thread = RemoveThread(
-                self, remote, removed_refs, installation
-            )
-            remove_thread.start()
+            helper.delete_remote(self, remote[0], remote[4])
         else:
             dialog.destroy()
     
     def on_info_button_clicked(self, widget):
-        name = self.get_selected_remote(0)
-        option = self.get_selected_remote(4)
+        remote = self.get_selected_remote()
 
-        dialog = InfoDialog(self.parent.parent, name, option)
-        response = dialog.run()
+        dialog = InfoDialog(self.parent.parent, remote[0], remote[4])
+        dialog.run()
         dialog.destroy()
     
-    def strip_bold_from_name(self, name):
-        name = name.replace('<b>', '')
-        name = name.replace('</b>', '')
-        return name
-    
-    def get_selected_remote(self, index):
+    def get_selected_remote(self):
         selection = self.view.get_selection()
         (model, pathlist) = selection.get_selected_rows()
         tree_iter = model.get_iter(pathlist[0])
-        value = model.get_value(tree_iter, index)
+        value = tuple(
+            model.get_value(tree_iter, index) for index in range(0, 5)
+        )
         self.log.debug('Current selection: %s', value)
         return value
 
-    def on_row_activated(self, widget, data1, data2):
-        remote = self.get_selected_remote(0)
-        name = self.get_selected_remote(1)
-        name = name.replace('<b>', '')
-        name = name.replace('</b>', '')
-        self.log.info('Deleting remote %s', remote)
-
-        dialog = DeleteDialog(self.parent.parent, name)
-        response = dialog.run()
-        
-        if response == Gtk.ResponseType.OK:
-            flatpak.remotes.delete_remote(remote)
-        
-        dialog.destroy()
-        self.generate_entries()
-
     def on_add_button_clicked(self, widget):
-        dialog = AddDialog(self.parent.parent)
+        dialog = AddDialog(self.parent.parent, flatpak=True)
         response = dialog.run()
         self.log.debug('Response type: %s', response)
 
         if response == Gtk.ResponseType.OK:
-            self.add_button.set_sensitive(False)
-            self.info_button.set_sensitive(False)
-            self.delete_button.set_sensitive(False)
-            url = dialog.url_entry.get_text().strip()
+            url = dialog.repo_entry.get_text().strip()
             name = splitext(url.split('/')[-1])[0]
+            dialog.destroy()
+            self.set_items_insensitive()
             self.log.info('Adding flatpakrepo %s at %s', name, url)
-            self.add_repo_name = name            
-            dialog.destroy()
-            self.get_repo_file(url)
+            helper.add_remote(self, name, url, 'User')
         else:
             dialog.destroy()
-        
-        self.generate_entries()
-
-    def get_repo_file(self, url):
-        """Downloads a flatpakrepo file to add to the system.
-
-        Arguments:
-            url (str): The URL of the flatpakrepo file to add.
-        """
-        self.log.debug('Fetching .flatpakrepo file: %s', url)
-        _repofile = Gio.File.new_for_uri(url)
-        _repofile.load_contents_async(None, self.on_file_ready, None)
-    
-    def on_file_ready(self, source_object, result, user_data):
-        try:
-            a, content, b = source_object.load_contents_finish(result)
-
-        except GLib.GError as e:
-            self.log.debug('Could not fetch flatpakrepo, %s', e.message)
-            content = None
-
-        else:
-            _repofile = GLib.Bytes.new(content)
-            new_remote = flatpak.Remote.new_from_file(self.add_repo_name, _repofile)
-            fp_user_inst.add_remote(new_remote, True, None)
-
-        finally:
-            self.add_button.set_sensitive(True)
-            self.generate_entries()
 
     def generate_entries(self):
         self.remote_liststore.clear()
 
-        for remote in fp_user_inst.list_remotes():
-            if remote.get_title():
-                title = remote.get_title()
-            else:
-                title = remote.get_name()
+        for option in ['User', 'System']:
+            self.log.debug('Getting %s remotes', option)
+            for remote in helper.get_remotes(option):
+                self.log.debug('Found remote: %s', remote.get_name())
+                if remote.get_title():
+                    title = remote.get_title()
+                else:
+                    title = remote.get_name()
 
-            self.remote_liststore.append([
-                remote.get_name(),
-                f'<b>{title}</b>',
-                remote.get_comment(),
-                remote.get_url(),
-                'User'
-            ])
-        
-        for remote in fp_sys_inst.list_remotes():
-            if remote.get_title():
-                title = remote.get_title()
-            else:
-                title = remote.get_name()
-
-            self.remote_liststore.append([
-                remote.get_name(),
-                f'<b>{title}</b>',
-                remote.get_comment(),
-                remote.get_url(),
-                'System'
-            ])
+                self.remote_liststore.append([
+                    remote.get_name(),
+                    title,
+                    remote.get_comment(),
+                    remote.get_url(),
+                    option
+                ])
         
         self.add_button.set_sensitive(True)
 
@@ -553,9 +244,9 @@ class Flatpak(Gtk.Box):
             self.delete_button.set_sensitive(False)
 
     def throw_error_dialog(self, message, msg_type):
-        if msg_type == "error":
-            msg_type = Gtk.MessageType.ERROR
-        dialog = Gtk.MessageDialog(self.parent.parent, 0, msg_type,
-                                   Gtk.ButtonsType.CLOSE, message)
+        dialog = ErrorDialog(
+            self.parent, 'Couldn\'t add source', 'dialog-error',
+            'Couldn\'t add source', message
+        )
         dialog.run()
         dialog.destroy()
