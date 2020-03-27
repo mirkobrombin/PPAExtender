@@ -103,7 +103,8 @@ class AddDialog(Gtk.Dialog):
         content_grid.attach(add_title, 0, 0, 1, 1)
 
         add_label = Gtk.Label(_("e.g. ppa:mirkobrombin/ppa"))
-        content_grid.attach(add_label, 0, 1, 1, 1)
+        if not self.flatpak:
+            content_grid.attach(add_label, 0, 1, 1, 1)
 
         self.repo_entry = Gtk.Entry()
         self.repo_entry.set_placeholder_text(_("Source Line"))
