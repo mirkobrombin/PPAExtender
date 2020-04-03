@@ -28,7 +28,10 @@ gettext.bindtextdomain('repoman', '/usr/share/repoman/po')
 gettext.textdomain("repoman")
 _ = gettext.gettext
 
-from . import flatpak_helper 
+try:
+    from . import flatpak_helper 
+except (ImportError, ValueError):
+    pass
 from .ppa import PPA
 
 class ErrorDialog(Gtk.Dialog):
