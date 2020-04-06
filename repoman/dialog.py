@@ -371,6 +371,24 @@ class InfoDialog(Gtk.Dialog):
         content_grid.set_row_spacing(6)
         content_area.add(content_grid)
 
+        self.icon_box = Gtk.Box()
+        self.icon_box.set_halign(Gtk.Align.CENTER)
+        content_grid.attach(self.icon_box, 0, 0, 1, 1)
+
+        self.log.debug('Trying to get icon for %s', name)
+        cached_icon = flatpak_helper.get_icon_cache_for_remote(name, option)
+        pixbuf = flatpak_helper.get_icon_pixbuf(cached_icon)
+        
+        if pixbuf:
+            self.icon = flatpak_helper.get_image_from_pixbuf(pixbuf)
+            self.icon_box.add(self.icon)
+        else:
+            self.icon = Gtk.Image.new_from_icon_name(
+                'notfound',
+                Gtk.IconSize.SMALL_TOOLBAR
+            )
+            self.icon.props.opacity = 0
+
         title_label = Gtk.Label()
         title_label.set_line_wrap(True)
         title_label.set_markup(f'<b>{title}</b>')
@@ -395,4 +413,19 @@ class InfoDialog(Gtk.Dialog):
             content_grid.attach(url_button, 0, 4, 1, 1)
 
         self.show_all()
-        
+
+        icon_thread = flatpak_helper.IconThread(self, name, option)
+        icon_thread.start()
+    
+    def set_remote_icon(self, image):
+        """ Set's the remote icon to a given Gtk.Image
+
+        Arguments:
+            image (`Gtk.Image`): The image to set.
+        """
+        self.icon.destroy()
+        self.icon = image
+        self.icon.show()
+        self.icon_box.add(self.icon)
+        self.log.debug('Got latest icon')
+
