@@ -97,11 +97,16 @@ def get_installation_for_type(option):
         The requested :obj:`Flatpak.Installation`
     """
     log.debug('Getting %s Installation', option)
+
+    # We want to drop the caches for these installations in case they have been
+    # modified from some other source.
     if option.lower() == 'user':
         log.debug('User installation found.')
+        fp_user_inst.drop_caches()
         return fp_user_inst
     else:
         log.debug('System installation found.')
+        fp_sys_inst.drop_caches()
         return fp_sys_inst
 
 def get_installed_refs_from_remote(name, option):
