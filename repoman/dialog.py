@@ -151,7 +151,6 @@ class DeleteDialog(Gtk.Dialog):
     def __init__(self, parent, title, flatpak=False, refs=None):
 
         settings = Gtk.Settings.get_default()
-
         header = settings.props.gtk_dialogs_use_header
 
         Gtk.Dialog.__init__(self, _(f'Remove {title}'), parent, 0,
@@ -160,6 +159,10 @@ class DeleteDialog(Gtk.Dialog):
                              modal=1, use_header_bar=header)
 
         self.log = logging.getLogger("repoman.DeleteDialog")
+
+        self.expanded_height = 400
+        self.expanded_width = 200
+        self.set_resizable(False)
 
         content_area = self.get_content_area()
 
@@ -195,8 +198,7 @@ class DeleteDialog(Gtk.Dialog):
             delete_explain = Gtk.Label.new(
                 _(
                     'If you remove this source, you will need to add it again '
-                    'to continue using it. Any software you\'ve installed from '
-                    'this source will be removed.'
+                    'to continue using it.'
                 )
             )
         delete_explain.props.wrap = True
@@ -210,6 +212,64 @@ class DeleteDialog(Gtk.Dialog):
         )
 
         self.show_all()
+
+        if flatpak and refs:
+            delete_explain_text = delete_explain.get_text()
+            delete_explain_text += _(
+                 ' All flatpaks you\'ve installed from this source will '
+                 'be removed.'
+            )
+            delete_explain.set_text(delete_explain_text)
+
+            removed_expander = Gtk.Expander.new(_('Removed Flatpaks'))
+            removed_expander.connect('notify::expanded', self.show_hide_removed)
+            content_grid.attach(removed_expander, 1, 2, 1, 1)
+
+            self.removed_revealer = Gtk.Revealer()
+            self.removed_revealer.set_margin_start(18)
+            self.removed_revealer.set_transition_type(
+                Gtk.RevealerTransitionType.CROSSFADE
+            )
+            content_grid.attach(self.removed_revealer, 1, 3, 1, 1)
+
+            list_grid = Gtk.Grid()
+            self.removed_revealer.add(list_grid)
+
+            removed_label = Gtk.Label.new(
+                _('The following Flatpaks will be removed with this source:')
+            )
+            list_grid.attach(removed_label, 0, 0, 1, 1)
+            list_window = Gtk.ScrolledWindow()
+            list_window.set_vexpand(True)
+            list_window.set_hexpand(True)
+            list_grid.attach(list_window, 0, 1, 1, 1)
+            
+            removed_view = Gtk.TextView()
+            removed_view.set_editable(False)
+            list_window.add(removed_view)
+
+            removed_list = removed_view.get_buffer()
+            removed_text = ''
+            for ref in refs:
+                if ref.get_appdata_name():
+                    removed_text += f'{ref.get_appdata_name()} ({ref.get_name()})\n'
+            for ref in refs:
+                if not ref.get_appdata_name():
+                    removed_text += f'{ref.get_name()}\n'
+            removed_list.set_text(removed_text)
+            
+            self.show_all()
+    
+    def show_hide_removed(self, expander, data=None):
+        self.removed_revealer.props.reveal_child = expander.get_expanded()
+        if expander.get_expanded():
+            self.resize(self.expanded_width, self.expanded_height)
+            self.set_resizable(True)
+        else:
+            self.expanded_height = self.get_allocated_height() - 99
+            self.expanded_width = self.get_allocated_width() - 52
+            self.resize(self.expanded_width, 1)
+            self.set_resizable(False)
 
 class EditDialog(Gtk.Dialog):
 
