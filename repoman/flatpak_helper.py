@@ -223,7 +223,7 @@ class RemoveThread(Thread):
         self.parent = parent
         self.remote = remote
         self.refs = list(self.populate_refs_on_remote(option))
-        self.log = logging.getLogger(f'repoman.remove-{remote.get_name()}')
+        self.log = logging.getLogger(f'repoman.remove-{remote}')
 
     def populate_refs_on_remote(self, option):
         for ref in get_installed_refs_for_option(option):
