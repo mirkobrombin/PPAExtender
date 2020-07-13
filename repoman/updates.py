@@ -165,4 +165,3 @@ class Updates(Gtk.Box):
             self.ppa.set_child_enabled(child.name, enabled)
         except dbus.exceptions.DBusException:
             self.show_updates()
-

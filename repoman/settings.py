@@ -179,6 +179,10 @@ class Settings(Gtk.Box):
             self.ppa.set_comp_enabled(comp, enabled)
         except dbus.exceptions.DBusException:
             self.show_distro()
+        
+        self.parent.updates.init_updates()
+        self.parent.updates.show_updates()
+
         return 0
 
     def on_source_check_toggled(self, checkbutton):
@@ -187,6 +191,10 @@ class Settings(Gtk.Box):
             self.ppa.set_source_code_enabled(enabled)
         except dbus.exceptions.DBusException:
             self.show_distro()
+        
+        self.parent.updates.init_updates()
+        self.parent.updates.show_updates()
+
         return 0
 
     def on_proposed_check_toggled(self, checkbutton, comp):
@@ -195,5 +203,9 @@ class Settings(Gtk.Box):
             self.ppa.set_child_enabled(comp.name, enabled)
         except dbus.exceptions.DBusException:
             self.show_distro()
+        
+        self.parent.updates.init_updates()
+        self.parent.updates.show_updates()
+
         return 0
     
