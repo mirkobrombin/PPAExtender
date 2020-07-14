@@ -182,21 +182,25 @@ class PPA:
 
     # Returns the current distro Components.
     def get_distro_sources(self):
+        self.sp.reload_sourceslist()
         components = self.sp.distro.source_template.components
         return components
 
     # Returns the current child repos (updates)
     def get_distro_child_repos(self):
+        self.sp.reload_sourceslist()
         repos = self.sp.distro.source_template.children
         return repos
 
     # Get whether a component is enabled or not
     def get_comp_download_state(self, comp):
+        self.sp.reload_sourceslist()
         (active, inconsistent) = self.sp.get_comp_download_state(comp)
         return (active, inconsistent)
 
     # Get whether a child repo is enabled or not
     def get_child_download_state(self, child):
+        self.sp.reload_sourceslist()
         (active, inconsistent) = self.sp.get_comp_child_state(child)
         self.log.debug(child.name + " (" + str(active) + ", " + str(inconsistent) + ")")
         return (active, inconsistent)
