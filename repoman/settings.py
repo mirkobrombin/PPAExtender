@@ -164,6 +164,15 @@ class Settings(Gtk.Box):
 
         return 0
     
+    def set_child_checks_sensitive(self):
+        self.source_check.set_sensitive(self.prev_enabled)
+        self.proposed_check.set_sensitive(self.prev_enabled)
+        try:
+            self.parent.updates.set_checks_enabled(self.prev_enabled)
+        except AttributeError:
+            # In case the updates page hasn't been init'd yet
+            pass
+    
     def show_source_code(self):
         (active, inconsistent) = self.ppa.get_source_code_enabled()
         self.source_check.set_active(active)
@@ -186,6 +195,7 @@ class Settings(Gtk.Box):
         self.show_source_code()
         self.unblock_handlers()
         self.prev_enabled = self.checks_enabled
+        self.set_child_checks_sensitive()
         return 0
 
     def on_component_toggled(self, checkbutton, comp):
@@ -201,6 +211,7 @@ class Settings(Gtk.Box):
             self.show_source_code()
         
         self.prev_enabled = self.checks_enabled
+        self.set_child_checks_sensitive()
         return 0
 
     def on_source_check_toggled(self, checkbutton):

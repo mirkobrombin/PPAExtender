@@ -45,14 +45,17 @@ class Stack(Gtk.Box):
         self.stack.set_transition_duration(300)
 
         self.setting = Settings(self)
+        self.stack.add_titled(self.setting, "settings", _("Settings"))
+        
         self.updates = Updates(self)
+        self.stack.add_titled(self.updates, "updates", _("Updates"))
+        
         self.list_all = List(self)
+        self.stack.add_titled(self.list_all, "list", _("Extra Sources"))
+        
         if Flatpak:
             self.flatpak = Flatpak(self)
 
-        self.stack.add_titled(self.setting, "settings", _("Settings"))
-        self.stack.add_titled(self.updates, "updates", _("Updates"))
-        self.stack.add_titled(self.list_all, "list", _("Extra Sources"))
         if Flatpak:
             self.stack.add_titled(self.flatpak, "flatpak", _("Flatpak"))
 
