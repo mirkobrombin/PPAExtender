@@ -163,6 +163,16 @@ class Settings(Gtk.Box):
                                                    template)
 
         return 0
+    
+    def show_source_code(self):
+        (active, inconsistent) = self.ppa.get_source_code_enabled()
+        self.source_check.set_active(active)
+        self.source_check.set_inconsistent(inconsistent)
+    
+    def show_proposed(self):
+        (active, inconsistent) = self.ppa.get_child_download_state(self.proposed_check.template)
+        self.proposed_check.set_active(active)
+        self.proposed_check.set_inconsistent(inconsistent)
 
     def show_distro(self):
         self.block_handlers()
@@ -172,14 +182,8 @@ class Settings(Gtk.Box):
             checkbox.set_active(active)
             checkbox.set_inconsistent(inconsistent)
 
-        (src_active, src_inconsistent) = self.ppa.get_source_code_enabled()
-        self.source_check.set_active(src_active)
-        self.source_check.set_inconsistent(src_inconsistent)
-
-        (prop_active, prop_inconsistent) = self.ppa.get_child_download_state(self.proposed_check.template)
-        self.proposed_check.set_active(prop_active)
-        self.proposed_check.set_inconsistent(prop_inconsistent)
-
+        self.show_proposed()
+        self.show_source_code()
         self.unblock_handlers()
         self.prev_enabled = self.checks_enabled
         return 0
@@ -191,9 +195,10 @@ class Settings(Gtk.Box):
         except dbus.exceptions.DBusException:
             self.show_distro()
         
-        if self.checks_enabled != self.prev_enabled:
-            self.parent.updates.init_updates()
+        if self.checks_enabled != self.prev_enabled and self.prev_enabled:
             self.parent.updates.show_updates()
+            self.show_proposed()
+            self.show_source_code()
         
         self.prev_enabled = self.checks_enabled
         return 0
