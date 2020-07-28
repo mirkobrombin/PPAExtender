@@ -40,6 +40,7 @@ class Settings(Gtk.Box):
         self.log.debug('Logging established.')
         self.os_name = self.ppa.get_os_name()
         self.handlers = {}
+        self.prev_enabled = False
 
         self.parent = parent
 
@@ -98,6 +99,15 @@ class Settings(Gtk.Box):
         self.init_distro()
         self.show_distro()
 
+    @property
+    def checks_enabled(self):
+        for checkbox in self.checks_grid.get_children():
+            if checkbox.get_active():
+                return True
+            else:
+                continue
+        return False
+
     def block_handlers(self):
         for widget in self.handlers:
             if widget.handler_is_connected(self.handlers[widget]):
@@ -107,7 +117,7 @@ class Settings(Gtk.Box):
         for widget in self.handlers:
             if widget.handler_is_connected(self.handlers[widget]):
                 widget.handler_unblock(self.handlers[widget])
-
+    
     def init_distro(self):
 
         self.handlers[self.source_check] = \
@@ -171,6 +181,7 @@ class Settings(Gtk.Box):
         self.proposed_check.set_inconsistent(prop_inconsistent)
 
         self.unblock_handlers()
+        self.prev_enabled = self.checks_enabled
         return 0
 
     def on_component_toggled(self, checkbutton, comp):
@@ -180,9 +191,11 @@ class Settings(Gtk.Box):
         except dbus.exceptions.DBusException:
             self.show_distro()
         
-        self.parent.updates.init_updates()
-        self.parent.updates.show_updates()
-
+        if self.checks_enabled != self.prev_enabled:
+            self.parent.updates.init_updates()
+            self.parent.updates.show_updates()
+        
+        self.prev_enabled = self.checks_enabled
         return 0
 
     def on_source_check_toggled(self, checkbutton):
@@ -191,9 +204,6 @@ class Settings(Gtk.Box):
             self.ppa.set_source_code_enabled(enabled)
         except dbus.exceptions.DBusException:
             self.show_distro()
-        
-        self.parent.updates.init_updates()
-        self.parent.updates.show_updates()
 
         return 0
 
@@ -203,9 +213,6 @@ class Settings(Gtk.Box):
             self.ppa.set_child_enabled(comp.name, enabled)
         except dbus.exceptions.DBusException:
             self.show_distro()
-        
-        self.parent.updates.init_updates()
-        self.parent.updates.show_updates()
 
         return 0
     
