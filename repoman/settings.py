@@ -98,6 +98,10 @@ class Settings(Gtk.Box):
 
         self.init_distro()
         self.show_distro()
+        self.block_handlers()
+        self.show_proposed()
+        self.show_source_code()
+        self.unblock_handlers()
 
     @property
     def checks_enabled(self):
@@ -191,8 +195,6 @@ class Settings(Gtk.Box):
             checkbox.set_active(active)
             checkbox.set_inconsistent(inconsistent)
 
-        self.show_proposed()
-        self.show_source_code()
         self.unblock_handlers()
         self.prev_enabled = self.checks_enabled
         self.set_child_checks_sensitive()
@@ -209,6 +211,9 @@ class Settings(Gtk.Box):
             self.parent.updates.show_updates()
             self.show_proposed()
             self.show_source_code()
+        
+        if 'multiverse' in checkbutton.get_label():
+            self.show_distro()
         
         self.prev_enabled = self.checks_enabled
         self.set_child_checks_sensitive()
