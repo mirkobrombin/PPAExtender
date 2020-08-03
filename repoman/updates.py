@@ -107,6 +107,7 @@ class Updates(Gtk.Box):
 
         self.init_updates()
         self.show_updates()
+        self.set_checks_enabled(self.parent.setting.checks_enabled)
 
     def block_handlers(self):
         for widget in self.handlers:
@@ -147,6 +148,10 @@ class Updates(Gtk.Box):
             self.checks_grid.add(checkbox)
             checkbox.show()
         return 0
+    
+    def set_checks_enabled(self, enabled):
+        for checkbox in self.checks_grid.get_children():
+            checkbox.set_sensitive(enabled)
 
     def show_updates(self):
         self.block_handlers()
@@ -165,4 +170,3 @@ class Updates(Gtk.Box):
             self.ppa.set_child_enabled(child.name, enabled)
         except dbus.exceptions.DBusException:
             self.show_updates()
-

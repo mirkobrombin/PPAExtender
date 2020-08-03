@@ -40,6 +40,7 @@ class Settings(Gtk.Box):
         self.log.debug('Logging established.')
         self.os_name = self.ppa.get_os_name()
         self.handlers = {}
+        self.prev_enabled = False
 
         self.parent = parent
 
@@ -97,6 +98,19 @@ class Settings(Gtk.Box):
 
         self.init_distro()
         self.show_distro()
+        self.block_handlers()
+        self.show_proposed()
+        self.show_source_code()
+        self.unblock_handlers()
+
+    @property
+    def checks_enabled(self):
+        for checkbox in self.checks_grid.get_children():
+            if checkbox.get_active():
+                return True
+            else:
+                continue
+        return False
 
     def block_handlers(self):
         for widget in self.handlers:
@@ -107,7 +121,7 @@ class Settings(Gtk.Box):
         for widget in self.handlers:
             if widget.handler_is_connected(self.handlers[widget]):
                 widget.handler_unblock(self.handlers[widget])
-
+    
     def init_distro(self):
 
         self.handlers[self.source_check] = \
@@ -153,6 +167,25 @@ class Settings(Gtk.Box):
                                                    template)
 
         return 0
+    
+    def set_child_checks_sensitive(self):
+        self.source_check.set_sensitive(self.prev_enabled)
+        self.proposed_check.set_sensitive(self.prev_enabled)
+        try:
+            self.parent.updates.set_checks_enabled(self.prev_enabled)
+        except AttributeError:
+            # In case the updates page hasn't been init'd yet
+            pass
+    
+    def show_source_code(self):
+        (active, inconsistent) = self.ppa.get_source_code_enabled()
+        self.source_check.set_active(active)
+        self.source_check.set_inconsistent(inconsistent)
+    
+    def show_proposed(self):
+        (active, inconsistent) = self.ppa.get_child_download_state(self.proposed_check.template)
+        self.proposed_check.set_active(active)
+        self.proposed_check.set_inconsistent(inconsistent)
 
     def show_distro(self):
         self.block_handlers()
@@ -162,15 +195,9 @@ class Settings(Gtk.Box):
             checkbox.set_active(active)
             checkbox.set_inconsistent(inconsistent)
 
-        (src_active, src_inconsistent) = self.ppa.get_source_code_enabled()
-        self.source_check.set_active(src_active)
-        self.source_check.set_inconsistent(src_inconsistent)
-
-        (prop_active, prop_inconsistent) = self.ppa.get_child_download_state(self.proposed_check.template)
-        self.proposed_check.set_active(prop_active)
-        self.proposed_check.set_inconsistent(prop_inconsistent)
-
         self.unblock_handlers()
+        self.prev_enabled = self.checks_enabled
+        self.set_child_checks_sensitive()
         return 0
 
     def on_component_toggled(self, checkbutton, comp):
@@ -179,6 +206,17 @@ class Settings(Gtk.Box):
             self.ppa.set_comp_enabled(comp, enabled)
         except dbus.exceptions.DBusException:
             self.show_distro()
+        
+        if self.checks_enabled != self.prev_enabled and self.prev_enabled:
+            self.parent.updates.show_updates()
+            self.show_proposed()
+            self.show_source_code()
+        
+        if 'multiverse' in checkbutton.get_label():
+            self.show_distro()
+        
+        self.prev_enabled = self.checks_enabled
+        self.set_child_checks_sensitive()
         return 0
 
     def on_source_check_toggled(self, checkbutton):
@@ -187,6 +225,7 @@ class Settings(Gtk.Box):
             self.ppa.set_source_code_enabled(enabled)
         except dbus.exceptions.DBusException:
             self.show_distro()
+
         return 0
 
     def on_proposed_check_toggled(self, checkbutton, comp):
@@ -195,5 +234,6 @@ class Settings(Gtk.Box):
             self.ppa.set_child_enabled(comp.name, enabled)
         except dbus.exceptions.DBusException:
             self.show_distro()
+
         return 0
     
