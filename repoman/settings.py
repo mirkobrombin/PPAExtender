@@ -24,21 +24,27 @@ import gi
 import logging
 gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk
-from .ppa import PPA
+from . import repo
 import gettext
 gettext.bindtextdomain('repoman', '/usr/share/repoman/po')
 gettext.textdomain("repoman")
 _ = gettext.gettext
 
 class Settings(Gtk.Box):
+    repo_descriptions = {
+        'main': _('Officially supported software'),
+        'universe': _('Community-maintained software'),
+        'restricted': _('Proprietary drivers for devices'),
+        'multiverse': _('Software with Copyright or Legal Restrictions')
+    }
     
     def __init__(self, parent):
         Gtk.Box.__init__(self, False, 0)
 
-        self.ppa = PPA(self)
+        self.system_repo = parent.system_repo
         self.log = logging.getLogger('repoman.Settings')
         self.log.debug('Logging established.')
-        self.os_name = self.ppa.get_os_name()
+        self.os_name = repo.get_os_name()
         self.handlers = {}
         self.prev_enabled = False
 
@@ -46,6 +52,15 @@ class Settings(Gtk.Box):
 
         self.source_check = Gtk.CheckButton(label=_("Include source code"))
         self.proposed_check = Gtk.CheckButton()
+
+        source_box = Gtk.Box.new(orientation=Gtk.Orientation.HORIZONTAL)
+        source_box.set_hexpand(True)
+        source_label = Gtk.Label.new(_('Include source code'))
+        source_label.set_halign(Gtk.Align.START)
+        source_box.add(source_label)
+        source_switch = Gtk.Switch()
+        source_switch.suite = f'{repo.get_os_codename()}-proposed'
+        source_switch.set_halign(Gtk.Align.END)
 
         settings_grid = Gtk.Grid()
         settings_grid.set_margin_left(12)
@@ -96,21 +111,21 @@ class Settings(Gtk.Box):
         self.developer_grid.add(self.source_check)
         self.developer_grid.add(self.proposed_check)
 
-        self.init_distro()
-        self.show_distro()
-        self.block_handlers()
-        self.show_proposed()
-        self.show_source_code()
-        self.unblock_handlers()
-
     @property
     def checks_enabled(self):
+        """ bool: whether the checks/switches are enabled or not. """
         for checkbox in self.checks_grid.get_children():
             if checkbox.get_active():
                 return True
             else:
                 continue
         return False
+    
+    @checks_enabled.setter
+    def checks_enabled(self, active):
+        """ Directly set the GTK properties. """
+        for checkbox in self.checks_grid.get_children():
+            checkbox.set_active(active)
 
     def block_handlers(self):
         for widget in self.handlers:
@@ -122,51 +137,52 @@ class Settings(Gtk.Box):
             if widget.handler_is_connected(self.handlers[widget]):
                 widget.handler_unblock(self.handlers[widget])
     
-    def init_distro(self):
+    def get_new_switch(self, component, description=None):
+        """ Creates a Box with a new switch and a description. 
 
-        self.handlers[self.source_check] = \
-                              self.source_check.connect("toggled",
-                                                                   self.on_source_check_toggled)
+        If the name of the component matches one of the normal default 
+        components, include the description of the component. Otherwise use the
+        supplied description (if given) or the name of the component.
 
-        for checkbutton in self.checks_grid.get_children():
-            self.checks_grid.remove(checkbutton)
+        Arguments:
+            component (str): The name of a distro component to bind to the switch
+            description (str): An optional description to use if the component
+                isn't of the predefinied normal sources.
+        
+        Returns:
+            A Gtk.Box with the added switch and label description
+        """
 
-        distro_comps = self.ppa.get_distro_sources()
+        switch = Gtk.Box.new(orientation=Gtk.Orientation.HORIZONTAL)
+        switch.set_hexpand(True)
+        if component in self.repo_descriptions:
+            description = self.repo_descriptions[component]
 
-        for comp in distro_comps:
-            description = comp.description
-            if description == 'Non-free drivers':
-                description = _("Proprietary Drivers for Devices")
-            elif description == 'Restricted software':
-                description = _("Software with Copyright or Legal Restrictions")
-            else:
-                description = description + " software"
+        label_text = component
+        if description:
+            label_text = f'{description} ({component})'
+        label = Gtk.Label.new(label_text)
+        label.set_halign(Gtk.Align.START)
+        toggle = Gtk.Switch()
+        toggle.set_halign(Gtk.Align.END)
+        toggle.component = component
 
-            label = "%s (%s)" % (description, comp.name)
-            checkbox = Gtk.CheckButton(label=label)
+        return switch
+    
+    def create_switches(self):
+        """ Create the grid of switches that control the sources. """
+        for switch in self.checks_grid.get_children():
+            self.checks_grid.remove(switch)
 
-            checkbox.comp = comp
-            self.handlers[checkbox] = checkbox.connect("toggled",
-                                                       self.on_component_toggled,
-                                                       comp.name)
-
-            self.checks_grid.add(checkbox)
-            checkbox.show()
-
-        child_repos = self.ppa.get_distro_child_repos()
-        for template in child_repos:
-            if template.type == "deb-src":
+        for component in self.repo_descriptions:
+            switch = self.get_new_switch(component)
+            self.checks_grid.add(switch)
+        
+        for component in self.system_repo.components:
+            if component in self.repo_descriptions:
                 continue
-
-            if "proposed" in template.name:
-                self.proposed_check.set_label("%s (%s)" % (template.description,
-                                                           template.name))
-                self.proposed_check.template = template
-                self.handlers[self.proposed_check] = self.proposed_check.connect("toggled",
-                                                   self.on_proposed_check_toggled,
-                                                   template)
-
-        return 0
+            switch = self.get_new_switch(component)
+            self.checks_grid.add(switch)
     
     def set_child_checks_sensitive(self):
         self.source_check.set_sensitive(self.prev_enabled)
@@ -178,22 +194,25 @@ class Settings(Gtk.Box):
             pass
     
     def show_source_code(self):
-        (active, inconsistent) = self.ppa.get_source_code_enabled()
-        self.source_check.set_active(active)
-        self.source_check.set_inconsistent(inconsistent)
+        # (active, inconsistent) = self.ppa.get_source_code_enabled()
+        # self.source_check.set_active(active)
+        # self.source_check.set_inconsistent(inconsistent)
+        pass
     
     def show_proposed(self):
-        (active, inconsistent) = self.ppa.get_child_download_state(self.proposed_check.template)
-        self.proposed_check.set_active(active)
-        self.proposed_check.set_inconsistent(inconsistent)
+        # (active, inconsistent) = self.ppa.get_child_download_state(self.proposed_check.template)
+        # self.proposed_check.set_active(active)
+        # self.proposed_check.set_inconsistent(inconsistent)
+        pass
 
     def show_distro(self):
         self.block_handlers()
 
         for checkbox in self.checks_grid.get_children():
-            (active, inconsistent) = self.ppa.get_comp_download_state(checkbox.comp)
-            checkbox.set_active(active)
-            checkbox.set_inconsistent(inconsistent)
+            # (active, inconsistent) = self.ppa.get_comp_download_state(checkbox.comp)
+            # checkbox.set_active(active)
+            # checkbox.set_inconsistent(inconsistent)
+            pass
 
         self.unblock_handlers()
         self.prev_enabled = self.checks_enabled
@@ -203,9 +222,11 @@ class Settings(Gtk.Box):
     def on_component_toggled(self, checkbutton, comp):
         enabled = checkbutton.get_active()
         try:
-            self.ppa.set_comp_enabled(comp, enabled)
+            # self.ppa.set_comp_enabled(comp, enabled)
+            pass
         except dbus.exceptions.DBusException:
-            self.show_distro()
+            # self.show_distro()
+            pass
         
         if self.checks_enabled != self.prev_enabled and self.prev_enabled:
             self.parent.updates.show_updates()
@@ -222,18 +243,22 @@ class Settings(Gtk.Box):
     def on_source_check_toggled(self, checkbutton):
         enabled = checkbutton.get_active()
         try:
-            self.ppa.set_source_code_enabled(enabled)
+            # self.ppa.set_source_code_enabled(enabled)
+            pass
         except dbus.exceptions.DBusException:
-            self.show_distro()
+            # self.show_distro()
+            pass
 
         return 0
 
     def on_proposed_check_toggled(self, checkbutton, comp):
         enabled = checkbutton.get_active()
         try:
-            self.ppa.set_child_enabled(comp.name, enabled)
+            # self.ppa.set_child_enabled(comp.name, enabled)
+            pass
         except dbus.exceptions.DBusException:
-            self.show_distro()
+            # self.show_distro()
+            pass
 
         return 0
     

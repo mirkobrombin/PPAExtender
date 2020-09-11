@@ -80,4 +80,27 @@ def get_all_sources(get_system=False):
         sources[name] = repo
     
     return sources
+
+def get_os_codename():
+    """ Returns the current OS codename."""
+    return repolib.util.DISTRO_CODENAME
+
+def get_os_name():
+    """ Returns the current OS name, or fallback if not available."""
+    try:
+        with open("/etc/os-release") as os_release_file:
+            os_release = os_release_file.readlines()
+            for line in os_release:
+                parse = line.split('=')
+                if parse[0] == "NAME":
+                    if parse[1].startswith('"'):
+                        return parse[1][1:-2]
+                    else:
+                        return parse[1][:-1]
+                else:
+                    continue
+    except FileNotFoundError:
+        return "your OS"
+
+    return "your OS"
         
