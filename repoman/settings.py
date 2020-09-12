@@ -50,10 +50,16 @@ class Settings(Gtk.Box):
 
         self.parent = parent
 
-        self.source_check = Gtk.CheckButton(label=_("Include source code"))
-        self.proposed_check = Gtk.CheckButton()
+        self.source_check = self.get_new_switch(
+            'source-code',
+            _('Include source code')
+        )
+        self.proposed_check = self.get_new_switch(
+            f'{repo.get_os_codename()}-proposed',
+            _('Prerelease updates')
+        )
 
-        source_box = Gtk.Box.new(orientation=Gtk.Orientation.HORIZONTAL)
+        source_box = Gtk.Box.new(Gtk.Orientation.HORIZONTAL, 6)
         source_box.set_hexpand(True)
         source_label = Gtk.Label.new(_('Include source code'))
         source_label.set_halign(Gtk.Align.START)
@@ -63,9 +69,9 @@ class Settings(Gtk.Box):
         source_switch.set_halign(Gtk.Align.END)
 
         settings_grid = Gtk.Grid()
-        settings_grid.set_margin_left(12)
+        settings_grid.set_margin_left(36)
         settings_grid.set_margin_top(24)
-        settings_grid.set_margin_right(12)
+        settings_grid.set_margin_right(36)
         settings_grid.set_margin_bottom(12)
         settings_grid.set_hexpand(True)
         settings_grid.set_halign(Gtk.Align.CENTER)
@@ -98,7 +104,7 @@ class Settings(Gtk.Box):
         self.developer_grid = Gtk.VBox()
         self.developer_grid.set_margin_left(12)
         self.developer_grid.set_margin_top(12)
-        self.developer_grid.set_margin_right(12)
+        self.developer_grid.set_margin_right(36)
         self.developer_grid.set_margin_bottom(12)
         self.developer_grid.set_spacing(12)
         developer_options.add(self.developer_grid)
@@ -106,26 +112,41 @@ class Settings(Gtk.Box):
         developer_label = Gtk.Label(_("These options are primarily of interest to developers."))
         developer_label.set_line_wrap(True)
         developer_label.set_halign(Gtk.Align.START)
-        developer_label.set_margin_start(5)
+        developer_label.set_margin_start(0)
         self.developer_grid.add(developer_label)
         self.developer_grid.add(self.source_check)
         self.developer_grid.add(self.proposed_check)
+
+        self.create_switches()
+        self.switches_sensitive = True
+        if not self.system_repo:
+            self.switches_sensitive = False
 
     @property
     def checks_enabled(self):
         """ bool: whether the checks/switches are enabled or not. """
         for checkbox in self.checks_grid.get_children():
-            if checkbox.get_active():
+            if checkbox.toggle.get_active():
                 return True
             else:
                 continue
         return False
     
-    @checks_enabled.setter
-    def checks_enabled(self, active):
-        """ Directly set the GTK properties. """
-        for checkbox in self.checks_grid.get_children():
-            checkbox.set_active(active)
+    @property
+    def switches_sensitive(self):
+        for switchbox in self.checks_grid.get_children():
+            if switchbox.get_sensitive():
+                return True
+            else:
+                continue
+        return False
+    
+    @switches_sensitive.setter
+    def switches_sensitive(self, sensitive):
+        for switchbox in self.checks_grid.get_children():
+            switchbox.set_sensitive(sensitive)
+        for switchbox in self.developer_grid.get_children():
+            switchbox.set_sensitive(sensitive)
 
     def block_handlers(self):
         for widget in self.handlers:
@@ -153,7 +174,7 @@ class Settings(Gtk.Box):
             A Gtk.Box with the added switch and label description
         """
 
-        switch = Gtk.Box.new(orientation=Gtk.Orientation.HORIZONTAL)
+        switch = Gtk.Box.new(Gtk.Orientation.HORIZONTAL, 6)
         switch.set_hexpand(True)
         if component in self.repo_descriptions:
             description = self.repo_descriptions[component]
@@ -163,9 +184,14 @@ class Settings(Gtk.Box):
             label_text = f'{description} ({component})'
         label = Gtk.Label.new(label_text)
         label.set_halign(Gtk.Align.START)
+        switch.label = label
+        switch.add(label)
         toggle = Gtk.Switch()
         toggle.set_halign(Gtk.Align.END)
+        toggle.set_hexpand(True)
         toggle.component = component
+        switch.toggle = toggle
+        switch.add(toggle)
 
         return switch
     
@@ -178,11 +204,12 @@ class Settings(Gtk.Box):
             switch = self.get_new_switch(component)
             self.checks_grid.add(switch)
         
-        for component in self.system_repo.components:
-            if component in self.repo_descriptions:
-                continue
-            switch = self.get_new_switch(component)
-            self.checks_grid.add(switch)
+        if self.system_repo:
+            for component in self.system_repo.components:
+                if component in self.repo_descriptions:
+                    continue
+                switch = self.get_new_switch(component)
+                self.checks_grid.add(switch)
     
     def set_child_checks_sensitive(self):
         self.source_check.set_sensitive(self.prev_enabled)
