@@ -118,13 +118,9 @@ class Settings(Gtk.Box):
         self.developer_grid.add(self.proposed_check)
 
         self.create_switches()
-        
-        if self.system_repo:
-            self.switches_sensitive = True
-            self.show_distro()
-        else:
+        self.switches_sensitive = True
+        if not self.system_repo:
             self.switches_sensitive = False
-            self.log.debug("Can't find system repo, disabling system settings.")
 
     @property
     def checks_enabled(self):
@@ -193,11 +189,11 @@ class Settings(Gtk.Box):
         toggle = Gtk.Switch()
         toggle.set_halign(Gtk.Align.END)
         toggle.set_hexpand(True)
-        switch.component = toggle.component = component
+        toggle.component = component
         switch.toggle = toggle
         switch.add(toggle)
 
-        return switch   
+        return switch
     
     def create_switches(self):
         """ Create the grid of switches that control the sources. """
@@ -206,7 +202,6 @@ class Settings(Gtk.Box):
 
         for component in self.repo_descriptions:
             switch = self.get_new_switch(component)
-            switch.toggle.connect('state-set', self.on_component_toggled)
             self.checks_grid.add(switch)
         
         if self.system_repo:
@@ -241,20 +236,36 @@ class Settings(Gtk.Box):
         self.block_handlers()
 
         for checkbox in self.checks_grid.get_children():
-            if checkbox.component in self.system_repo.components:
-                checkbox.toggle.set_active(True)
-            else:
-                checkbox.toggle.set_active(False)
+            # (active, inconsistent) = self.ppa.get_comp_download_state(checkbox.comp)
+            # checkbox.set_active(active)
+            # checkbox.set_inconsistent(inconsistent)
+            pass
 
         self.unblock_handlers()
+        self.prev_enabled = self.checks_enabled
+        self.set_child_checks_sensitive()
         return 0
+
+    def on_component_toggled(self, checkbutton, comp):
+        enabled = checkbutton.get_active()
+        try:
+            # self.ppa.set_comp_enabled(comp, enabled)
+            pass
+        except dbus.exceptions.DBusException:
+            # self.show_distro()
+            pass
         
-    def on_component_toggled(self, switch, state):
-        """ Handler for component toggle switches. """
-        self.system_repo.set_component_enabled(
-            component=switch.component,
-            enabled=state
-        )
+        if self.checks_enabled != self.prev_enabled and self.prev_enabled:
+            self.parent.updates.show_updates()
+            self.show_proposed()
+            self.show_source_code()
+        
+        if 'multiverse' in checkbutton.get_label():
+            self.show_distro()
+        
+        self.prev_enabled = self.checks_enabled
+        self.set_child_checks_sensitive()
+        return 0
 
     def on_source_check_toggled(self, checkbutton):
         enabled = checkbutton.get_active()

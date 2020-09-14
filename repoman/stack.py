@@ -19,23 +19,18 @@
     along with Repoman.  If not, see <http://www.gnu.org/licenses/>.
 '''
 
-import gettext
-from logging import getLogger
-
 import gi
+gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk
-
-from . import repo
-from .list import List
 from .settings import Settings
 from .updates import Updates
-
-gi.require_version('Gtk', '3.0')
+from .list import List
+from . import repo
 try:
     from .flatpak import Flatpak
 except (ImportError, ValueError):
     Flatpak = False
-
+import gettext
 gettext.bindtextdomain('repoman', '/usr/share/repoman/po')
 gettext.textdomain("repoman")
 _ = gettext.gettext
@@ -45,13 +40,9 @@ class Stack(Gtk.Box):
     def __init__(self, parent):
         Gtk.Box.__init__(self, orientation=Gtk.Orientation.VERTICAL, spacing=6)
         self.parent = parent
-        self.log = getLogger('repoman.Stack')
-        self.log.debug('Logging established.')
         try:
-            self.system_repo = repo.get_system_repo()
-            self.log.debug('Got system sources at %s', self.system_repo.filename)
+            self.system_repo = repo.get_repo_for_name('system')
         except:
-            self.log.debug("Can't get system repo")
             self.system_repo = None
 
         self.stack = Gtk.Stack()
@@ -74,3 +65,5 @@ class Stack(Gtk.Box):
             self.stack.add_titled(self.flatpak, "flatpak", _("Flatpak"))
 
         self.pack_start(self.stack, True, True, 0)
+
+
