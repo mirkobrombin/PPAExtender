@@ -41,7 +41,7 @@ class Stack(Gtk.Box):
         Gtk.Box.__init__(self, orientation=Gtk.Orientation.VERTICAL, spacing=6)
         self.parent = parent
         try:
-            self.system_repo = repo.get_repo_for_name('system')
+            self.system_repo = repo.get_system_repo()
         except:
             self.system_repo = None
 

@@ -18,7 +18,18 @@
     along with Repoman.  If not, see <http://www.gnu.org/licenses/>.
 '''
 
+import dbus
 import repolib
+
+bus = dbus.SystemBus()
+privileged_object = bus.get_object('org.pop_os.repoman', '/PPA')
+
+
+
+def get_system_repo():
+    """Get a repo for the system sources. """
+    repo = repolib.SystemSource()
+    return repo
 
 def get_repo_for_name(name):
     """ Get a repo from a given name.

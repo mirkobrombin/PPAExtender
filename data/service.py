@@ -33,8 +33,6 @@ import os
 from softwareproperties.SoftwareProperties import SoftwareProperties
 from aptsources.sourceslist import SourceEntry
 
-GLib.threads_init()
-
 class RepomanException(dbus.DBusException):
     _dbus_error_name = 'org.pop_os.repoman.RepomanException'
 
@@ -263,5 +261,5 @@ if __name__ == '__main__':
     name = dbus.service.BusName("org.pop_os.repoman", bus)
     object = PPA(bus, '/PPA')
 
-    mainloop = GObject.MainLoop()
+    mainloop = GLib.MainLoop()
     mainloop.run()

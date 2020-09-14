@@ -118,8 +118,10 @@ class Settings(Gtk.Box):
         self.developer_grid.add(self.proposed_check)
 
         self.create_switches()
-        self.switches_sensitive = True
-        if not self.system_repo:
+        if self.system_repo:
+            self.switches_sensitive = True
+            self.show_distro()
+        else:
             self.switches_sensitive = False
 
     @property
@@ -189,7 +191,7 @@ class Settings(Gtk.Box):
         toggle = Gtk.Switch()
         toggle.set_halign(Gtk.Align.END)
         toggle.set_hexpand(True)
-        toggle.component = component
+        toggle.component = switch.component = component
         switch.toggle = toggle
         switch.add(toggle)
 
@@ -233,39 +235,18 @@ class Settings(Gtk.Box):
         pass
 
     def show_distro(self):
-        self.block_handlers()
 
-        for checkbox in self.checks_grid.get_children():
-            # (active, inconsistent) = self.ppa.get_comp_download_state(checkbox.comp)
-            # checkbox.set_active(active)
-            # checkbox.set_inconsistent(inconsistent)
-            pass
-
-        self.unblock_handlers()
-        self.prev_enabled = self.checks_enabled
-        self.set_child_checks_sensitive()
+        for comp in self.checks_grid.get_children():
+            if comp.component in self.system_repo.components:
+                comp.toggle.set_active(True)
+            comp.toggle.connect(
+                'state-set',
+                self.on_component_toggled
+            )
         return 0
 
-    def on_component_toggled(self, checkbutton, comp):
-        enabled = checkbutton.get_active()
-        try:
-            # self.ppa.set_comp_enabled(comp, enabled)
-            pass
-        except dbus.exceptions.DBusException:
-            # self.show_distro()
-            pass
-        
-        if self.checks_enabled != self.prev_enabled and self.prev_enabled:
-            self.parent.updates.show_updates()
-            self.show_proposed()
-            self.show_source_code()
-        
-        if 'multiverse' in checkbutton.get_label():
-            self.show_distro()
-        
-        self.prev_enabled = self.checks_enabled
-        self.set_child_checks_sensitive()
-        return 0
+    def on_component_toggled(self, switch, state):
+        repo.get_os_name()
 
     def on_source_check_toggled(self, checkbutton):
         enabled = checkbutton.get_active()
