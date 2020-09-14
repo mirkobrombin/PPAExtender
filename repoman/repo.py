@@ -24,7 +24,15 @@ import repolib
 bus = dbus.SystemBus()
 privileged_object = bus.get_object('org.pop_os.repoman', '/PPA')
 
-
+def set_system_comp_enabled(comp, enable):
+    """ Enable or disable a component in the system source. 
+        
+    Arguments:
+        comp (str): the component to set
+        enable (bool): The new state to set, True = Enabled.
+    """
+    success = privileged_object.set_system_comp_enabled(comp, enable)
+    return success
 
 def get_system_repo():
     """Get a repo for the system sources. """

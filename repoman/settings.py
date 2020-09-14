@@ -246,7 +246,7 @@ class Settings(Gtk.Box):
         return 0
 
     def on_component_toggled(self, switch, state):
-        repo.get_os_name()
+        repo.set_system_comp_enabled(switch.component, state)
 
     def on_source_check_toggled(self, checkbutton):
         enabled = checkbutton.get_active()
