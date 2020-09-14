@@ -80,6 +80,9 @@ class PPA(dbus.service.Object):
             comp (str): the component to set
             enable (bool): The new state to set, True = Enabled.
         """
+        self._check_polkit_privilege(
+            sender, conn, 'org.pop_os.repoman.modifysources'
+        )
         if self.system_repo:
             self.system_repo.load_from_file()
             self.system_repo.set_component_enabled(component=comp, enabled=enable)
