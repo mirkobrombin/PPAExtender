@@ -33,8 +33,6 @@ import os
 from softwareproperties.SoftwareProperties import SoftwareProperties
 from aptsources.sourceslist import SourceEntry
 
-import repoman.repo
-
 GLib.threads_init()
 
 class RepomanException(dbus.DBusException):
@@ -54,22 +52,8 @@ class PPA(dbus.service.Object):
         self.dbus_info = None
         self.polkit = None
         self.enforce_polkit = True
-        
-        self.system_repo = repoman.repo.get_system_repo()
         self.sp = SoftwareProperties()
         self.cache = apt.Cache()
-    
-    @dbus.service.method(
-        'org.pop_os.repoman.Interface',
-        in_signature='sb', out_signature='b',
-        sender_keyword='sender', connection_keyword='conn'
-    )
-    def set_system_comp_enabled(self, comp, enabled, sender=None, conn=None):
-        self._check_polkit_privilege(
-            sender, conn, 'org.pop_os.repoman.modifysources'
-        )
-        self.system_repo.set_component_enabled(component=comp, enabled=enabled)
-        return True
     
     @dbus.service.method(
         'org.pop_os.repoman.Interface',
