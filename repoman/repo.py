@@ -18,7 +18,27 @@
     along with Repoman.  If not, see <http://www.gnu.org/licenses/>.
 '''
 
+from logging import getLogger
+
+import dbus
+import apt
+import threading
 import repolib
+
+# bus = dbus.SystemBus()
+# privileged_object = bus.get_object('org.pop_os.repoman', '/PPA')
+log = getLogger('repoman.Repo')
+log.debug('Logging established.')
+
+def get_system_repo():
+    """ Get a system repo object. """
+    log.info('Looking up system repo')
+    try:
+        repo = repolib.SystemSource()
+        return repo
+    except:
+        log.warning("Can't find a system repo.")
+        return None
 
 def get_repo_for_name(name):
     """ Get a repo from a given name.
@@ -32,13 +52,17 @@ def get_repo_for_name(name):
     Returns:
         A repolib.Source (or subclass) representing the given name.
     """
+    log.info('Looking up repo for %s', name)
     full_path = repolib.util.get_source_path(name)
+    log.debug('Checking in %s', full_path)
+        
     if full_path:
         if full_path.suffix == '.sources':
             repo = repolib.Source(filename=full_path)
         else:
             repo = repolib.LegacyDebSource(filename=full_path)
         
+        repo.load_from_file()
         return repo
     raise Exception(f'Could not find a source for {name}.')
 
