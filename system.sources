@@ -1,6 +1,0 @@
-X-Repolib-Name: Pop!_OS System Sources
-Enabled: yes
-Types: deb
-URIs: http://apt.pop-os.org/ubuntu
-Suites: focal focal-updates focal-backports focal-security
-Components: main universe multiverse restricted
