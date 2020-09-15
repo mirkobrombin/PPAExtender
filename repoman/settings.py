@@ -32,7 +32,6 @@ _ = gettext.gettext
 
 class Settings(Gtk.Box):
     repo_descriptions = {
-        'main': _('Officially supported software'),
         'universe': _('Community-maintained software'),
         'restricted': _('Proprietary drivers for devices'),
         'multiverse': _('Software with Copyright or Legal Restrictions')
@@ -221,6 +220,9 @@ class Settings(Gtk.Box):
         if self.system_repo:
             for component in self.system_repo.components:
                 if component in self.repo_descriptions:
+                    continue
+                if component == 'main':
+                    # Doesn't really make sense for this to be toggleable.
                     continue
                 switch = self.get_new_switch(component)
                 self.checks_grid.add(switch)

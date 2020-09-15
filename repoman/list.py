@@ -19,14 +19,17 @@
     along with Repoman.  If not, see <http://www.gnu.org/licenses/>.
 '''
 
-import gi
+import gettext
 import logging
+
+import gi
 gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk
 from softwareproperties.SoftwareProperties import SoftwareProperties
-from .ppa import PPA
-from .dialog import AddDialog, EditDialog, ErrorDialog, DeleteDialog
-import gettext
+
+from . import repo
+from .dialog import AddDialog, DeleteDialog, EditDialog, ErrorDialog
+
 gettext.bindtextdomain('repoman', '/usr/share/repoman/po')
 gettext.textdomain("repoman")
 _ = gettext.gettext
@@ -39,7 +42,6 @@ class List(Gtk.Box):
         self.sp = SoftwareProperties()
         Gtk.Box.__init__(self, False, 0)
         self.parent = parent
-        self.ppa = PPA(self)
 
         self.settings = Gtk.Settings()
 
@@ -77,8 +79,10 @@ class List(Gtk.Box):
         self.ppa_liststore = Gtk.ListStore(str, str)
         self.view = Gtk.TreeView(self.ppa_liststore)
         renderer = Gtk.CellRendererText()
-        column = Gtk.TreeViewColumn(_("Source"), renderer, markup=0)
-        self.view.append_column(column)
+        name_column = Gtk.TreeViewColumn(_("Source"), renderer, markup=0)
+        self.view.append_column(name_column)
+        uri_column = Gtk.TreeViewColumn(_('URI'), renderer, markup=0)
+        self.view.append_column(uri_column)
         self.view.set_hexpand(True)
         self.view.set_vexpand(True)
         self.tree_selection = self.view.get_selection()
@@ -121,7 +125,7 @@ class List(Gtk.Box):
         action_bar.insert(self.add_button, 0)
         list_grid.attach(action_bar, 0, 1, 1, 1)
 
-        self.generate_entries(self.ppa.get_isv())
+        self.generate_entries()
     
     def on_delete_button_clicked(self, widget):
         selec = self.view.get_selection()
@@ -139,7 +143,6 @@ class List(Gtk.Box):
             self.add_button.set_sensitive(False)
             self.edit_button.set_sensitive(False)
             self.delete_button.set_sensitive(False)
-            self.ppa.remove(repo)
             dialog.destroy()
         
         else:
@@ -160,44 +163,44 @@ class List(Gtk.Box):
         self.do_edit(value)
 
     def do_edit(self, repo):
-        source = self.ppa.deb_line_to_source(repo)
-        dialog = EditDialog(self.parent.parent,
-                            source.disabled,
-                            source.type,
-                            source.uri,
-                            source.dist,
-                            source.comps,
-                            source.architectures,
-                            repo)
-        response = dialog.run()
+        """ Perform an edit action. """
+        # dialog = EditDialog(self.parent.parent,
+        #                     source.disabled,
+        #                     source.type,
+        #                     source.uri,
+        #                     source.dist,
+        #                     source.comps,
+        #                     source.architectures,
+        #                     repo)
+        # response = dialog.run()
 
-        if response == Gtk.ResponseType.OK:
-            self.add_button.set_sensitive(False)
-            self.edit_button.set_sensitive(False)
-            self.delete_button.set_sensitive(False)
-            if dialog.type_box.get_active() == 0:
-                new_rtype = "deb"
-            elif dialog.type_box.get_active() == 1:
-                new_rtype = "deb-src"
-            new_disabled = not dialog.enabled_switch.get_active()
-            new_uri = dialog.uri_entry.get_text()
-            self.log.info(new_disabled)
-            new_version = dialog.version_entry.get_text()
-            new_component = dialog.component_entry.get_text()
-            dialog.destroy()
-            new_archs = "[arch="
-            for arch in source.architectures:
-                new_archs = "%s%s," % (new_archs, arch)
-            new_archs = new_archs[:-1] + "]"
-            self.ppa.modify_ppa(source,
-                                new_disabled,
-                                new_rtype,
-                                new_archs,
-                                new_uri,
-                                new_version,
-                                new_component)
-        else:
-            dialog.destroy()
+        # if response == Gtk.ResponseType.OK:
+        #     self.add_button.set_sensitive(False)
+        #     self.edit_button.set_sensitive(False)
+        #     self.delete_button.set_sensitive(False)
+        #     if dialog.type_box.get_active() == 0:
+        #         new_rtype = "deb"
+        #     elif dialog.type_box.get_active() == 1:
+        #         new_rtype = "deb-src"
+        #     new_disabled = not dialog.enabled_switch.get_active()
+        #     new_uri = dialog.uri_entry.get_text()
+        #     self.log.info(new_disabled)
+        #     new_version = dialog.version_entry.get_text()
+        #     new_component = dialog.component_entry.get_text()
+        #     dialog.destroy()
+        #     new_archs = "[arch="
+        #     for arch in source.architectures:
+        #         new_archs = "%s%s," % (new_archs, arch)
+        #     new_archs = new_archs[:-1] + "]"
+        #     self.ppa.modify_ppa(source,
+        #                         new_disabled,
+        #                         new_rtype,
+        #                         new_archs,
+        #                         new_uri,
+        #                         new_version,
+        #                         new_component)
+        # else:
+        #     dialog.destroy()
 
     def on_add_button_clicked(self, widget):
         dialog = AddDialog(self.parent.parent)
@@ -209,35 +212,28 @@ class List(Gtk.Box):
             self.delete_button.set_sensitive(False)
             url = dialog.repo_entry.get_text().strip()
             dialog.destroy()
-            self.ppa.add(url)
+            # self.ppa.add(url)
         else:
             dialog.destroy()
 
-    def generate_entries(self, isv_list):
+    def generate_entries(self):
         self.ppa_liststore.clear()
 
-        self.listiter_count = self.listiter_count + 1
-
-        for source in isv_list:
-            if not "cdrom" in str(source):
-                if not str(source).startswith("#"):
-                    source_pretty = self.sp.render_source(source)
-                    if "Partners" in source_pretty:
-                        continue
-                    self.ppa_liststore.insert_with_valuesv(-1,
-                                                           [0, 1],
-                                                           [source_pretty, str(source)])
-        for source in isv_list:
-            if not "cdrom" in str(source):
-                if str(source).startswith("#"):
-                    source_str_list = self.sp.render_source(source).split("b>")
-                    source_pretty = "%s%s <i>Disabled</i>" % (source_str_list[1][:-2],
-                                                              source_str_list[2])
-                    if "Partners" in source_pretty:
-                        continue
-                    self.ppa_liststore.insert_with_valuesv(-1,
-                                                           [0, 1],
-                                                           [source_pretty, str(source)])
+        sources = repo.get_all_sources()
+        for source in sources:
+            if source.enabled:
+                self.ppa_liststore.insert_with_valuesv(
+                    -1,
+                    [0, 1],
+                    [f'<b>{source.name}</b>', source.uris[0]]
+                )
+        for source in sources:
+            if not source.enabled: 
+                self.ppa_liststore.insert_with_valuesv(
+                    -1,
+                    [0, 1],
+                    [source.name, source.uris[0]]
+                )
         self.add_button.set_sensitive(True)
 
     def on_row_selected(self, widget):

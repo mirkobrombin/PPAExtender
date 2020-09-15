@@ -100,6 +100,28 @@ def get_all_sources(get_system=False):
             sources['system'] = system
         except Exception:
             pass
+    sources_dir = repolib.util.get_sources_dir()
+    sources_files = sources_dir.glob('*.sources')
+    list_files = sources_dir.glob('*.list')
+    try:
+        sources_list_file = sources_dir.parent / 'sources.list'
+    except FileNotFoundError:
+        sources_list_file = None
+    
+    for file in sources_files:
+        source = repolib.Source(filename=file)
+        source.load_from_file()
+        sources[source.name] = source
+    
+    for file in list_files:
+        source = repolib.LegacyDebSource(filename=file)
+        source.load_from_file()
+        sources[source.name] = source
+    
+    if sources_list_file:
+        sources['sources.list'] = ''
+    
+    return sources
     
     sources_dir = repolib.util.get_sources_dir()
     files_sources = sources_dir.glob('*.sources')
