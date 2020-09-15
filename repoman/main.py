@@ -42,9 +42,6 @@ class Application(Gtk.Application):
         self.win.set_default_size(700, 400)
         self.win.connect("delete-event", self.application_quit)
         self.win.show_all()
-        self.win.stack.updates.noti_grid.hide()
-        self.win.stack.updates.notifications_title.hide()
-        self.win.stack.updates.notifications_label.hide()
 
         Gtk.main()
     

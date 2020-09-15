@@ -134,6 +134,7 @@ class Settings(Gtk.Box):
             self.show_proposed()
         else:
             self.switches_sensitive = False
+        self.show_all()
 
     @property
     def checks_enabled(self):
