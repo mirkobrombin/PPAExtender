@@ -47,6 +47,7 @@ class Settings(Gtk.Box):
         self.os_name = repo.get_os_name()
         self.handlers = {}
         self.prev_enabled = False
+        self.proposed_name = f'{repo.get_os_codename()}-proposed'
 
         self.parent = parent
 
@@ -59,8 +60,12 @@ class Settings(Gtk.Box):
             self.on_source_check_toggled
         )
         self.proposed_check = self.get_new_switch(
-            f'{repo.get_os_codename()}-proposed',
+           self.proposed_name,
             _('Prerelease updates')
+        )
+        self.handlers[self.proposed_check.toggle] = self.proposed_check.toggle.connect(
+            'state-set',
+            self.on_proposed_check_toggled
         )
 
         source_box = Gtk.Box.new(Gtk.Orientation.HORIZONTAL, 6)
@@ -126,6 +131,7 @@ class Settings(Gtk.Box):
             self.switches_sensitive = True
             self.show_distro()
             self.show_source_code()
+            self.show_proposed()
         else:
             self.switches_sensitive = False
 
@@ -233,10 +239,12 @@ class Settings(Gtk.Box):
         self.unblock_handlers()
 
     def show_proposed(self):
-        # (active, inconsistent) = self.ppa.get_child_download_state(self.proposed_check.template)
-        # self.proposed_check.set_active(active)
-        # self.proposed_check.set_inconsistent(inconsistent)
-        pass
+        self.block_handlers()
+        if self.proposed_name in self.system_repo.suites:
+            self.proposed_check.toggle.set_active(True)
+        else:
+            self.proposed_check.toggle.set_active(False)
+        self.unblock_handlers()
 
     def show_distro(self):
         self.block_handlers()
@@ -256,14 +264,6 @@ class Settings(Gtk.Box):
     def on_source_check_toggled(self, switch, state):
         repo.set_system_source_code_enabled(state)
 
-    def on_proposed_check_toggled(self, checkbutton, comp):
-        enabled = checkbutton.get_active()
-        try:
-            # self.ppa.set_child_enabled(comp.name, enabled)
-            pass
-        except dbus.exceptions.DBusException:
-            # self.show_distro()
-            pass
-
-        return 0
+    def on_proposed_check_toggled(self, switch, state):
+        repo.set_system_suite_enabled(switch.component, state)
     

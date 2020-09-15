@@ -34,6 +34,16 @@ def set_system_comp_enabled(comp, enable):
     success = privileged_object.set_system_comp_enabled(comp, enable)
     return success
 
+def set_system_suite_enabled(suite, enable):
+    """ Enable or disable a suite in the system source. 
+        
+    Arguments:
+        suite (str): the suite to set
+        enable (bool): The new state to set, True = Enabled.
+    """
+    success = privileged_object.set_system_suite_enabled(suite, enable)
+    return success
+
 def set_system_source_code_enabled(enabled):
     """ Enable or disable source code in the system source. 
     

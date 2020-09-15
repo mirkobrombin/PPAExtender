@@ -113,6 +113,28 @@ class PPA(dbus.service.Object):
             self.system_repo.save_to_disk()
             return True
         return False
+    
+    @dbus.service.method(
+        "org.pop_os.repoman.Interface",
+        in_signature='sb', out_signature='b',
+        sender_keyword='sender', connection_keyword='conn'
+    )
+    def set_system_suite_enabled(self, suite, enable, sender=None, conn=None):
+        """ Enable or disable a suite in the system source. 
+        
+        Arguments:
+            suite (str): the suite to set
+            enable (bool): The new state to set, True = Enabled.
+        """
+        self._check_polkit_privilege(
+            sender, conn, 'org.pop_os.repoman.modifysources'
+        )
+        if self.system_repo:
+            self.system_repo.load_from_file()
+            self.system_repo.set_suite_enabled(suite=suite, enabled=enable)
+            self.system_repo.save_to_disk()
+            return True
+        return False
 
     ## TODO: These are old SoftwareProperties Methods, and need to be replaced.
     
