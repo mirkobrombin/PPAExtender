@@ -70,6 +70,30 @@ class PPA(dbus.service.Object):
     
     @dbus.service.method(
         "org.pop_os.repoman.Interface",
+        in_signature='b', out_signature='b',
+        sender_keyword='sender', connection_keyword='conn'
+    )
+    def set_system_source_code_enabled(self, enabled, sender=None, conn=None):
+        """ Enable or disable source code in the system source. 
+        
+        Arguments:
+            enabled (bool): The new state to set, True = Enabled.
+        """
+        self._check_polkit_privilege(
+            sender, conn, 'org.pop_os.repoman.modifysources'
+        )
+        if self.system_repo:
+            self.system_repo.load_from_file()
+            new_types = [repolib.util.AptSourceType.BINARY]
+            if enabled:
+                new_types.append(repolib.util.AptSourceType.SOURCE)
+            self.system_repo.types = new_types
+            self.system_repo.save_to_disk()
+            return enabled
+        return False
+
+    @dbus.service.method(
+        "org.pop_os.repoman.Interface",
         in_signature='sb', out_signature='b',
         sender_keyword='sender', connection_keyword='conn'
     )

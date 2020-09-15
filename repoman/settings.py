@@ -54,6 +54,10 @@ class Settings(Gtk.Box):
             'source-code',
             _('Include source code')
         )
+        self.handlers[self.source_check.toggle] = self.source_check.toggle.connect(
+            'state-set',
+            self.on_source_check_toggled
+        )
         self.proposed_check = self.get_new_switch(
             f'{repo.get_os_codename()}-proposed',
             _('Prerelease updates')
@@ -121,6 +125,7 @@ class Settings(Gtk.Box):
         if self.system_repo:
             self.switches_sensitive = True
             self.show_distro()
+            self.show_source_code()
         else:
             self.switches_sensitive = False
 
@@ -223,11 +228,10 @@ class Settings(Gtk.Box):
             pass
     
     def show_source_code(self):
-        # (active, inconsistent) = self.ppa.get_source_code_enabled()
-        # self.source_check.set_active(active)
-        # self.source_check.set_inconsistent(inconsistent)
-        pass
-    
+        self.block_handlers()
+        self.source_check.toggle.set_active(self.system_repo.source_code_enabled)
+        self.unblock_handlers()
+
     def show_proposed(self):
         # (active, inconsistent) = self.ppa.get_child_download_state(self.proposed_check.template)
         # self.proposed_check.set_active(active)
@@ -235,29 +239,22 @@ class Settings(Gtk.Box):
         pass
 
     def show_distro(self):
-
+        self.block_handlers()
         for comp in self.checks_grid.get_children():
             if comp.component in self.system_repo.components:
                 comp.toggle.set_active(True)
-            comp.toggle.connect(
+            self.handlers[comp.toggle] = comp.toggle.connect(
                 'state-set',
                 self.on_component_toggled
             )
+        self.unblock_handlers()
         return 0
 
     def on_component_toggled(self, switch, state):
         repo.set_system_comp_enabled(switch.component, state)
 
-    def on_source_check_toggled(self, checkbutton):
-        enabled = checkbutton.get_active()
-        try:
-            # self.ppa.set_source_code_enabled(enabled)
-            pass
-        except dbus.exceptions.DBusException:
-            # self.show_distro()
-            pass
-
-        return 0
+    def on_source_check_toggled(self, switch, state):
+        repo.set_system_source_code_enabled(state)
 
     def on_proposed_check_toggled(self, checkbutton, comp):
         enabled = checkbutton.get_active()
