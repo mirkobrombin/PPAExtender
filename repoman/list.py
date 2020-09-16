@@ -76,12 +76,12 @@ class List(Gtk.Box):
         Gtk.StyleContext.add_class(list_window.get_style_context(), "list_window")
         list_grid.attach(list_window, 0, 0, 1, 1)
 
-        self.ppa_liststore = Gtk.ListStore(str, str)
+        self.ppa_liststore = Gtk.ListStore(str, str, str)
         self.view = Gtk.TreeView(self.ppa_liststore)
         renderer = Gtk.CellRendererText()
         name_column = Gtk.TreeViewColumn(_("Source"), renderer, markup=0)
         self.view.append_column(name_column)
-        uri_column = Gtk.TreeViewColumn(_('URI'), renderer, markup=0)
+        uri_column = Gtk.TreeViewColumn(_('URI'), renderer, markup=1)
         self.view.append_column(uri_column)
         self.view.set_hexpand(True)
         self.view.set_vexpand(True)
@@ -152,7 +152,7 @@ class List(Gtk.Box):
         selec = self.view.get_selection()
         (model, pathlist) = selec.get_selected_rows()
         tree_iter = model.get_iter(pathlist[0])
-        value = model.get_value(tree_iter, 1)
+        value = model.get_value(tree_iter, 2)
         self.log.info("PPA to edit: %s" % value)
         self.do_edit(value)
 
@@ -219,21 +219,42 @@ class List(Gtk.Box):
     def generate_entries(self):
         self.ppa_liststore.clear()
 
-        sources = repo.get_all_sources()
-        for source in sources:
-            if source.enabled:
-                self.ppa_liststore.insert_with_valuesv(
-                    -1,
-                    [0, 1],
-                    [f'<b>{source.name}</b>', source.uris[0]]
-                )
-        for source in sources:
-            if not source.enabled: 
-                self.ppa_liststore.insert_with_valuesv(
-                    -1,
-                    [0, 1],
-                    [source.name, source.uris[0]]
-                )
+        self.sources = {}
+        self.sources = repo.get_all_sources()
+        self.log.debug('Sources found:\n%s', self.sources)
+        for i in self.sources:
+            source = self.sources[i]
+            try:
+                if source.enabled:
+                    self.log.debug('Source: %s, URIs: %s', source.name, source.uris[0])
+                    self.ppa_liststore.insert_with_valuesv(
+                        -1,
+                        [0, 1, 2],
+                        [f'<b>{source.name}</b>', source.uris[0], source.filename]
+                    )
+            except AttributeError:
+                # Skip any weirdly malformed sources
+                pass
+
+        for i in self.sources:
+            source = self.sources[i]
+            try:
+                if not source.enabled: 
+                    self.ppa_liststore.insert_with_valuesv(
+                        -1,
+                        [0, 1, 2],
+                        [source.name, source.uris[0], source.filename]
+                    )
+            except AttributeError:
+                pass
+        
+        if 'sources.list' in self.sources:
+            self.ppa_liststore.insert_with_valuesv(
+                -1,
+                [0, 1, 2],
+                ['sources.list', '<i>Legacy System Sources</i>', 'x-repoman-legacy-sources']
+            )
+            
         self.add_button.set_sensitive(True)
 
     def on_row_selected(self, widget):

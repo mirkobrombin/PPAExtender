@@ -18,11 +18,16 @@
     along with Repoman.  If not, see <http://www.gnu.org/licenses/>.
 '''
 
+import logging
+
 import dbus
 import repolib
 
 bus = dbus.SystemBus()
 privileged_object = bus.get_object('org.pop_os.repoman', '/PPA')
+
+log = logging.getLogger("repoman.Repo")
+log.debug('Logging established')
 
 def set_system_comp_enabled(comp, enable):
     """ Enable or disable a component in the system source. 
@@ -108,36 +113,25 @@ def get_all_sources(get_system=False):
     except FileNotFoundError:
         sources_list_file = None
     
+    log.debug('Loading .sources files')
     for file in sources_files:
-        source = repolib.Source(filename=file)
+        if file.name == 'system.sources':
+            # We loaded system before (or didn't because we aren't supposed to)
+            continue
+        log.debug('Loading %s', file)
+        source = repolib.Source(filename=file.name)
         source.load_from_file()
-        sources[source.name] = source
+        sources[source.filename] = source
     
+    log.debug('Loading .list files')
     for file in list_files:
-        source = repolib.LegacyDebSource(filename=file)
+        log.debug('Loading %s', file)
+        source = repolib.LegacyDebSource(filename=file.name)
         source.load_from_file()
-        sources[source.name] = source
+        sources[source.filename] = source
     
     if sources_list_file:
-        sources['sources.list'] = ''
-    
-    return sources
-    
-    sources_dir = repolib.util.get_sources_dir()
-    files_sources = sources_dir.glob('*.sources')
-    files_list = sources_dir.glob('*.list')
-
-    for file in files_sources:
-        repo = repolib.Source(filename=file)
-        repo.load_from_file()
-        name = repo.filename.replace('.sources', '')
-        sources[name] = repo
-    
-    for file in files_list:
-        repo = repolib.LegacyDebSource(filename=file)
-        repo.load_from_file()
-        name = repo.filename.replace('.list', '')
-        sources[name] = repo
+        sources['sources.list'] = {}
     
     return sources
 
