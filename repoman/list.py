@@ -152,9 +152,15 @@ class List(Gtk.Box):
         selec = self.view.get_selection()
         (model, pathlist) = selec.get_selected_rows()
         tree_iter = model.get_iter(pathlist[0])
-        value = model.get_value(tree_iter, 2)
-        self.log.info("PPA to edit: %s" % value)
-        self.do_edit(value)
+        repo_name = model.get_value(tree_iter, 2)
+        self.log.info("PPA to edit: %s" % repo_name)
+        if repo_name == 'x-repoman-legacy-sources':
+            repo.edit_system_legacy_sources_list()
+        else:
+            self.do_edit(repo_name)
+    
+    def edit_sources_list(self):
+        repo.edit_system_legacy_sources_list()
 
     def on_row_activated(self, widget, data1, data2):
         tree_iter = self.ppa_liststore.get_iter(data1)

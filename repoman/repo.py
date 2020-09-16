@@ -19,6 +19,8 @@
 '''
 
 import logging
+import subprocess
+
 
 import dbus
 import repolib
@@ -28,6 +30,25 @@ privileged_object = bus.get_object('org.pop_os.repoman', '/PPA')
 
 log = logging.getLogger("repoman.Repo")
 log.debug('Logging established')
+
+def edit_system_legacy_sources_list():
+    try:
+        subprocess.run(['gedit', 'admin:///etc/apt/sources.list'])
+    except FileNotFoundError:
+        try:
+            subprocess.run([
+                'gnome-terminal', 
+                '--', 
+                'sudo', 'editor', '/etc/apt/sources.list'
+            ])
+        except FileNotFoundError:
+            subprocess.run([
+                'x-terminal-emulator',
+                '-e', 
+                'sudo',
+                'editor',
+                '/etc/apt/sources.list'
+            ])
 
 def set_system_comp_enabled(comp, enable):
     """ Enable or disable a component in the system source. 
