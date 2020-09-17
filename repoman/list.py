@@ -270,11 +270,14 @@ class List(Gtk.Box):
         (model, pathlist) = widget.get_selected_rows()
         if pathlist:
             self.edit_button.set_sensitive(True)
-            self.delete_button.set_sensitive(True)
             for path in pathlist :
                 tree_iter = model.get_iter(path)
-                value = model.get_value(tree_iter,1)
-                self.remote_name = value
+                repo_name = model.get_value(tree_iter,2)
+                self.remote_name = repo_name
+                if repo_name != 'x-repoman-legacy-sources':
+                    self.delete_button.set_sensitive(True)
+                else:
+                    self.delete_button.set_sensitive(False)
         else:
             self.edit_button.set_sensitive(False)
             self.delete_button.set_sensitive(False)
