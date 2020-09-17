@@ -168,19 +168,17 @@ class List(Gtk.Box):
         self.log.info("PPA to edit: %s" % value)
         self.do_edit(value)
 
-    def do_edit(self, repo):
+    def do_edit(self, repo_name):
         """ Perform an edit action. """
-        # dialog = EditDialog(self.parent.parent,
-        #                     source.disabled,
-        #                     source.type,
-        #                     source.uri,
-        #                     source.dist,
-        #                     source.comps,
-        #                     source.architectures,
-        #                     repo)
-        # response = dialog.run()
+        source = self.sources[repo_name]
+        self.log.debug('Editing %s', source)
+        dialog = EditDialog(self.parent.parent, source)
+        response = dialog.run()
 
-        # if response == Gtk.ResponseType.OK:
+        if response != Gtk.ResponseType.OK:
+            dialog.source.load_from_file()
+        else:
+            dialog.source.save_to_disk()
         #     self.add_button.set_sensitive(False)
         #     self.edit_button.set_sensitive(False)
         #     self.delete_button.set_sensitive(False)
@@ -207,6 +205,8 @@ class List(Gtk.Box):
         #                         new_component)
         # else:
         #     dialog.destroy()
+        self.log.debug('New source: %s', dialog.source)
+        dialog.destroy()
 
     def on_add_button_clicked(self, widget):
         dialog = AddDialog(self.parent.parent)
