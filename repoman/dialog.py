@@ -32,7 +32,6 @@ try:
     from . import flatpak_helper 
 except (ImportError, ValueError):
     pass
-from .ppa import PPA
 from . import repo
 
 class ErrorDialog(Gtk.Dialog):
@@ -136,7 +135,7 @@ class AddDialog(Gtk.Dialog):
             entry_valid = flatpak_helper.validate_flatpakrepo(entry_text)
         
         else:
-            entry_valid = self.ppa.validate(entry_text)
+            entry_valid = repo.validate(entry_text)
 
         # Set the add button's sensitivity based on the results of validation.
         try:

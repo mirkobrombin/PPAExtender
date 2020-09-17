@@ -131,11 +131,11 @@ class List(Gtk.Box):
         selec = self.view.get_selection()
         (model, pathlist) = selec.get_selected_rows()
         tree_iter = model.get_iter(pathlist[0])
-        value = model.get_value(tree_iter, 1)
-        self.log.debug('Deleting PPA: %s', value)
-        self.do_delete(value)
+        repo_name = model.get_value(tree_iter, 2)
+        self.log.debug('Deleting PPA: %s', repo_name)
+        self.do_delete(repo_name)
     
-    def do_delete(self, repo):
+    def do_delete(self, repo_name):
         dialog = DeleteDialog(self.parent.parent, 'Source')
         response = dialog.run()
 
@@ -144,9 +144,10 @@ class List(Gtk.Box):
             self.edit_button.set_sensitive(False)
             self.delete_button.set_sensitive(False)
             dialog.destroy()
-        
+            repo.delete_repo(repo_name)
         else:
             dialog.destroy()
+        self.generate_entries()
 
     def on_edit_button_clicked(self, widget):
         selec = self.view.get_selection()
@@ -158,6 +159,7 @@ class List(Gtk.Box):
             repo.edit_system_legacy_sources_list()
         else:
             self.do_edit(repo_name)
+        self.generate_entries()
     
     def edit_sources_list(self):
         repo.edit_system_legacy_sources_list()
@@ -221,6 +223,7 @@ class List(Gtk.Box):
             repo.add_source(url)
         else:
             dialog.destroy()
+        self.generate_entries()
 
     def generate_entries(self):
         self.ppa_liststore.clear()

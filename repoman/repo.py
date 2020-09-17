@@ -21,6 +21,8 @@
 import logging
 import subprocess
 
+import dbus
+
 import repolib
 
 log = logging.getLogger("repoman.Repo")
@@ -126,6 +128,10 @@ def get_os_codename():
     """ Returns the current OS codename."""
     return repolib.util.DISTRO_CODENAME
 
+def validate(line):
+    """ Validate a repo line. """
+    return repolib.util.validate_debline(line)
+
 def get_os_name():
     """ Returns the current OS name, or fallback if not available."""
     try:
@@ -151,6 +157,7 @@ def add_source(line):
     Arguments:
         line (str): the deb line to add.
     """
+    log.debug('Adding repo %s', line)
     new_source = repolib.LegacyDebSource()
     if line.startswith('ppa:'):
         bin_repo = repolib.PPALine(line)
@@ -163,5 +170,18 @@ def add_source(line):
     new_source.name = bin_repo.name
     new_source.sources.append(bin_repo)
     new_source.sources.append(src_repo)
+    new_source.load_from_sources()
     new_source.make_names()
+    log.debug('New source: %s', new_source.make_deblines())
     new_source.save_to_disk()
+
+def delete_repo(repo):
+    """ Delete a repo from the sytem.
+
+    Note: This is about the only thing we need dbus for, so we use it here
+    and only here.
+    """
+    bus = dbus.SystemBus()
+    privileged_object = bus.get_object('org.pop_os.repolib', '/Repo')
+    privileged_object.delete_source(repo)
+    privileged_object.exit()
