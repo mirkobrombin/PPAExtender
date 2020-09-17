@@ -19,7 +19,6 @@
     along with Repoman.  If not, see <http://www.gnu.org/licenses/>.
 '''
 
-import dbus
 import gi
 import logging
 gi.require_version('Gtk', '3.0')
@@ -262,11 +261,18 @@ class Settings(Gtk.Box):
         return 0
 
     def on_component_toggled(self, switch, state):
-        repo.set_system_comp_enabled(switch.component, state)
+        self.system_repo.set_component_enabled(
+            component=switch.component, enabled=state
+        )
 
     def on_source_check_toggled(self, switch, state):
-        repo.set_system_source_code_enabled(state)
+        self.system_repo['Types'] = 'deb'
+        if state:
+            self.system_repo['Types'] = 'deb deb-src'
+        self.system_repo.save_to_disk()
 
     def on_proposed_check_toggled(self, switch, state):
-        repo.set_system_suite_enabled(switch.component, state)
+        self.system_repo.set_suite_enabled(
+            suite=switch.component, enabled=state
+        )
     

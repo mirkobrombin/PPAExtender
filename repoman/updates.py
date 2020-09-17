@@ -19,7 +19,6 @@
     along with Repoman.  If not, see <http://www.gnu.org/licenses/>.
 '''
 
-import dbus
 import logging
 import gi
 gi.require_version('Gtk', '3.0')
@@ -179,4 +178,4 @@ class Updates(Gtk.Box):
 
     def on_suite_toggled(self, switch, state):
         """ state-set handler for suite switches. """
-        repo.set_system_suite_enabled(switch.suite, state)
+        self.system_repo.set_suite_enabled(suite=switch.suite, enabled=state)

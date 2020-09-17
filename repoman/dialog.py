@@ -18,7 +18,7 @@
     You should have received a copy of the GNU General Public License
     along with Repoman.  If not, see <http://www.gnu.org/licenses/>.
 '''
-import dbus
+
 import logging
 import gi
 gi.require_version('Gtk', '3.0')
@@ -34,9 +34,6 @@ except (ImportError, ValueError):
     pass
 from .ppa import PPA
 from . import repo
-
-bus = dbus.SystemBus()
-privileged_object = bus.get_object('org.pop_os.repolib', '/Repo')
 
 class ErrorDialog(Gtk.Dialog):
 
@@ -91,7 +88,6 @@ class AddDialog(Gtk.Dialog):
 
         self.log = logging.getLogger("repoman.AddDialog")
         self.flatpak = flatpak
-        self.ppa = PPA(parent)
 
         content_area = self.get_content_area()
 

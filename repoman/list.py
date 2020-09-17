@@ -218,7 +218,7 @@ class List(Gtk.Box):
             self.delete_button.set_sensitive(False)
             url = dialog.repo_entry.get_text().strip()
             dialog.destroy()
-            # self.ppa.add(url)
+            repo.add_source(url)
         else:
             dialog.destroy()
 

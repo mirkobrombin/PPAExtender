@@ -19,7 +19,6 @@
     along with Repoman.  If not, see <http://www.gnu.org/licenses/>.
 '''
 
-import dbus
 import gi
 gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk, Gdk
@@ -30,9 +29,6 @@ except ImportError:
     JournalHandler = False
 
 from .window import Window
-
-bus = dbus.SystemBus()
-privileged_object = bus.get_object('org.pop_os.repoman', '/PPA')
 
 class Application(Gtk.Application):
 
@@ -46,7 +42,6 @@ class Application(Gtk.Application):
         Gtk.main()
     
     def application_quit(self, widget, data=None):
-        privileged_object.exit()
         Gtk.main_quit()
 
 app = Application()

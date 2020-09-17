@@ -21,12 +21,7 @@
 import logging
 import subprocess
 
-
-import dbus
 import repolib
-
-bus = dbus.SystemBus()
-privileged_object = bus.get_object('org.pop_os.repoman', '/PPA')
 
 log = logging.getLogger("repoman.Repo")
 log.debug('Logging established')
@@ -49,35 +44,6 @@ def edit_system_legacy_sources_list():
                 'editor',
                 '/etc/apt/sources.list'
             ])
-
-def set_system_comp_enabled(comp, enable):
-    """ Enable or disable a component in the system source. 
-        
-    Arguments:
-        comp (str): the component to set
-        enable (bool): The new state to set, True = Enabled.
-    """
-    success = privileged_object.set_system_comp_enabled(comp, enable)
-    return success
-
-def set_system_suite_enabled(suite, enable):
-    """ Enable or disable a suite in the system source. 
-        
-    Arguments:
-        suite (str): the suite to set
-        enable (bool): The new state to set, True = Enabled.
-    """
-    success = privileged_object.set_system_suite_enabled(suite, enable)
-    return success
-
-def set_system_source_code_enabled(enabled):
-    """ Enable or disable source code in the system source. 
-    
-    Arguments:
-        enabled (bool): The new state to set, True = Enabled.
-    """
-    success = privileged_object.set_system_source_code_enabled(enabled)
-    return success
 
 def get_system_repo():
     """Get a repo for the system sources. """
@@ -179,3 +145,23 @@ def get_os_name():
 
     return "your OS"
         
+def add_source(line):
+    """ Add a legacy deb source to the system.
+
+    Arguments:
+        line (str): the deb line to add.
+    """
+    new_source = repolib.LegacyDebSource()
+    if line.startswith('ppa:'):
+        bin_repo = repolib.PPALine(line)
+    elif line.startswith('deb'):
+        bin_repo = repolib.DebLine(line)
+    
+    src_repo = bin_repo.copy()
+    src_repo.enabled = False
+
+    new_source.name = bin_repo.name
+    new_source.sources.append(bin_repo)
+    new_source.sources.append(src_repo)
+    new_source.make_names()
+    new_source.save_to_disk()
