@@ -16,6 +16,7 @@ setup(
         ('/usr/share/metainfo', ['data/repoman.appdata.xml']),
         ('/usr/share/applications', ['data/repoman.desktop']),
         ('/usr/share/repoman', ['data/style.css']),
+        ('/usr/lib/repoman', ['data/repoman.pkexec'])
     ],
     scripts = ['repoman/repoman'],
 )
