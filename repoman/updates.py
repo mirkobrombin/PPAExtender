@@ -140,6 +140,11 @@ class Updates(Gtk.Box):
 
         for repo in self.repo_descriptions:
             switch = self.get_new_switch(repo)
+
+            self.handlers[switch.toggle] = switch.toggle.connect(
+                'state-set',
+                self.on_suite_toggled
+            )
             self.checks_grid.add(switch)
             switch.show()
         
@@ -154,6 +159,10 @@ class Updates(Gtk.Box):
                     # Skip the standard distro suite.
                     continue
                 switch = self.get_new_switch(suite)
+                self.handlers[switch.toggle] = switch.toggle.connect(
+                    'state-set',
+                    self.on_suite_toggled
+                )
                 self.checks_grid.add(switch)
                 switch.show()
 
@@ -165,11 +174,7 @@ class Updates(Gtk.Box):
         for suite in self.checks_grid.get_children():
             if suite.suite in self.system_repo.suites:
                 suite.toggle.set_active(True)
-            self.handlers[suite.toggle] = suite.toggle.connect(
-                'state-set',
-                self.on_suite_toggled
-            )
-
+            
         self.unblock_handlers()
 
     def set_suites_enabled(self, enabled):

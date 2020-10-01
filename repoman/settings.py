@@ -214,6 +214,10 @@ class Settings(Gtk.Box):
 
         for component in self.repo_descriptions:
             switch = self.get_new_switch(component)
+            self.handlers[switch.toggle] = switch.toggle.connect(
+                'state-set',
+                self.on_component_toggled
+            )
             self.checks_grid.add(switch)
         
         if self.system_repo:
@@ -224,6 +228,10 @@ class Settings(Gtk.Box):
                     # Doesn't really make sense for this to be toggleable.
                     continue
                 switch = self.get_new_switch(component)
+                self.handlers[switch.toggle] = switch.toggle.connect(
+                    'state-set',
+                    self.on_component_toggled
+                )
                 self.checks_grid.add(switch)
     
     def set_child_checks_sensitive(self):
@@ -253,12 +261,8 @@ class Settings(Gtk.Box):
         for comp in self.checks_grid.get_children():
             if comp.component in self.system_repo.components:
                 comp.toggle.set_active(True)
-            self.handlers[comp.toggle] = comp.toggle.connect(
-                'state-set',
-                self.on_component_toggled
-            )
+
         self.unblock_handlers()
-        return 0
 
     def on_component_toggled(self, switch, state):
         self.system_repo.set_component_enabled(
