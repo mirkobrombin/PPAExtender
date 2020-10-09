@@ -20,6 +20,7 @@
 
 import logging
 import subprocess
+import threading
 
 import dbus
 
@@ -28,7 +29,7 @@ import repolib
 log = logging.getLogger("repoman.Repo")
 log.debug('Logging established')
 
-def edit_system_legacy_sources_list():
+def _do_edit_system_legacy_sources_list(name):
     try:
         subprocess.run(['gedit', 'admin:///etc/apt/sources.list'])
     except FileNotFoundError:
@@ -46,6 +47,13 @@ def edit_system_legacy_sources_list():
                 'editor',
                 '/etc/apt/sources.list'
             ])
+
+def edit_system_legacy_sources_list():
+    thread = threading.Thread(
+        target=_do_edit_system_legacy_sources_list,
+        args=(1,)
+    )
+    thread.start()
 
 def get_system_repo():
     """Get a repo for the system sources. """
