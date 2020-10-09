@@ -24,7 +24,7 @@ import logging
 
 import gi
 gi.require_version('Gtk', '3.0')
-from gi.repository import Gtk
+from gi.repository import Gtk, Gio
 from softwareproperties.SoftwareProperties import SoftwareProperties
 
 from . import repo
@@ -125,6 +125,12 @@ class List(Gtk.Box):
         action_bar.insert(self.add_button, 0)
         list_grid.attach(action_bar, 0, 1, 1, 1)
 
+        # Watch the config directory for changes, so we can reload if so
+        self.file = Gio.File.new_for_path('/etc/apt/sources.list.d/')
+        self.monitor = self.file.monitor_directory(Gio.FileMonitorFlags.NONE)
+        self.monitor.connect('changed', self.on_config_changed)
+        self.log.debug('Monitor Created: %s', self.monitor)
+
         self.generate_entries()
     
     def on_delete_button_clicked(self, widget):
@@ -147,7 +153,6 @@ class List(Gtk.Box):
             repo.delete_repo(repo_name)
         else:
             dialog.destroy()
-        self.generate_entries()
 
     def on_edit_button_clicked(self, widget):
         selec = self.view.get_selection()
@@ -181,32 +186,7 @@ class List(Gtk.Box):
             dialog.source.load_from_file()
         else:
             dialog.source.save_to_disk()
-        #     self.add_button.set_sensitive(False)
-        #     self.edit_button.set_sensitive(False)
-        #     self.delete_button.set_sensitive(False)
-        #     if dialog.type_box.get_active() == 0:
-        #         new_rtype = "deb"
-        #     elif dialog.type_box.get_active() == 1:
-        #         new_rtype = "deb-src"
-        #     new_disabled = not dialog.enabled_switch.get_active()
-        #     new_uri = dialog.uri_entry.get_text()
-        #     self.log.info(new_disabled)
-        #     new_version = dialog.version_entry.get_text()
-        #     new_component = dialog.component_entry.get_text()
-        #     dialog.destroy()
-        #     new_archs = "[arch="
-        #     for arch in source.architectures:
-        #         new_archs = "%s%s," % (new_archs, arch)
-        #     new_archs = new_archs[:-1] + "]"
-        #     self.ppa.modify_ppa(source,
-        #                         new_disabled,
-        #                         new_rtype,
-        #                         new_archs,
-        #                         new_uri,
-        #                         new_version,
-        #                         new_component)
-        # else:
-        #     dialog.destroy()
+
         self.log.debug('New source: %s', dialog.source)
         dialog.destroy()
 
@@ -219,13 +199,12 @@ class List(Gtk.Box):
             self.edit_button.set_sensitive(False)
             self.delete_button.set_sensitive(False)
             url = dialog.repo_entry.get_text().strip()
-            dialog.destroy()
-            repo.add_source(url)
+            repo.add_source(url, dialog)
         else:
             dialog.destroy()
-        self.generate_entries()
 
-    def generate_entries(self):
+    def generate_entries(self, *args, **kwargs):
+        self.log.debug('Generating list of repos')
         self.ppa_liststore.clear()
 
         self.sources = {}
@@ -265,6 +244,10 @@ class List(Gtk.Box):
             )
             
         self.add_button.set_sensitive(True)
+
+    def on_config_changed(self, monitor, file, other_file, event_type):
+        self.log.debug('Installation changed, regenerating list')
+        self.generate_entries()
 
     def on_row_selected(self, widget):
         (model, pathlist) = widget.get_selected_rows()
