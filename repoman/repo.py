@@ -23,8 +23,10 @@ import subprocess
 import threading
 
 import dbus
-
+import gi
+from gi.repository import GLib
 import repolib
+
 
 log = logging.getLogger("repoman.Repo")
 log.debug('Logging established')
@@ -158,14 +160,8 @@ def get_os_name():
         return "your OS"
 
     return "your OS"
-        
-def add_source(line):
-    """ Add a legacy deb source to the system.
 
-    Arguments:
-        line (str): the deb line to add.
-    """
-    log.debug('Adding repo %s', line)
+def _do_add_source(name, line, dialog):
     new_source = repolib.LegacyDebSource()
     if line.startswith('ppa:'):
         bin_repo = repolib.PPALine(line)
@@ -182,6 +178,18 @@ def add_source(line):
     new_source.make_names()
     log.debug('New source: %s', new_source.make_deblines())
     new_source.save_to_disk()
+    GLib.idle_add(dialog.destroy)
+
+def add_source(line, dialog):
+    """ Add a legacy deb source to the system.
+
+    Arguments:
+        line (str): the deb line to add.
+    """
+    log.debug('Adding repo %s', line)
+    dialog.set_busy()
+    thread = threading.Thread(target=_do_add_source, args=(1, line, dialog))
+    thread.start()
 
 def delete_repo(repo):
     """ Delete a repo from the sytem.

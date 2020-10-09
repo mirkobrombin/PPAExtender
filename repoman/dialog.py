@@ -100,13 +100,28 @@ class AddDialog(Gtk.Dialog):
         content_grid.set_hexpand(True)
         content_area.add(content_grid)
 
+        self.title_spinner = Gtk.Stack()
+        self.title_spinner.set_transition_type(Gtk.StackTransitionType.CROSSFADE)
+        self.title_spinner.set_transition_duration(200)
+        self.title_spinner.set_homogeneous(True)
+        self.title_spinner.set_halign(Gtk.Align.CENTER)
+        content_grid.attach(self.title_spinner, 0, 0, 1, 1)
+
+        add_grid = Gtk.Grid()
+
         add_title = Gtk.Label(_("Enter Source Details"))
         Gtk.StyleContext.add_class(add_title.get_style_context(), "h2")
-        content_grid.attach(add_title, 0, 0, 1, 1)
+        add_grid.attach(add_title, 0, 0, 1, 1)
 
         add_label = Gtk.Label(_("e.g. ppa:mirkobrombin/ppa"))
         if not self.flatpak:
-            content_grid.attach(add_label, 0, 1, 1, 1)
+            add_grid.attach(add_label, 0, 1, 1, 1)
+        
+        self.title_spinner.add_named(add_grid, 'title')
+
+        self.spinner = Gtk.Spinner()
+        self.spinner.stop()
+        self.title_spinner.add_named(self.spinner, 'spinner')
 
         self.repo_entry = Gtk.Entry()
         self.repo_entry.set_placeholder_text(_("Source Line"))
@@ -142,6 +157,11 @@ class AddDialog(Gtk.Dialog):
             self.add_button.set_sensitive(entry_valid)
         except TypeError:
             pass
+    
+    def set_busy(self):
+        self.spinner.start()
+        self.title_spinner.set_visible_child_name('spinner')
+        self.set_sensitive(False)
 
 class DeleteDialog(Gtk.Dialog):
 
