@@ -276,7 +276,6 @@ class Settings(Gtk.Box):
             
             new_entry = not entry.get_text() in self.system_repo.uris
             action_edit = entry.get_icon_name(e_pos) == 'document-save-symbolic'
-            print(new_entry, action_edit)
             if new_entry and action_edit:
                 uris.append(entry.get_text())
             
