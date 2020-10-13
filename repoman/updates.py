@@ -22,7 +22,7 @@
 import logging
 import gi
 gi.require_version('Gtk', '3.0')
-from gi.repository import Gtk
+from gi.repository import Gtk, Gio
 import gettext
 
 from . import repo
@@ -85,6 +85,13 @@ class Updates(Gtk.Box):
         self.set_suites_enabled(self.parent.setting.checks_enabled)
         if self.system_repo:
             self.show_updates()
+        
+        # Watch the config directory for changes, so we can reload if so
+        self.file = Gio.File.new_for_path('/etc/apt/sources.list.d/')
+        self.monitor = self.file.monitor_directory(Gio.FileMonitorFlags.NONE)
+        self.monitor.connect('changed', self.on_config_changed)
+        self.log.debug('Monitor Created: %s', self.monitor)
+        self.show_all()
 
     def block_handlers(self):
         for widget in self.handlers:
@@ -184,3 +191,9 @@ class Updates(Gtk.Box):
     def on_suite_toggled(self, switch, state):
         """ state-set handler for suite switches. """
         self.system_repo.set_suite_enabled(suite=switch.suite, enabled=state)
+
+    def on_config_changed(self, monitor, file, other_file, event_type):
+        self.log.debug('Installation changed, regenerating list')
+        if self.system_repo:
+            self.set_suites_enabled(self.parent.setting.checks_enabled)
+            self.show_updates()
