@@ -22,12 +22,13 @@
 import gi
 import logging
 gi.require_version('Gtk', '3.0')
-from gi.repository import Gtk
+from gi.repository import Gtk, Gio
 from . import repo
 import gettext
 gettext.bindtextdomain('repoman', '/usr/share/repoman/po')
-gettext.textdomain("repoman")
+gettext.textdomain('repoman')
 _ = gettext.gettext
+e_pos = Gtk.EntryIconPosition.SECONDARY
 
 class Settings(Gtk.Box):
     repo_descriptions = {
@@ -35,7 +36,7 @@ class Settings(Gtk.Box):
         'restricted': _('Proprietary drivers for devices'),
         'multiverse': _('Software with Copyright or Legal Restrictions')
     }
-    
+
     def __init__(self, parent):
         Gtk.Box.__init__(self, False, 0)
 
@@ -84,9 +85,9 @@ class Settings(Gtk.Box):
         settings_grid.set_halign(Gtk.Align.CENTER)
         self.add(settings_grid)
 
-        sources_title = Gtk.Label(_("Official Sources"))
+        sources_title = Gtk.Label(_('Official Sources'))
         sources_title.set_halign(Gtk.Align.START)
-        Gtk.StyleContext.add_class(sources_title.get_style_context(), "h2")
+        Gtk.StyleContext.add_class(sources_title.get_style_context(), 'h2')
         settings_grid.attach(sources_title, 0, 0, 1, 1)
 
         sources_label = Gtk.Label.new(
@@ -98,9 +99,13 @@ class Settings(Gtk.Box):
         sources_label.set_halign(Gtk.Align.START)
         Gtk.StyleContext.add_class(
             sources_label.get_style_context(),
-            "description"
+            'description'
         )
         settings_grid.attach(sources_label, 0, 1, 1, 1)
+
+        self.mirror_box = Gtk.Box.new(Gtk.Orientation.VERTICAL, 0)
+        Gtk.StyleContext.add_class(self.mirror_box.get_style_context(), 'linked')
+        settings_grid.attach(self.mirror_box, 0, 2, 1, 1)
 
         self.checks_grid = Gtk.VBox()
         self.checks_grid.set_margin_left(12)
@@ -108,11 +113,11 @@ class Settings(Gtk.Box):
         self.checks_grid.set_margin_right(12)
         self.checks_grid.set_margin_bottom(12)
         self.checks_grid.set_spacing(12)
-        settings_grid.attach(self.checks_grid, 0, 2, 1, 1)
+        settings_grid.attach(self.checks_grid, 0, 3, 1, 1)
 
         developer_options = Gtk.Expander()
-        developer_options.set_label(_("Developer Options (Advanced)"))
-        settings_grid.attach(developer_options, 0, 3, 1, 1)
+        developer_options.set_label(_('Developer Options (Advanced)'))
+        settings_grid.attach(developer_options, 0, 4, 1, 1)
 
         self.developer_grid = Gtk.VBox()
         self.developer_grid.set_margin_left(12)
@@ -123,7 +128,7 @@ class Settings(Gtk.Box):
         developer_options.add(self.developer_grid)
 
         developer_label = Gtk.Label.new(
-            _("These options are primarily of interest to developers.")
+            _('These options are primarily of interest to developers.')
         )
         developer_label.set_line_wrap(True)
         developer_label.set_halign(Gtk.Align.START)
@@ -134,12 +139,17 @@ class Settings(Gtk.Box):
 
         self.create_switches()
         if self.system_repo:
-            self.switches_sensitive = True
-            self.show_distro()
-            self.show_source_code()
-            self.show_proposed()
+            self.on_config_changed(None, None, None, None)
+            developer_options.grab_default()
+            developer_options.grab_focus()
         else:
             self.switches_sensitive = False
+
+        # Watch the config directory for changes, so we can reload if so
+        self.file = Gio.File.new_for_path('/etc/apt/sources.list.d/')
+        self.monitor = self.file.monitor_directory(Gio.FileMonitorFlags.NONE)
+        self.monitor.connect('changed', self.on_config_changed)
+        self.log.debug('Monitor Created: %s', self.monitor)
         self.show_all()
 
     @property
@@ -151,7 +161,7 @@ class Settings(Gtk.Box):
             else:
                 continue
         return False
-    
+
     @property
     def switches_sensitive(self):
         for switchbox in self.checks_grid.get_children():
@@ -160,7 +170,7 @@ class Settings(Gtk.Box):
             else:
                 continue
         return False
-    
+
     @switches_sensitive.setter
     def switches_sensitive(self, sensitive):
         for switchbox in self.checks_grid.get_children():
@@ -177,11 +187,107 @@ class Settings(Gtk.Box):
         for widget in self.handlers:
             if widget.handler_is_connected(self.handlers[widget]):
                 widget.handler_unblock(self.handlers[widget])
-    
-    def get_new_switch(self, component, description=None):
-        """ Creates a Box with a new switch and a description. 
 
-        If the name of the component matches one of the normal default 
+    def get_mirror_entry(
+            self,
+            uri=None,
+            placeholder='http://example.com/ubuntu',
+            icon_name='edit-delete-symbolic',
+            icon_tooltip=_('Remove Mirror'),
+            icon_position=Gtk.EntryIconPosition.SECONDARY
+        ):
+        self.log.debug('Creating entry for %s', uri)
+        mirror_entry = Gtk.Entry()
+        mirror_entry.set_input_purpose(Gtk.InputPurpose.URL)
+        mirror_entry.set_placeholder_text(placeholder)
+        if uri:
+            mirror_entry.set_text(uri)
+        mirror_entry.uri = uri
+        mirror_entry.handlers = {}
+
+        mirror_entry.set_icon_from_icon_name(icon_position, icon_name)
+        mirror_entry.set_icon_sensitive(icon_position, True)
+        mirror_entry.set_icon_activatable(icon_position, True)
+        mirror_entry.set_icon_tooltip_text(icon_position, icon_tooltip)
+        return mirror_entry
+
+    def set_mirrors(self):
+        """ Sets up the list of mirrors.
+
+        Also adds a blank entry for adding a new mirror to the list.
+        """
+        self.system_repo.load_from_file()
+        self.log.debug('Adding mirrors')
+        for child in self.mirror_box.get_children():
+            self.log.debug('Removing outdated entry for %s', child.get_text())
+            child.destroy()
+
+        new_mirror_entry = self.get_mirror_entry(
+            placeholder=_('Add a new mirror'),
+            icon_name='list-add-symbolic',
+            icon_tooltip=_('Add mirror')
+        )
+        for signal in ['icon-release', 'activate']:
+            new_mirror_entry.connect(signal, self.do_entry_add)
+        self.mirror_box.pack_end(new_mirror_entry, True, True, 0)
+        new_mirror_entry.show()
+
+        for uri in self.system_repo.uris:
+            self.log.debug('Mirror found: %s', uri)
+            mirror_entry = self.get_mirror_entry(uri=uri)
+            mirror_entry.connect('icon-release', self.do_entry_delete)
+            mirror_entry.connect('activate', self.do_entry_delete)
+            mirror_entry.connect('changed', self.do_entry_changed)
+            if len(self.system_repo.uris) == 1:
+                # Don't allow removing the last mirror
+                self.log.debug('Mirror %s is the only mirror', uri)
+                mirror_entry.set_icon_from_icon_name(e_pos, '')
+            self.mirror_box.pack_start(mirror_entry, True, True, 0)
+            mirror_entry.show()
+
+    def do_entry_add(self, entry, *args, **kwargs):
+        """ :icon-release: signal handler for the new_mirror_entry."""
+        new_uri = entry.get_text()
+        uris = self.system_repo.uris
+        if not new_uri in uris:
+            uris.append(new_uri)
+        self.system_repo.uris = uris
+        self.system_repo.save_to_disk()
+
+    def do_entry_changed(self, entry):
+        """ :changed: signal handler for mirror_entry items. """
+        if entry.get_text() != entry.uri:
+            entry.set_icon_from_icon_name(e_pos, 'document-save-symbolic')
+        else:
+            if len(self.system_repo.uris) == 1:
+                entry.set_icon_from_icon_name(e_pos, '')
+            else:
+                entry.set_icon_from_icon_name(e_pos, 'edit-delete-symbolic')
+
+    def do_entry_delete(self, entry, *args, **kwargs):
+        """ :icon-release: handler for mirror_entry items.
+
+        Used to remove existing entries from the list.
+        """
+        uris = self.system_repo.uris
+        if entry.get_icon_name(e_pos):
+            if entry.uri in self.system_repo.uris:
+                uris.remove(entry.uri)
+            
+            new_entry = not entry.get_text() in self.system_repo.uris
+            action_edit = entry.get_icon_name(e_pos) == 'document-save-symbolic'
+            print(new_entry, action_edit)
+            if new_entry and action_edit:
+                uris.append(entry.get_text())
+            
+            self.system_repo.uris = uris
+            self.system_repo.save_to_disk()
+                
+
+    def get_new_switch(self, component, description=None):
+        """ Creates a Box with a new switch and a description.
+
+        If the name of the component matches one of the normal default
         components, include the description of the component. Otherwise use the
         supplied description (if given) or the name of the component.
 
@@ -189,7 +295,7 @@ class Settings(Gtk.Box):
             component (str): The name of a component to bind to the switch
             description (str): An optional description to use if the component
                 isn't of the predefinied normal sources.
-        
+
         Returns:
             A Gtk.Box with the added switch and label description
         """
@@ -214,7 +320,7 @@ class Settings(Gtk.Box):
         switch.add(toggle)
 
         return switch
-    
+
     def create_switches(self):
         """ Create the grid of switches that control the sources. """
         for switch in self.checks_grid.get_children():
@@ -227,7 +333,7 @@ class Settings(Gtk.Box):
                 self.on_component_toggled
             )
             self.checks_grid.add(switch)
-        
+
         if self.system_repo:
             for component in self.system_repo.components:
                 if component in self.repo_descriptions:
@@ -241,7 +347,7 @@ class Settings(Gtk.Box):
                     self.on_component_toggled
                 )
                 self.checks_grid.add(switch)
-    
+
     def set_child_checks_sensitive(self):
         self.source_check.set_sensitive(self.prev_enabled)
         self.proposed_check.set_sensitive(self.prev_enabled)
@@ -250,13 +356,15 @@ class Settings(Gtk.Box):
         except AttributeError:
             # In case the updates page hasn't been init'd yet
             pass
-    
+
     def show_source_code(self):
+        self.system_repo.load_from_file()
         self.block_handlers()
         self.source_check.toggle.set_active(self.system_repo.source_code_enabled)
         self.unblock_handlers()
 
     def show_proposed(self):
+        self.system_repo.load_from_file()
         self.block_handlers()
         if self.proposed_name in self.system_repo.suites:
             self.proposed_check.toggle.set_active(True)
@@ -265,10 +373,15 @@ class Settings(Gtk.Box):
         self.unblock_handlers()
 
     def show_distro(self):
+        self.system_repo.load_from_file()
         self.block_handlers()
         for comp in self.checks_grid.get_children():
             if comp.component in self.system_repo.components:
+                self.log.debug('Component %s is enabled', comp.component)
                 comp.toggle.set_active(True)
+            else:
+                self.log.debug('Component %s is disabled', comp.component)
+                comp.toggle.set_active(False)
 
         self.unblock_handlers()
 
@@ -287,4 +400,11 @@ class Settings(Gtk.Box):
         self.system_repo.set_suite_enabled(
             suite=switch.component, enabled=state
         )
-    
+
+    def on_config_changed(self, monitor, file, other_file, event_type):
+        self.log.debug('Installation changed, regenerating list')
+        self.switches_sensitive = True
+        self.show_distro()
+        self.show_source_code()
+        self.show_proposed()
+        self.set_mirrors()
