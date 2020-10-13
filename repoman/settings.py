@@ -403,8 +403,9 @@ class Settings(Gtk.Box):
 
     def on_config_changed(self, monitor, file, other_file, event_type):
         self.log.debug('Installation changed, regenerating list')
-        self.switches_sensitive = True
-        self.show_distro()
-        self.show_source_code()
-        self.show_proposed()
-        self.set_mirrors()
+        if self.system_repo:
+            self.switches_sensitive = True
+            self.show_distro()
+            self.show_source_code()
+            self.show_proposed()
+            self.set_mirrors()
