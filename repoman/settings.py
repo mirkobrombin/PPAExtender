@@ -89,11 +89,17 @@ class Settings(Gtk.Box):
         Gtk.StyleContext.add_class(sources_title.get_style_context(), "h2")
         settings_grid.attach(sources_title, 0, 0, 1, 1)
 
-        sources_label = Gtk.Label(_("Official sources are provided by %s and its developers. It's recommended to leave these sources enabled.") % self.os_name)
+        sources_label = Gtk.Label.new(
+            _(f'Official sources are provided by {self.os_name} and its '
+            "developers. It's recommended to leave these sources enabled.")
+        )
         sources_label.set_line_wrap(True)
         sources_label.set_justify(Gtk.Justification.FILL)
         sources_label.set_halign(Gtk.Align.START)
-        Gtk.StyleContext.add_class(sources_label.get_style_context(), "description")
+        Gtk.StyleContext.add_class(
+            sources_label.get_style_context(),
+            "description"
+        )
         settings_grid.attach(sources_label, 0, 1, 1, 1)
 
         self.checks_grid = Gtk.VBox()
@@ -116,7 +122,9 @@ class Settings(Gtk.Box):
         self.developer_grid.set_spacing(12)
         developer_options.add(self.developer_grid)
 
-        developer_label = Gtk.Label(_("These options are primarily of interest to developers."))
+        developer_label = Gtk.Label.new(
+            _("These options are primarily of interest to developers.")
+        )
         developer_label.set_line_wrap(True)
         developer_label.set_halign(Gtk.Align.START)
         developer_label.set_margin_start(0)
@@ -178,7 +186,7 @@ class Settings(Gtk.Box):
         supplied description (if given) or the name of the component.
 
         Arguments:
-            component (str): The name of a distro component to bind to the switch
+            component (str): The name of a component to bind to the switch
             description (str): An optional description to use if the component
                 isn't of the predefinied normal sources.
         
