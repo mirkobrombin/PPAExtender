@@ -318,6 +318,7 @@ class Settings(Gtk.Box):
         switch.toggle = toggle
         switch.add(toggle)
 
+        switch.show_all()
         return switch
 
     def create_switches(self):
@@ -331,6 +332,7 @@ class Settings(Gtk.Box):
                 'state-set',
                 self.on_component_toggled
             )
+            switch.show()
             self.checks_grid.add(switch)
 
         if self.system_repo:
@@ -345,6 +347,7 @@ class Settings(Gtk.Box):
                     'state-set',
                     self.on_component_toggled
                 )
+                switch.show()
                 self.checks_grid.add(switch)
 
     def set_child_checks_sensitive(self):
@@ -373,14 +376,18 @@ class Settings(Gtk.Box):
 
     def show_distro(self):
         self.system_repo.load_from_file()
+        self.create_switches()
         self.block_handlers()
-        for comp in self.checks_grid.get_children():
-            if comp.component in self.system_repo.components:
-                self.log.debug('Component %s is enabled', comp.component)
-                comp.toggle.set_active(True)
-            else:
-                self.log.debug('Component %s is disabled', comp.component)
-                comp.toggle.set_active(False)
+        self.switches_sensitive = False
+        if self.system_repo:
+            self.switches_sensitive = True
+            for comp in self.checks_grid.get_children():
+                if comp.component in self.system_repo.components:
+                    self.log.debug('Component %s is enabled', comp.component)
+                    comp.toggle.set_active(True)
+                else:
+                    self.log.debug('Component %s is disabled', comp.component)
+                    comp.toggle.set_active(False)
 
         self.unblock_handlers()
 
@@ -403,7 +410,6 @@ class Settings(Gtk.Box):
     def on_config_changed(self, monitor, file, other_file, event_type):
         self.log.debug('Installation changed, regenerating list')
         if self.system_repo:
-            self.switches_sensitive = True
             self.show_distro()
             self.show_source_code()
             self.show_proposed()
