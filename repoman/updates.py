@@ -153,7 +153,7 @@ class Updates(Gtk.Box):
                 self.on_suite_toggled
             )
             self.checks_grid.add(switch)
-            switch.show()
+            switch.show_all()
         
         if self.system_repo:
             for suite in self.system_repo.suites:
@@ -171,16 +171,20 @@ class Updates(Gtk.Box):
                     self.on_suite_toggled
                 )
                 self.checks_grid.add(switch)
-                switch.show()
+                switch.show_all()
 
     def show_updates(self):
         """ Initialize the state of all of the switches. """
         self.log.debug("init_distro")
+        self.system_repo.load_from_file()
+        self.create_switches()
         self.block_handlers()
         
         for suite in self.checks_grid.get_children():
             if suite.suite in self.system_repo.suites:
                 suite.toggle.set_active(True)
+            else:
+                suite.toggle.set_active(False)
             
         self.unblock_handlers()
 
@@ -195,5 +199,5 @@ class Updates(Gtk.Box):
     def on_config_changed(self, monitor, file, other_file, event_type):
         self.log.debug('Installation changed, regenerating list')
         if self.system_repo:
-            self.set_suites_enabled(self.parent.setting.checks_enabled)
             self.show_updates()
+            self.set_suites_enabled(self.parent.setting.checks_enabled)
