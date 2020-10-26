@@ -65,7 +65,8 @@ class ErrorDialog(Gtk.Dialog):
 
         dialog_label = Gtk.Label()
         dialog_label.set_markup(f'<b>{message_title}</b>')
-        dialog_message = Gtk.Label(message_text)
+        dialog_message = Gtk.Label()
+        dialog_message.set_markup(message_text)
         content_grid.attach(dialog_label, 1, 0, 1, 1)
         content_grid.attach(dialog_message, 1, 1, 1, 1)
 

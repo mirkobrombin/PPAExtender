@@ -208,7 +208,32 @@ class List(Gtk.Box):
         self.ppa_liststore.clear()
 
         self.sources = {}
-        self.sources = repo.get_all_sources()
+        self.sources, errors = repo.get_all_sources()
+        
+        # Display an error dialog for invalid sources
+        if errors:
+            err_string = 'The following source files had errors and were omitted:\n'
+            for file in errors:
+                err_string += f'    {file}\n'
+            err_string += '\nRun '
+            err_string += (
+                '<span '
+                'font-family="monospace" '
+                'background="#333333" '
+                'foreground="white" '
+                '> apt-manage -b </span> '
+            )
+            err_string += 'for more information'
+            err_dialog = ErrorDialog(
+                self.parent.parent,
+                'Source File Errors',
+                'dialog-warning',
+                'Some sources contained errors',
+                err_string
+            )
+            err_dialog.run()
+            err_dialog.destroy()
+
         self.log.debug('Sources found:\n%s', self.sources)
         for i in self.sources:
             source = self.sources[i]
