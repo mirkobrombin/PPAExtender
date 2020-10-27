@@ -138,8 +138,9 @@ class List(Gtk.Box):
         (model, pathlist) = selec.get_selected_rows()
         tree_iter = model.get_iter(pathlist[0])
         repo_name = model.get_value(tree_iter, 2)
-        self.log.debug('Deleting PPA: %s', repo_name)
-        self.do_delete(repo_name)
+        repo = self.sources[repo_name]
+        self.log.debug('Deleting PPA: %s', repo.filename)
+        self.do_delete(repo.filename)
     
     def do_delete(self, repo_name):
         dialog = DeleteDialog(self.parent.parent, 'Source')
