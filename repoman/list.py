@@ -218,7 +218,7 @@ class List(Gtk.Box):
                     self.ppa_liststore.insert_with_valuesv(
                         -1,
                         [0, 1, 2],
-                        [f'<b>{source.name}</b>', source.uris[0], source.filename]
+                        [f'<b>{source.name}</b>', source.uris[0], source.ident]
                     )
             except AttributeError:
                 # Skip any weirdly malformed sources
@@ -231,7 +231,7 @@ class List(Gtk.Box):
                     self.ppa_liststore.insert_with_valuesv(
                         -1,
                         [0, 1, 2],
-                        [source.name, source.uris[0], source.filename]
+                        [source.name, source.uris[0], source.ident]
                     )
             except AttributeError:
                 pass
