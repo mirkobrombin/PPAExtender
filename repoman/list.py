@@ -138,8 +138,9 @@ class List(Gtk.Box):
         (model, pathlist) = selec.get_selected_rows()
         tree_iter = model.get_iter(pathlist[0])
         repo_name = model.get_value(tree_iter, 2)
-        self.log.debug('Deleting PPA: %s', repo_name)
-        self.do_delete(repo_name)
+        repo = self.sources[repo_name]
+        self.log.debug('Deleting PPA: %s', repo.filename)
+        self.do_delete(repo.filename)
     
     def do_delete(self, repo_name):
         dialog = DeleteDialog(self.parent.parent, 'Source')
@@ -218,7 +219,7 @@ class List(Gtk.Box):
                     self.ppa_liststore.insert_with_valuesv(
                         -1,
                         [0, 1, 2],
-                        [f'<b>{source.name}</b>', source.uris[0], source.filename]
+                        [f'<b>{source.name}</b>', source.uris[0], source.ident]
                     )
             except AttributeError:
                 # Skip any weirdly malformed sources
@@ -231,7 +232,7 @@ class List(Gtk.Box):
                     self.ppa_liststore.insert_with_valuesv(
                         -1,
                         [0, 1, 2],
-                        [source.name, source.uris[0], source.filename]
+                        [source.name, source.uris[0], source.ident]
                     )
             except AttributeError:
                 pass
