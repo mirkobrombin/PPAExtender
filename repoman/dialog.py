@@ -44,6 +44,7 @@ class ErrorDialog(Gtk.Dialog):
                  
         super().__init__(use_header_bar=header, modal=1)
         self.set_deletable(False)
+        self.set_transient_for(parent)
 
         self.log = logging.getLogger("repoman.ErrorDialog")
         
