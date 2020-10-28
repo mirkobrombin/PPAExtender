@@ -211,7 +211,7 @@ class List(Gtk.Box):
         self.sources = {}
         self.sources, errors = repo.get_all_sources()
         
-        # Display an error dialog for invalid sources
+        # Print a warning to console about source file errors.
         if errors:
             err_string = 'The following source files have errors:\n\n'
             for file in errors:
