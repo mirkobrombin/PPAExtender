@@ -39,6 +39,12 @@ class Application(Gtk.Application):
         self.win.connect("delete-event", self.application_quit)
         self.win.show_all()
 
+        # If there are errors in source files, display the dialog to inform 
+        # the user.
+        if self.win.err_dialog:
+            self.win.err_dialog.run()
+            self.win.err_dialog.destroy()
+
         Gtk.main()
     
     def application_quit(self, widget, data=None):
