@@ -34,12 +34,13 @@ except (ImportError, ValueError):
     pass
 from . import repo
 
+settings = Gtk.Settings.get_default()
+header = settings.props.gtk_dialogs_use_header
+
 class ErrorDialog(Gtk.Dialog):
 
     def __init__(self, parent, dialog_title, dialog_icon,
                  message_title, message_text):
-        settings = Gtk.Settings.get_default()
-        header = settings.props.gtk_dialogs_use_header
                  
         super().__init__(use_header_bar=header, modal=1)
         self.set_deletable(False)
@@ -77,10 +78,6 @@ class AddDialog(Gtk.Dialog):
     ppa_name = False
 
     def __init__(self, parent, flatpak=False):
-
-        settings = Gtk.Settings.get_default()
-        header = settings.props.gtk_dialogs_use_header
-
         Gtk.Dialog.__init__(self, _("Add Source"), parent, 0,
                             (Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL,
                              Gtk.STOCK_ADD, Gtk.ResponseType.OK),
@@ -169,10 +166,6 @@ class DeleteDialog(Gtk.Dialog):
     ppa_name = False
 
     def __init__(self, parent, title, flatpak=False, refs=None):
-
-        settings = Gtk.Settings.get_default()
-        header = settings.props.gtk_dialogs_use_header
-
         Gtk.Dialog.__init__(self, _(f'Remove {title}'), parent, 0,
                             (Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL,
                              Gtk.STOCK_REMOVE, Gtk.ResponseType.OK),
@@ -296,9 +289,6 @@ class EditDialog(Gtk.Dialog):
     ppa_name = False
 
     def __init__(self, parent, source):
-
-        settings = Gtk.Settings.get_default()
-        header = settings.props.gtk_dialogs_use_header
         self.source = source
         # Ensure the source is fully up to date.
         self.source.load_from_file()
