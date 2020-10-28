@@ -35,15 +35,7 @@ class Application(Gtk.Application):
     def do_activate(self):
 
         self.win = Window()
-        self.win.set_default_size(700, 400)
         self.win.connect("delete-event", self.application_quit)
-        self.win.show_all()
-
-        # If there are errors in source files, display the dialog to inform 
-        # the user.
-        if self.win.err_dialog:
-            self.win.err_dialog.run()
-            self.win.err_dialog.destroy()
 
         Gtk.main()
     

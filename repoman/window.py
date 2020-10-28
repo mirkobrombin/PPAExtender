@@ -33,6 +33,7 @@ class Window(Gtk.Window):
         Gtk.Window.__init__(self)
 
         self.set_position(Gtk.WindowPosition.CENTER)
+        self.set_default_size(700, 400)
 
         self.err_dialog = None
 
@@ -54,9 +55,13 @@ class Window(Gtk.Window):
         self.context.add_provider_for_screen(self.screen, self.css_provider,
           Gtk.STYLE_PROVIDER_PRIORITY_USER)
         
-        # Set up an error dialog to inform the user about source errors.
+        self.show_all()
+        
+        # Show an error dialog to inform the user about source errors.
         if self.stack.errors:
             self.get_repos_error_dialog()
+            self.err_dialog.run()
+            self.err_dialog.destroy()
     
     def get_repos_error_dialog(self):
         err_string = 'The following source files had errors and were omitted:\n'
