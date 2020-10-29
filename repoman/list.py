@@ -209,7 +209,15 @@ class List(Gtk.Box):
         self.ppa_liststore.clear()
 
         self.sources = {}
-        self.sources = repo.get_all_sources()
+        self.sources, errors = repo.get_all_sources()
+        
+        # Print a warning to console about source file errors.
+        if errors:
+            err_string = 'The following source files have errors:\n\n'
+            for file in errors:
+                err_string += f'{file}\n'
+            self.log.warning(err_string)
+
         self.log.debug('Sources found:\n%s', self.sources)
         for i in self.sources:
             source = self.sources[i]

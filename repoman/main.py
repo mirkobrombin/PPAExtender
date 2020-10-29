@@ -35,9 +35,7 @@ class Application(Gtk.Application):
     def do_activate(self):
 
         self.win = Window()
-        self.win.set_default_size(700, 400)
         self.win.connect("delete-event", self.application_quit)
-        self.win.show_all()
 
         Gtk.main()
     

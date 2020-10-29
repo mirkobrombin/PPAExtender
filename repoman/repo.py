@@ -131,7 +131,10 @@ def get_all_sources(get_system=False):
     except FileNotFoundError:
         sources_list_file = None
     
-    sources_list = repolib.get_all_sources(get_system=get_system)
+    sources_list, errors = repolib.get_all_sources(
+        get_system=get_system,
+        get_exceptions=True
+    )
 
     for source in sources_list:
         sources[source.ident] = source
@@ -139,7 +142,7 @@ def get_all_sources(get_system=False):
     if sources_list_file:
         sources['sources.list'] = {}
     
-    return sources
+    return sources, errors
 
 def get_os_codename():
     """ Returns the current OS codename."""
