@@ -110,19 +110,19 @@ class Settings(Gtk.Box):
 
         if self.system_repo:
             if self.system_repo.default_mirror:
-                reset_mirrors_button = Gtk.Button()
-                reset_mirrors_button.set_label(_('Reset Mirrors to Defaults'))
-                reset_mirrors_button.set_halign(Gtk.Align.END)
-                reset_mirrors_button.set_margin_top(6)
+                self.reset_mirrors_button = Gtk.Button()
+                self.reset_mirrors_button.set_label(_('Reset Mirrors to Defaults'))
+                self.reset_mirrors_button.set_halign(Gtk.Align.END)
+                self.reset_mirrors_button.set_margin_top(6)
                 Gtk.StyleContext.add_class(
-                    reset_mirrors_button.get_style_context(),
+                    self.reset_mirrors_button.get_style_context(),
                     'destructive-action'
                 )
-                reset_mirrors_button.connect(
+                self.reset_mirrors_button.connect(
                     'clicked',
                     self.on_reset_mirror_button_clicked
                 )
-                settings_grid.attach(reset_mirrors_button, 0, 3, 1, 1)
+                settings_grid.attach(self.reset_mirrors_button, 0, 3, 1, 1)
 
         self.checks_grid = Gtk.VBox()
         self.checks_grid.set_margin_left(12)
@@ -263,6 +263,12 @@ class Settings(Gtk.Box):
                 mirror_entry.set_icon_from_icon_name(sec_pos, '')
             self.mirror_box.pack_start(mirror_entry, True, True, 0)
             mirror_entry.show()
+        
+        if self.system_repo.default_mirror:
+            if [self.system_repo.default_mirror] == self.system_repo.uris:
+                self.reset_mirrors_button.set_sensitive(False)
+            else:
+                self.reset_mirrors_button.set_sensitive(True)
 
     def do_entry_add(self, entry, *args, **kwargs):
         """ :icon-release: signal handler for the new_mirror_entry."""
