@@ -25,7 +25,6 @@ import logging
 import gi
 gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk, Gio
-from softwareproperties.SoftwareProperties import SoftwareProperties
 
 from . import repo
 from .dialog import AddDialog, DeleteDialog, EditDialog, ErrorDialog
@@ -39,7 +38,6 @@ class List(Gtk.Box):
     listiter_count = 0
 
     def __init__(self, parent):
-        self.sp = SoftwareProperties()
         Gtk.Box.__init__(self, False, 0)
         self.parent = parent
 
