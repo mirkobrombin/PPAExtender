@@ -172,11 +172,21 @@ def get_os_name():
     return "your OS"
 
 def _do_add_source(name, line, dialog):
+    enable = True
     new_source = repolib.LegacyDebSource()
+
+    # Add the source disabled if it's preceded with a '#'/commented out
+    if line.startswith('#'):
+        enable = False
+        line = line.replace('#', '')
+
     if line.startswith('ppa:'):
         bin_repo = repolib.PPALine(line)
-    elif line.startswith('deb'):
+    else:
+        if not line.startswith('deb'):
+            line = f'deb {line} {get_os_codename()} main'
         bin_repo = repolib.DebLine(line)
+
     
     src_repo = bin_repo.copy()
     src_repo.enabled = False
