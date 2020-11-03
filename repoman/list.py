@@ -149,9 +149,25 @@ class List(Gtk.Box):
             self.edit_button.set_sensitive(False)
             self.delete_button.set_sensitive(False)
             dialog.destroy()
-            repo.delete_repo(repo_name)
+            success = repo.delete_repo(repo_name)
         else:
             dialog.destroy()
+            success = True
+        
+        if not success:
+            error_dialog = Gtk.MessageDialog(
+                transient_for=self.parent.parent,
+                flags=0,
+                message_type=Gtk.MessageType.ERROR,
+                buttons=Gtk.ButtonsType.CANCEL,
+                text="Could not remove source",
+            )
+            error_dialog.format_secondary_text(
+                f"The source {repo_name} could not be removed."
+            )
+            error_dialog.run()
+
+            error_dialog.destroy()
 
     def on_edit_button_clicked(self, widget):
         selec = self.view.get_selection()
@@ -184,7 +200,20 @@ class List(Gtk.Box):
         if response != Gtk.ResponseType.OK:
             dialog.source.load_from_file()
         else:
-            dialog.source.save_to_disk()
+            try:
+                dialog.source.save_to_disk()
+            except Exception as err:
+                self.log.error(
+                    'Could not edit mirror %s: %s', source.ident, str(err)
+                )
+                err_dialog = repo.get_error_messagedialog(
+                    self.parent.parent,
+                    f'Could not save source',
+                    err,
+                    f'{source.name} could not be saved'
+                )
+                err_dialog.run()
+                err_dialog.destroy()
 
         self.log.debug('New source: %s', dialog.source)
         dialog.destroy()

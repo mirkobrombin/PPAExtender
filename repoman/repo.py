@@ -21,11 +21,12 @@
 import logging
 import subprocess
 import threading
+import traceback
 from urllib.parse import urlparse
 
 import dbus
 import gi
-from gi.repository import GLib
+from gi.repository import GLib, Gtk
 import repolib
 
 
@@ -171,23 +172,59 @@ def get_os_name():
 
     return "your OS"
 
-def _do_add_source(name, line, dialog):
-    new_source = repolib.LegacyDebSource()
-    if line.startswith('ppa:'):
-        bin_repo = repolib.PPALine(line)
-    elif line.startswith('deb'):
-        bin_repo = repolib.DebLine(line)
-    
-    src_repo = bin_repo.copy()
-    src_repo.enabled = False
+def get_error_messagedialog(parent, text, exc, prefix):
+    """ Get an error dialog to display an error to the user.
 
-    new_source.name = bin_repo.name
-    new_source.sources.append(bin_repo)
-    new_source.sources.append(src_repo)
-    new_source.load_from_sources()
-    new_source.make_names()
-    log.debug('New source: %s', new_source.make_deblines())
-    new_source.save_to_disk()
+    Arguments:
+        parent (:obj:`Gtk.Window`): The transient parent for the dialog
+        text (str): The main/title text of the dialog.
+        exc (:obj:`Exception`): The exception which threw the error
+        tb (:obj:`traceback`): The traceback of the error
+    
+    Returns:
+        A :obj:`Gtk.MessageDialog`
+    """
+    dialog = Gtk.MessageDialog(
+        transient_for=parent,
+        flags=0,
+        message_type=Gtk.MessageType.ERROR,
+        buttons=Gtk.ButtonsType.CANCEL,
+        text=text,
+    )
+
+    traceback_text = ' '.join(traceback.format_tb(exc.__traceback__))
+    dialog.format_secondary_markup(f'{prefix}:\n{str(exc)}')
+    content_area = dialog.get_content_area()
+    
+    expander = Gtk.Expander.new('Error details:')
+    traceback_label = Gtk.Label.new(traceback_text)
+    traceback_label.set_line_wrap(True)
+    expander.add(traceback_label)
+    content_area.add(expander)
+    dialog.show_all()
+
+    return dialog
+
+def _do_add_source(name, line, dialog):
+    try:
+        new_source = repolib.LegacyDebSource()
+        if line.startswith('ppa:'):
+            bin_repo = repolib.PPALine(line)
+        elif line.startswith('deb'):
+            bin_repo = repolib.DebLine(line)
+        
+        src_repo = bin_repo.copy()
+        src_repo.enabled = False
+
+        new_source.name = bin_repo.name
+        new_source.sources.append(bin_repo)
+        new_source.sources.append(src_repo)
+        new_source.load_from_sources()
+        new_source.make_names()
+        log.debug('New source: %s', new_source.make_deblines())
+        new_source.save_to_disk()
+    except Exception as err:
+        GLib.idle_add(dialog.show_error, err)
     GLib.idle_add(dialog.destroy)
 
 def add_source(line, dialog):
