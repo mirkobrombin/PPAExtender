@@ -125,42 +125,24 @@ def get_all_sources(get_system=False):
         The above described dict.
     """
     sources = {}
-
-    if get_system:
-        try:
-            system = get_repo_for_name('system')
-            sources['system'] = system
-        except Exception:
-            pass
     sources_dir = repolib.util.get_sources_dir()
-    sources_files = sources_dir.glob('*.sources')
-    list_files = sources_dir.glob('*.list')
     try:
         sources_list_file = sources_dir.parent / 'sources.list'
     except FileNotFoundError:
         sources_list_file = None
     
-    log.debug('Loading .sources files')
-    for file in sources_files:
-        if file.name == 'system.sources':
-            # We loaded system before (or didn't because we aren't supposed to)
-            continue
-        log.debug('Loading %s', file)
-        source = repolib.Source(filename=file.name)
-        source.load_from_file()
-        sources[source.filename] = source
-    
-    log.debug('Loading .list files')
-    for file in list_files:
-        log.debug('Loading %s', file)
-        source = repolib.LegacyDebSource(filename=file.name)
-        source.load_from_file()
-        sources[source.filename] = source
+    sources_list, errors = repolib.get_all_sources(
+        get_system=get_system,
+        get_exceptions=True
+    )
+
+    for source in sources_list:
+        sources[source.ident] = source
     
     if sources_list_file:
         sources['sources.list'] = {}
     
-    return sources
+    return sources, errors
 
 def get_os_codename():
     """ Returns the current OS codename."""

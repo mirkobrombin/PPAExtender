@@ -44,6 +44,9 @@ class Stack(Gtk.Box):
             self.system_repo = repo.get_system_repo()
         except:
             self.system_repo = None
+        self.sources = {}
+        self.errors = {}
+        self.sources, self.errors = repo.get_all_sources()
 
         self.stack = Gtk.Stack()
         self.stack.set_transition_type(Gtk.StackTransitionType.SLIDE_LEFT_RIGHT)

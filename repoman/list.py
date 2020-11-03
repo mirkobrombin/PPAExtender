@@ -25,7 +25,6 @@ import logging
 import gi
 gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk, Gio
-from softwareproperties.SoftwareProperties import SoftwareProperties
 
 from . import repo
 from .dialog import AddDialog, DeleteDialog, EditDialog, ErrorDialog
@@ -39,7 +38,6 @@ class List(Gtk.Box):
     listiter_count = 0
 
     def __init__(self, parent):
-        self.sp = SoftwareProperties()
         Gtk.Box.__init__(self, False, 0)
         self.parent = parent
 
@@ -138,8 +136,9 @@ class List(Gtk.Box):
         (model, pathlist) = selec.get_selected_rows()
         tree_iter = model.get_iter(pathlist[0])
         repo_name = model.get_value(tree_iter, 2)
-        self.log.debug('Deleting PPA: %s', repo_name)
-        self.do_delete(repo_name)
+        repo = self.sources[repo_name]
+        self.log.debug('Deleting PPA: %s', repo.filename)
+        self.do_delete(repo.filename)
     
     def do_delete(self, repo_name):
         dialog = DeleteDialog(self.parent.parent, 'Source')
@@ -208,7 +207,15 @@ class List(Gtk.Box):
         self.ppa_liststore.clear()
 
         self.sources = {}
-        self.sources = repo.get_all_sources()
+        self.sources, errors = repo.get_all_sources()
+        
+        # Print a warning to console about source file errors.
+        if errors:
+            err_string = 'The following source files have errors:\n\n'
+            for file in errors:
+                err_string += f'{file}\n'
+            self.log.warning(err_string)
+
         self.log.debug('Sources found:\n%s', self.sources)
         for i in self.sources:
             source = self.sources[i]
@@ -218,7 +225,7 @@ class List(Gtk.Box):
                     self.ppa_liststore.insert_with_valuesv(
                         -1,
                         [0, 1, 2],
-                        [f'<b>{source.name}</b>', source.uris[0], source.filename]
+                        [f'<b>{source.name}</b>', source.uris[0], source.ident]
                     )
             except AttributeError:
                 # Skip any weirdly malformed sources
@@ -231,7 +238,7 @@ class List(Gtk.Box):
                     self.ppa_liststore.insert_with_valuesv(
                         -1,
                         [0, 1, 2],
-                        [source.name, source.uris[0], source.filename]
+                        [source.name, source.uris[0], source.ident]
                     )
             except AttributeError:
                 pass
