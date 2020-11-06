@@ -230,6 +230,9 @@ class List(Gtk.Box):
             repo.add_source(url, dialog)
         else:
             dialog.destroy()
+        
+        # Ensure this is set sensitive again
+        self.add_button.set_sensitive(True)
 
     def generate_entries(self, *args, **kwargs):
         self.log.debug('Generating list of repos')
