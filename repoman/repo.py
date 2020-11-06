@@ -201,6 +201,9 @@ def get_error_messagedialog(parent, text, exc, prefix):
     traceback_label.set_line_wrap(True)
     expander.add(traceback_label)
     content_area.add(expander)
+
+    action_area = dialog.get_action_area()
+    action_area.set_layout(Gtk.ButtonBoxStyle.EXPAND)
     dialog.show_all()
 
     return dialog
