@@ -38,14 +38,14 @@ def _do_edit_system_legacy_sources_list(name):
     except FileNotFoundError:
         try:
             subprocess.run([
-                'gnome-terminal', 
-                '--', 
+                'gnome-terminal',
+                '--',
                 'sudo', 'editor', '/etc/apt/sources.list'
             ])
         except FileNotFoundError:
             subprocess.run([
                 'x-terminal-emulator',
-                '-e', 
+                '-e',
                 'sudo',
                 'editor',
                 '/etc/apt/sources.list'
@@ -66,7 +66,7 @@ def get_system_repo():
 def url_validator(url):
     """ Validate a url and tell if it's good or not.
 
-    FIXME: We should use the validator provided by Repolib. Change this once 
+    FIXME: We should use the validator provided by Repolib. Change this once
     that one is merged.
 
     Arguments:
@@ -93,12 +93,12 @@ def url_validator(url):
 def get_repo_for_name(name):
     """ Get a repo from a given name.
 
-    This takes a name and gives back a repolib.Source object which represents 
+    This takes a name and gives back a repolib.Source object which represents
     the given source.
 
     Arguments:
         name (str): The name of the repo to look for.
-    
+
     Returns:
         A repolib.Source (or subclass) representing the given name.
     """
@@ -108,19 +108,19 @@ def get_repo_for_name(name):
             repo = repolib.Source(filename=full_path)
         else:
             repo = repolib.LegacyDebSource(filename=full_path)
-        
+
         return repo
     raise Exception(f'Could not find a source for {name}.')
 
 def get_all_sources(get_system=False):
     """ Returns a dict with all sources on the system.
-    
+
     The keys for each entry in the dict are the names of the sources.
     The values are the corresponding repolin.Source subclass
 
     Arguments:
         get_system (bool): whether to include the system sources or not.
-    
+
     Returns:
         The above described dict.
     """
@@ -130,7 +130,7 @@ def get_all_sources(get_system=False):
         sources_list_file = sources_dir.parent / 'sources.list'
     except FileNotFoundError:
         sources_list_file = None
-    
+
     sources_list, errors = repolib.get_all_sources(
         get_system=get_system,
         get_exceptions=True
@@ -138,10 +138,10 @@ def get_all_sources(get_system=False):
 
     for source in sources_list:
         sources[source.ident] = source
-    
+
     if sources_list_file:
         sources['sources.list'] = {}
-    
+
     return sources, errors
 
 def get_os_codename():
@@ -173,11 +173,19 @@ def get_os_name():
 
 def _do_add_source(name, line, dialog):
     new_source = repolib.LegacyDebSource()
+
+    # Add the source disabled if it's preceded with a '#'/commented out
+    if line.startswith('#'):
+        line = line.replace('#', '')
+
     if line.startswith('ppa:'):
         bin_repo = repolib.PPALine(line)
-    elif line.startswith('deb'):
+    else:
+        if not line.startswith('deb'):
+            line = f'deb {line} {get_os_codename()} main'
         bin_repo = repolib.DebLine(line)
-    
+
+
     src_repo = bin_repo.copy()
     src_repo.enabled = False
 
