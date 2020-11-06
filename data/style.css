@@ -53,3 +53,28 @@ separator {
 .list_window {
   margin-top: 10px;
 }
+
+/* This is required because of some bug with GTK that makes the buttons
+in a message dialog wonky. It doesn't happen in other python projects, but I 
+can't figure out what's causing the problem. */
+
+messagedialog > decoration {
+	margin: 0px;
+  }
+  
+  messagedialog .dialog-vbox {
+	padding: 0px;
+	margin: -6px;
+  }
+  messagedialog > .dialog-vbox > * {
+	padding: 0 12px;
+  }
+  
+  messagedialog box.titlebar {
+	padding: 0px;
+  }
+  
+  .dialog-action-area {
+	margin: 0 -12px;
+	margin-top: 6px;
+  }
