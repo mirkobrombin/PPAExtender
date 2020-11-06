@@ -1,3 +1,10 @@
+repoman (2.2.0) UNRELEASED; urgency=medium
+
+  * Added support for renaming repositories
+  * Added ability to change system repository mirrors
+
+ -- Ian Santopietro <ian@system76.com>  Wed, 21 Oct 2020 10:57:09 -0600
+
 repoman (2.0.0) focal; urgency=medium
 
   * Repoman now uses Repolib instead of SoftwareProperties

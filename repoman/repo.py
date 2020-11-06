@@ -208,11 +208,19 @@ def get_error_messagedialog(parent, text, exc, prefix):
 def _do_add_source(name, line, dialog):
     try:
         new_source = repolib.LegacyDebSource()
+
+        # Add the source disabled if it's preceded with a '#'/commented out
+        if line.startswith('#'):
+            line = line.replace('#', '')
+
         if line.startswith('ppa:'):
             bin_repo = repolib.PPALine(line)
-        elif line.startswith('deb'):
+        else:
+            if not line.startswith('deb'):
+                line = f'deb {line} {get_os_codename()} main'
             bin_repo = repolib.DebLine(line)
-        
+
+
         src_repo = bin_repo.copy()
         src_repo.enabled = False
 
@@ -246,6 +254,5 @@ def delete_repo(repo):
     """
     bus = dbus.SystemBus()
     privileged_object = bus.get_object('org.pop_os.repolib', '/Repo')
-    success = privileged_object.delete_source(repo)
+    privileged_object.delete_source(repo)
     privileged_object.exit()
-    return success
