@@ -150,6 +150,21 @@ class AddDialog(Gtk.Dialog):
         
         else:
             entry_valid = repo.validate(entry_text)
+        
+        entry_isppa = entry_text.startswith('ppa')
+        entry_isdeb = entry_text.startswith('deb')
+
+        # If we're dealing with a plain URL, it can't have spaces
+        if not entry_isppa and not entry_isdeb:
+            uri = entry_text.split()
+            if len(uri) != 1:
+                entry_valid = False
+        
+        # deb lines must have at least three elements (type, URI, suite)
+        if entry_isdeb:
+            line = entry_text.split()
+            if len(line) < 3:
+                entry_valid = False
 
         # Set the add button's sensitivity based on the results of validation.
         try:
