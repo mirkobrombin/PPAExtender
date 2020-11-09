@@ -28,7 +28,6 @@ import gi
 from gi.repository import GLib
 import repolib
 
-
 log = logging.getLogger("repoman.Repo")
 log.debug('Logging established')
 

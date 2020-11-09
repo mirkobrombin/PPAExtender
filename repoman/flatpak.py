@@ -29,8 +29,6 @@ from gi.repository import Gtk, GObject, GLib, Gio, Pango
 from .dialog import ErrorDialog, AddDialog, DeleteDialog, InfoDialog
 from . import flatpak_helper as helper
 
- 
- 
 from gettext import gettext as _ 
 
 class Flatpak(Gtk.Box):

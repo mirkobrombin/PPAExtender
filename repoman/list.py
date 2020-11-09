@@ -19,7 +19,7 @@
     along with Repoman.  If not, see <http://www.gnu.org/licenses/>.
 '''
 
-import gettext
+from gettext import gettext as _
 import logging
 
 import gi
@@ -28,10 +28,6 @@ from gi.repository import Gtk, Gio
 
 from . import repo
 from .dialog import AddDialog, DeleteDialog, EditDialog, ErrorDialog
-
-gettext.bindtextdomain('repoman', '/usr/share/repoman/po')
-gettext.textdomain("repoman")
-_ = gettext.gettext
 
 class List(Gtk.Box):
 
@@ -141,7 +137,11 @@ class List(Gtk.Box):
         self.do_delete(repo.filename)
     
     def do_delete(self, repo_name):
-        dialog = DeleteDialog(self.parent.parent, 'Source')
+        selec = self.view.get_selection()
+        (model, pathlist) = selec.get_selected_rows()
+        tree_iter = model.get_iter(pathlist[0])
+        repo_o = self.sources[model.get_value(tree_iter, 2)]
+        dialog = DeleteDialog(self.parent.parent, repo_o.name)
         response = dialog.run()
 
         if response == Gtk.ResponseType.OK:

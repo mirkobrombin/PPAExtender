@@ -24,10 +24,8 @@ import logging
 gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk, Gio
 from . import repo
-import gettext
-gettext.bindtextdomain('repoman', '/usr/share/repoman/po')
-gettext.textdomain('repoman')
-_ = gettext.gettext
+from gettext import gettext as _
+
 prime_pos = Gtk.EntryIconPosition.PRIMARY
 sec_pos = Gtk.EntryIconPosition.SECONDARY
 
@@ -92,8 +90,10 @@ class Settings(Gtk.Box):
         settings_grid.attach(sources_title, 0, 0, 1, 1)
 
         sources_label = Gtk.Label.new(
-            _(f'Official sources are provided by {self.os_name} and its '
-            "developers. It's recommended to leave these sources enabled.")
+            # Can't seem to use Fstrings with gettext
+            _("Official sources are provided by {} "
+              "and its developers. It's recommended to leave these "
+              "sources enabled.").format(self.os_name)
         )
         sources_label.set_line_wrap(True)
         sources_label.set_justify(Gtk.Justification.FILL)

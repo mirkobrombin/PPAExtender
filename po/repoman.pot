@@ -3,12 +3,11 @@
 # This file is distributed under the same license as the REPOMAN package.
 # Ian Santopietro <isantop@gmail.com>, 2020.
 #
-#, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"Report-Msgid-Bugs-To: https://github.com/pop-os/repoman/issues\n"
-"POT-Creation-Date: 2020-11-09 13:30-0700\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2020-11-09 15:40-0700\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,25 +16,25 @@ msgstr ""
 "Content-Type: text/plain; charset=CHARSET\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: repoman/dialog.py:81
+#: repoman/dialog.py:80
 msgid "Add Source"
 msgstr ""
 
-#: repoman/dialog.py:110
+#: repoman/dialog.py:109
 msgid "Enter Source Details"
 msgstr ""
 
-#: repoman/dialog.py:114
+#: repoman/dialog.py:113
 msgid "e.g. ppa:mirkobrombin/ppa"
 msgstr ""
 
-#: repoman/dialog.py:125
+#: repoman/dialog.py:124
 msgid "Source Line"
 msgstr ""
 
-#: repoman/dialog.py:184
-#, python-brace-format
-msgid "Remove {title}"
+#: repoman/dialog.py:183
+# {} is the name of the source/repository
+msgid "Remove {}"
 msgstr ""
 
 #: repoman/dialog.py:212
@@ -94,11 +93,6 @@ msgstr ""
 msgid "Enabled"
 msgstr ""
 
-#: repoman/dialog.py:463
-#, python-brace-format
-msgid "{title}"
-msgstr ""
-
 #: repoman/dialog.py:526
 msgid "Homepage"
 msgstr ""
@@ -107,151 +101,155 @@ msgstr ""
 msgid "Installed Flatpaks"
 msgstr ""
 
-#: repoman/dialog.py:550
-#, python-brace-format
-msgid "The following Flatpaks are currently installed from {title}"
+#: repoman/dialog.py:551
+# {} is the name of the source/repository
+msgid "The following Flatpaks are currently installed from {}"
 msgstr ""
 
-#: repoman/flatpak.py:67
+#: repoman/dialog.py:568
+msgid "Applications:"
+msgstr ""
+
+#: repoman/flatpak.py:65
 msgid "Flatpak Sources"
 msgstr ""
 
-#: repoman/flatpak.py:72
+#: repoman/flatpak.py:70
 msgid ""
 "These sources are for software provided via Flatpak. They may present a "
 "security risk. Only add sources that you trust."
 msgstr ""
 
-#: repoman/flatpak.py:94 repoman/list.py:80
+#: repoman/flatpak.py:92 repoman/list.py:76
 msgid "Source"
 msgstr ""
 
-#: repoman/flatpak.py:98
+#: repoman/flatpak.py:96
 msgid "URL"
 msgstr ""
 
-#: repoman/flatpak.py:103
+#: repoman/flatpak.py:101
 msgid "Type"
 msgstr ""
 
-#: repoman/flatpak.py:119 repoman/list.py:96
+#: repoman/flatpak.py:117 repoman/list.py:92
 msgid "Add New Source"
 msgstr ""
 
-#: repoman/flatpak.py:128
+#: repoman/flatpak.py:126
 msgid "Remote Info"
 msgstr ""
 
-#: repoman/flatpak.py:137
+#: repoman/flatpak.py:135
 msgid "Remove Selected Source"
 msgstr ""
 
-#: repoman/list.py:59 repoman/stack.py:62
+#: repoman/list.py:55 repoman/stack.py:60
 msgid "Extra Sources"
 msgstr ""
 
-#: repoman/list.py:64
+#: repoman/list.py:60
 msgid ""
 "These sources are for software provided by a third party. They may present a "
 "security risk or cause system instability. Only add sources that you trust."
 msgstr ""
 
-#: repoman/list.py:82
+#: repoman/list.py:78
 msgid "URI"
 msgstr ""
 
-#: repoman/list.py:105
+#: repoman/list.py:101
 msgid "Modify Selected Source"
 msgstr ""
 
-#: repoman/list.py:114
+#: repoman/list.py:110
 msgid "Delete Selected Source"
 msgstr ""
 
-#: repoman/settings.py:36
+#: repoman/settings.py:34
 msgid "Community-maintained software"
 msgstr ""
 
-#: repoman/settings.py:37
+#: repoman/settings.py:35
 msgid "Proprietary drivers for devices"
 msgstr ""
 
-#: repoman/settings.py:38
+#: repoman/settings.py:36
 msgid "Software with Copyright or Legal Restrictions"
 msgstr ""
 
-#: repoman/settings.py:56 repoman/settings.py:73
+#: repoman/settings.py:54 repoman/settings.py:71
 msgid "Include source code"
 msgstr ""
 
-#: repoman/settings.py:64
+#: repoman/settings.py:62
 msgid "Prerelease updates"
 msgstr ""
 
-#: repoman/settings.py:89
+#: repoman/settings.py:87
 msgid "Official Sources"
 msgstr ""
 
 #: repoman/settings.py:95
-#, python-brace-format
+# {} is the name of the OS, or "your OS"
 msgid ""
-"Official sources are provided by {self.os_name} and its developers. It's "
-"recommended to leave these sources enabled."
+"Official sources are provided by {} and its developers. It's recommended to "
+"leave these sources enabled."
 msgstr ""
 
-#: repoman/settings.py:114
+#: repoman/settings.py:116
 msgid "Reset Mirrors to Defaults"
 msgstr ""
 
-#: repoman/settings.py:136
+#: repoman/settings.py:138
 msgid "Developer Options (Advanced)"
 msgstr ""
 
-#: repoman/settings.py:148
+#: repoman/settings.py:150
 msgid "These options are primarily of interest to developers."
 msgstr ""
 
-#: repoman/settings.py:213
+#: repoman/settings.py:215
 msgid "Remove Mirror"
 msgstr ""
 
-#: repoman/settings.py:243
+#: repoman/settings.py:245
 msgid "Add a new mirror"
 msgstr ""
 
-#: repoman/settings.py:245
+#: repoman/settings.py:247
 msgid "Add mirror"
 msgstr ""
 
-#: repoman/stack.py:56
+#: repoman/stack.py:54
 msgid "Settings"
 msgstr ""
 
-#: repoman/stack.py:59
+#: repoman/stack.py:57
 msgid "Updates"
 msgstr ""
 
-#: repoman/stack.py:68
+#: repoman/stack.py:66
 msgid "Flatpak"
 msgstr ""
 
-#: repoman/updates.py:39
+#: repoman/updates.py:35
 msgid "Important security updates"
 msgstr ""
 
-#: repoman/updates.py:40
+#: repoman/updates.py:36
 msgid "Recommended updates"
 msgstr ""
 
-#: repoman/updates.py:41
+#: repoman/updates.py:37
 msgid "Unsupported updates"
 msgstr ""
 
-#: repoman/updates.py:63
+#: repoman/updates.py:59
 msgid "Update Sources"
 msgstr ""
 
-#: repoman/updates.py:68
+#: repoman/updates.py:64
 #, python-format
 msgid ""
 "These sources control how %s checks for updates. It is recommended to leave "

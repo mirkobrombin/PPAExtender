@@ -31,8 +31,6 @@ try:
 except (ImportError, ValueError):
     Flatpak = False
 
- 
- 
 from gettext import gettext as _ 
 
 class Stack(Gtk.Box):

@@ -23,13 +23,9 @@ import logging
 import gi
 gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk, Gio
-import gettext
+from gettext import gettext as _
 
 from . import repo
-
-gettext.bindtextdomain('repoman', '/usr/share/repoman/po')
-gettext.textdomain("repoman")
-_ = gettext.gettext
 
 class Updates(Gtk.Box):
 
