@@ -260,3 +260,4 @@ def delete_repo(repo):
     privileged_object = bus.get_object('org.pop_os.repolib', '/Repo')
     privileged_object.delete_source(repo)
     privileged_object.exit()
+    return True

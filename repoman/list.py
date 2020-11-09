@@ -152,7 +152,7 @@ class List(Gtk.Box):
             success = repo.delete_repo(repo_name)
         else:
             dialog.destroy()
-            success = True
+            success = False
         
         if not success:
             error_dialog = Gtk.MessageDialog(
