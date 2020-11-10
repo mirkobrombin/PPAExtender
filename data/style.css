@@ -64,7 +64,7 @@ messagedialog > decoration {
 
 messagedialog .dialog-vbox {
   padding: 0px;
-  margin: -6px;
+  margin: 0px;
 }
 
 messagedialog > .dialog-vbox > box:not(.dialog-action-box) {
