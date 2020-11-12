@@ -177,6 +177,17 @@ class AddDialog(Gtk.Dialog):
         self.title_spinner.set_visible_child_name('spinner')
         self.set_sensitive(False)
 
+    def show_error(self, exc):
+        self.log.error('Could not add source: %s', self.repo_entry.get_text())
+        err_dialog = repo.get_error_messagedialog(
+            self,
+            'Could not add source',
+            exc,
+            f'{self.repo_entry.get_text()} could not be added'
+        )
+        err_dialog.run()
+        err_dialog.destroy()
+
 class DeleteDialog(Gtk.Dialog):
 
     ppa_name = False

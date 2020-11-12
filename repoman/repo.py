@@ -21,11 +21,12 @@
 import logging
 import subprocess
 import threading
+import traceback
 from urllib.parse import urlparse
 
 import dbus
 import gi
-from gi.repository import GLib
+from gi.repository import GLib, Gtk
 import repolib
 
 
@@ -38,14 +39,14 @@ def _do_edit_system_legacy_sources_list(name):
     except FileNotFoundError:
         try:
             subprocess.run([
-                'gnome-terminal',
-                '--',
+                'gnome-terminal', 
+                '--', 
                 'sudo', 'editor', '/etc/apt/sources.list'
             ])
         except FileNotFoundError:
             subprocess.run([
                 'x-terminal-emulator',
-                '-e',
+                '-e', 
                 'sudo',
                 'editor',
                 '/etc/apt/sources.list'
@@ -66,7 +67,7 @@ def get_system_repo():
 def url_validator(url):
     """ Validate a url and tell if it's good or not.
 
-    FIXME: We should use the validator provided by Repolib. Change this once
+    FIXME: We should use the validator provided by Repolib. Change this once 
     that one is merged.
 
     Arguments:
@@ -93,12 +94,12 @@ def url_validator(url):
 def get_repo_for_name(name):
     """ Get a repo from a given name.
 
-    This takes a name and gives back a repolib.Source object which represents
+    This takes a name and gives back a repolib.Source object which represents 
     the given source.
 
     Arguments:
         name (str): The name of the repo to look for.
-
+    
     Returns:
         A repolib.Source (or subclass) representing the given name.
     """
@@ -108,19 +109,19 @@ def get_repo_for_name(name):
             repo = repolib.Source(filename=full_path)
         else:
             repo = repolib.LegacyDebSource(filename=full_path)
-
+        
         return repo
     raise Exception(f'Could not find a source for {name}.')
 
 def get_all_sources(get_system=False):
     """ Returns a dict with all sources on the system.
-
+    
     The keys for each entry in the dict are the names of the sources.
     The values are the corresponding repolin.Source subclass
 
     Arguments:
         get_system (bool): whether to include the system sources or not.
-
+    
     Returns:
         The above described dict.
     """
@@ -130,7 +131,7 @@ def get_all_sources(get_system=False):
         sources_list_file = sources_dir.parent / 'sources.list'
     except FileNotFoundError:
         sources_list_file = None
-
+    
     sources_list, errors = repolib.get_all_sources(
         get_system=get_system,
         get_exceptions=True
@@ -138,10 +139,10 @@ def get_all_sources(get_system=False):
 
     for source in sources_list:
         sources[source.ident] = source
-
+    
     if sources_list_file:
         sources['sources.list'] = {}
-
+    
     return sources, errors
 
 def get_os_codename():
@@ -171,31 +172,71 @@ def get_os_name():
 
     return "your OS"
 
+def get_error_messagedialog(parent, text, exc, prefix):
+    """ Get an error dialog to display an error to the user.
+
+    Arguments:
+        parent (:obj:`Gtk.Window`): The transient parent for the dialog
+        text (str): The main/title text of the dialog.
+        exc (:obj:`Exception`): The exception which threw the error
+        tb (:obj:`traceback`): The traceback of the error
+    
+    Returns:
+        A :obj:`Gtk.MessageDialog`
+    """
+    dialog = Gtk.MessageDialog(
+        transient_for=parent,
+        flags=0,
+        message_type=Gtk.MessageType.ERROR,
+        buttons=Gtk.ButtonsType.CANCEL,
+        text=text,
+    )
+
+    traceback_text = ' '.join(traceback.format_tb(exc.__traceback__))
+    secondary_text = GLib.markup_escape_text(str(exc))
+    dialog.format_secondary_markup(f'{prefix}:\n{secondary_text}')
+    content_area = dialog.get_content_area()
+    
+    expander = Gtk.Expander.new('Error details:')
+    traceback_label = Gtk.Label.new(traceback_text)
+    traceback_label.set_line_wrap(True)
+    expander.add(traceback_label)
+    content_area.add(expander)
+
+    action_area = dialog.get_action_area()
+    action_area.set_layout(Gtk.ButtonBoxStyle.EXPAND)
+    dialog.show_all()
+
+    return dialog
+
 def _do_add_source(name, line, dialog):
-    new_source = repolib.LegacyDebSource()
+    try:
+        new_source = repolib.LegacyDebSource()
 
-    # Add the source disabled if it's preceded with a '#'/commented out
-    if line.startswith('#'):
-        line = line.replace('#', '')
+        # Add the source disabled if it's preceded with a '#'/commented out
+        if line.startswith('#'):
+            line = line.replace('#', '')
 
-    if line.startswith('ppa:'):
-        bin_repo = repolib.PPALine(line)
-    else:
-        if not line.startswith('deb'):
-            line = f'deb {line} {get_os_codename()} main'
-        bin_repo = repolib.DebLine(line)
+        if line.startswith('ppa:'):
+            bin_repo = repolib.PPALine(line)
+        else:
+            if not line.startswith('deb'):
+                line = f'deb {line} {get_os_codename()} main'
+            bin_repo = repolib.DebLine(line)
 
 
-    src_repo = bin_repo.copy()
-    src_repo.enabled = False
+        src_repo = bin_repo.copy()
+        src_repo.enabled = False
 
-    new_source.name = bin_repo.name
-    new_source.sources.append(bin_repo)
-    new_source.sources.append(src_repo)
-    new_source.load_from_sources()
-    new_source.make_names()
-    log.debug('New source: %s', new_source.make_deblines())
-    new_source.save_to_disk()
+        new_source.name = bin_repo.name
+        new_source.sources.append(bin_repo)
+        new_source.sources.append(src_repo)
+        new_source.load_from_sources()
+        new_source.make_names()
+        log.debug('New source: %s', new_source.make_deblines())
+        new_source.save_to_disk()
+    except Exception as err:
+        GLib.idle_add(dialog.show_error, err)
     GLib.idle_add(dialog.destroy)
 
 def add_source(line, dialog):
@@ -219,3 +260,4 @@ def delete_repo(repo):
     privileged_object = bus.get_object('org.pop_os.repolib', '/Repo')
     privileged_object.delete_source(repo)
     privileged_object.exit()
+    return True
