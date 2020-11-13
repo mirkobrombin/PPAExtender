@@ -277,8 +277,21 @@ class Settings(Gtk.Box):
             uris = self.system_repo.uris
             if not new_uri in uris:
                 uris.append(new_uri)
-            self.system_repo.uris = uris
-            self.system_repo.save_to_disk()
+            try:
+                self.system_repo.uris = uris
+                self.system_repo.save_to_disk()
+            except Exception as err:
+                self.log.error(
+                    'Could not add mirror %s: %s', new_uri, str(err)
+                )
+                err_dialog = repo.get_error_messagedialog(
+                    self.parent.parent,
+                    f'Could not add URI',
+                    err,
+                    f'{new_uri} could not be added to the system mirrors'
+                )
+                err_dialog.run()
+                err_dialog.destroy()
     
     def do_new_entry_changed(self, entry):
         """ :changed: signal handler for the new-mirror entry."""
@@ -319,8 +332,21 @@ class Settings(Gtk.Box):
             if new_entry and action_edit:
                 uris.append(entry.get_text())
 
-            self.system_repo.uris = uris
-            self.system_repo.save_to_disk()
+            try:
+                self.system_repo.uris = uris
+                self.system_repo.save_to_disk()
+            except Exception as err:
+                self.log.error(
+                    'Could not remove mirror %s: %s', entry.uri, str(err)
+                )
+                err_dialog = repo.get_error_messagedialog(
+                    self.parent.parent,
+                    f'Could not remove mirror',
+                    err,
+                    f'The mirror {entry.uri} could not be removed'
+                )
+                err_dialog.run()
+                err_dialog.destroy()
 
 
     def get_new_switch(self, component, description=None):
@@ -440,7 +466,20 @@ class Settings(Gtk.Box):
         self.system_repo['Types'] = 'deb'
         if state:
             self.system_repo['Types'] = 'deb deb-src'
-        self.system_repo.save_to_disk()
+        try:
+            self.system_repo.save_to_disk()
+        except Exception as err:
+            self.log.error(
+                    'Could not set source code: %s', str(err)
+            )
+            err_dialog = repo.get_error_messagedialog(
+                self.parent.parent,
+                f'Could not set Source Code',
+                err,
+                'The system source code status could not be changed'
+            )
+            err_dialog.run()
+            err_dialog.destroy()
 
     def on_proposed_check_toggled(self, switch, state):
         self.system_repo.set_suite_enabled(
@@ -457,5 +496,18 @@ class Settings(Gtk.Box):
 
     def on_reset_mirror_button_clicked(self, button):
         self.log.warning('Resetting mirrors to default values.')
-        self.system_repo.set_default_mirror()
-        self.system_repo.save_to_disk()
+        try:
+            self.system_repo.set_default_mirror()
+            self.system_repo.save_to_disk()
+        except Exception as err:
+            self.log.error(
+                'Could not reset mirrors'
+            )
+            err_dialog = repo.get_error_messagedialog(
+                self.parent.parent,
+                f'Could not reset the system mirrors',
+                err,
+                'The system mirrors could not be reset'
+            )
+            err_dialog.run()
+            err_dialog.destroy()
