@@ -23,10 +23,8 @@ import logging
 import gi
 gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk
-import gettext
-gettext.bindtextdomain('repoman', '/usr/share/repoman/po')
-gettext.textdomain("repoman")
-_ = gettext.gettext
+ 
+from gettext import gettext as _ 
 
 try:
     from . import flatpak_helper 
@@ -125,7 +123,7 @@ class AddDialog(Gtk.Dialog):
         self.repo_entry = Gtk.Entry()
         self.repo_entry.set_placeholder_text(_("Source Line"))
         self.repo_entry.set_activates_default(True)
-        self.repo_entry.connect(_("changed"), self.on_entry_changed)
+        self.repo_entry.connect("changed", self.on_entry_changed)
         self.repo_entry.set_width_chars(50)
         self.repo_entry.set_margin_top(12)
         content_grid.attach(self.repo_entry, 0, 2, 1, 1)
@@ -193,7 +191,8 @@ class DeleteDialog(Gtk.Dialog):
     ppa_name = False
 
     def __init__(self, parent, title, flatpak=False, refs=None):
-        Gtk.Dialog.__init__(self, _(f'Remove {title}'), parent, 0,
+        Gtk.Dialog.__init__(self, _('Remove {}').format(title), 
+                            parent, 0,
                             (Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL,
                              Gtk.STOCK_REMOVE, Gtk.ResponseType.OK),
                              modal=1, use_header_bar=header)
@@ -472,7 +471,7 @@ class InfoDialog(Gtk.Dialog):
         settings = Gtk.Settings.get_default()
         header = settings.props.gtk_dialogs_use_header
         super().__init__(
-            _(f'{title}'),
+            f'{title}',
             parent, 
             0,
             modal=1,
@@ -559,7 +558,7 @@ class InfoDialog(Gtk.Dialog):
             self.refs_revealer.add(list_grid)
 
             installed_label = Gtk.Label.new(
-                _(f'The following Flatpaks are currently installed from {title}')
+                _('The following Flatpaks are currently installed from {}').format(title)
             )
 
             installed_label.set_line_wrap(True)
@@ -574,7 +573,8 @@ class InfoDialog(Gtk.Dialog):
             list_window.add(refs_view)
 
             refs_buff = refs_view.get_buffer()
-            refs_list = 'Applications: \n'
+            refs_list = _('Applications:')
+            refs_list += '\n'
             for ref in installed_refs:
                 if ref.get_kind() == flatpak_helper.Flatpak.RefKind.APP:
                     if ref.get_appdata_name():
