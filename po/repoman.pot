@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-11-09 15:40-0700\n"
+"POT-Creation-Date: 2020-11-17 12:35-0700\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -32,81 +32,95 @@ msgstr ""
 msgid "Source Line"
 msgstr ""
 
-#: repoman/dialog.py:183
+#: repoman/dialog.py:179
+#, python-format
+msgid "Could not add source: %s"
+msgstr ""
+
+#: repoman/dialog.py:182
+msgid "Could not add source"
+msgstr ""
+
+# {} is the repo entered which couldn't be added
+#: repoman/dialog.py:184
+msgid "{} could not be added"
+msgstr ""
+
 # {} is the name of the source/repository
+#: repoman/dialog.py:194
 msgid "Remove {}"
 msgstr ""
 
-#: repoman/dialog.py:212
+#: repoman/dialog.py:223
 msgid "Are you sure you want to remove this source?"
 msgstr ""
 
-#: repoman/dialog.py:219
+#: repoman/dialog.py:230
 msgid ""
 "If you remove this source, you will need to add it again to continue using "
 "it. Any software you've installed from this source will remain installed."
 msgstr ""
 
-#: repoman/dialog.py:228
+#: repoman/dialog.py:239
 msgid ""
 "If you remove this source, you will need to add it again to continue using "
 "it."
 msgstr ""
 
-#: repoman/dialog.py:247
+#: repoman/dialog.py:258
 msgid " All flatpaks you've installed from this source will be removed."
 msgstr ""
 
-#: repoman/dialog.py:252
+#: repoman/dialog.py:263
 msgid "Removed Flatpaks"
 msgstr ""
 
-#: repoman/dialog.py:267
+#: repoman/dialog.py:278
 msgid "The following Flatpaks will be removed with this source:"
 msgstr ""
 
-#: repoman/dialog.py:311
+#: repoman/dialog.py:322
 msgid "Modify Source"
 msgstr ""
 
-#: repoman/dialog.py:334 repoman/dialog.py:354
+#: repoman/dialog.py:345 repoman/dialog.py:365
 msgid "Name"
 msgstr ""
 
-#: repoman/dialog.py:336
+#: repoman/dialog.py:347
 msgid "Source Code"
 msgstr ""
 
-#: repoman/dialog.py:338
+#: repoman/dialog.py:349
 msgid "URIs"
 msgstr ""
 
-#: repoman/dialog.py:340
+#: repoman/dialog.py:351
 msgid "Version"
 msgstr ""
 
-#: repoman/dialog.py:342
+#: repoman/dialog.py:353
 msgid "Components"
 msgstr ""
 
-#: repoman/dialog.py:344
+#: repoman/dialog.py:355
 msgid "Enabled"
 msgstr ""
 
-#: repoman/dialog.py:526
+#: repoman/dialog.py:537
 msgid "Homepage"
 msgstr ""
 
-#: repoman/dialog.py:534
+#: repoman/dialog.py:545
 msgid "Installed Flatpaks"
 msgstr ""
 
-#: repoman/dialog.py:551
 # {} is the name of the source/repository
+#: repoman/dialog.py:561
 msgid "The following Flatpaks are currently installed from {}"
 msgstr ""
 
-#: repoman/dialog.py:568
+#: repoman/dialog.py:576
 msgid "Applications:"
 msgstr ""
 
@@ -190,34 +204,34 @@ msgstr ""
 msgid "Official Sources"
 msgstr ""
 
-#: repoman/settings.py:95
 # {} is the name of the OS, or "your OS"
+#: repoman/settings.py:94
 msgid ""
 "Official sources are provided by {} and its developers. It's recommended to "
 "leave these sources enabled."
 msgstr ""
 
-#: repoman/settings.py:116
+#: repoman/settings.py:114
 msgid "Reset Mirrors to Defaults"
 msgstr ""
 
-#: repoman/settings.py:138
+#: repoman/settings.py:136
 msgid "Developer Options (Advanced)"
 msgstr ""
 
-#: repoman/settings.py:150
+#: repoman/settings.py:148
 msgid "These options are primarily of interest to developers."
 msgstr ""
 
-#: repoman/settings.py:215
+#: repoman/settings.py:213
 msgid "Remove Mirror"
 msgstr ""
 
-#: repoman/settings.py:245
+#: repoman/settings.py:243
 msgid "Add a new mirror"
 msgstr ""
 
-#: repoman/settings.py:247
+#: repoman/settings.py:245
 msgid "Add mirror"
 msgstr ""
 
